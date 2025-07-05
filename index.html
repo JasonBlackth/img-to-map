@@ -10,10 +10,10 @@
     
   </body>
   </html>
-  <title>Hello OpenCV.js</title>
+  <title>img-to-map</title>
   </head>
   <body>
-  <h2>Hello OpenCV.js</h2>
+  <h2>img-to-map</h2>
   <p id="status">OpenCV.js is loading...</p>
   <div>
     <div class="inputoutput">
@@ -28,6 +28,9 @@
         <input type="range" min="1" max="255" value="100" class="slider" id="cannyLow">
         High end: <span id="cHigh_display">100</span>
         <input type="range" min="1" max="255" value="100" class="slider" id="cannyHigh">
+        Contour number: <input type="number" min="0" value="0" id="cnt_number">
+        <button onclick='clear_canvas("canvasOutput1")'>Clear</button>
+        <button onclick='log_contour()'>Log</button>
       </div>
       <div class="caption">Outputs</div>
       <table >
