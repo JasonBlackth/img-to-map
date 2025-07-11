@@ -1,6 +1,10 @@
 //const cv = require("./opencv");
 
   let contours;
+  let inputImage;
+  let filled, canny, point_map, point_map_img;
+  let cannyChanged = true;
+
   var Module = {
       // https://emscripten.org/docs/api_reference/module.html#Module.onRuntimeInitialized
       async onRuntimeInitialized() {
@@ -8,14 +12,19 @@
       }
   };
 
-  function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  function deleteContour(){
+    let idx = +cnt_number.value
+    if (contours === undefined || contours.size() <= idx) return;
+    let contour = contours.get(idx)
+    contours.set(idx, new cv.Mat(contour.rows, 1, cv.CV_32SC2, new cv.Scalar(-1)))
+    processImg();
   }
+
+  addEventListener("keydown", (event) => { if (event.key === "Delete") deleteContour() })
 
 
   let imgElement = document.getElementById('imageSrc');
   let inputElement = document.getElementById('fileInput');
-  let slider = document.getElementById("threshold");
   let cL_slider = document.getElementById("cannyLow");
   let cH_slider = document.getElementById("cannyHigh");
   let cnt_number = document.getElementById("cnt_number");
@@ -54,7 +63,7 @@
        let point = contour.intPtr(j, 0);  // get pointer to point [x, y]
        console.log(`x = ${point[0]}, y = ${point[1]}`);
    }*/
-    
+          
     let contour = contours.get(+cnt_number.value)
     let mat = cv.imread(imgElement);
     let filled = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC3);
@@ -85,64 +94,47 @@
     try{
       
       cv = (cv instanceof Promise) ? await cv : cv;
-      let mat = cv.imread(imgElement);
-      //console.log(cv.resize()) //cv.resize(mat.clone(), (0, 0), fx = 0.1, fy = 0.1)
-      let binary = new cv.Mat();
-      let gray = new cv.Mat();
-      let canny = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC3);
-      let filled = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC3);
-      let hull_filled = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC3);
-      let cnt_img = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC3); //cv.imread(document.getElementById("canvasOutput1"))
-      let points = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC3);
-      contours = new cv.MatVector();
-      let hierarchy = new cv.Mat();
-      let th = Number(slider.value);
-      let cl = Number(cL_slider.value);
-      let ch = Number(cH_slider.value);
-      cv.cvtColor(mat, gray, cv.COLOR_RGBA2GRAY);
-      cv.threshold(gray, binary, th, 255, cv.THRESH_BINARY) //cv.THRESH_BINARY+cv.THRESH_OTSU
-      cv.Canny(gray, canny, cl, ch)
-      cv.findContours(canny, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-      let hull = new cv.MatVector();
-      for (let i = 0; i<contours.size(); i++){
-        let temp = new cv.Mat()
-        cv.convexHull(contours.get(i), temp);
-        hull.push_back(temp)
-        temp.delete()
+      if (inputImage === undefined) inputImage = cv.imread(imgElement)
+      let mat = inputImage.clone() 
+      cnt_img = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC1);
+
+      filled = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC3);
+      if (cannyChanged){
+        let gray = new cv.Mat();
+        canny = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC1);
+        point_map_img = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC1);
+        contours = new cv.MatVector();
+        let hierarchy = new cv.Mat();
+        let cl = Number(cL_slider.value);
+        let ch = Number(cH_slider.value);
+        cv.cvtColor(mat, gray, cv.COLOR_RGBA2GRAY);
+        cv.Canny(gray, canny, cl, ch)
+        cv.findContours(canny, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        
+        cannyChanged = false;
       }
-      cv.drawContours(hull_filled, hull, -1, new cv.Scalar(255, 255, 255), cv.FILLED)
       cv.drawContours(filled, contours, -1, new cv.Scalar(255, 255, 255), cv.FILLED)
       
       // Find & Draw isolated Contour
       
-      let contour = contours.get(+cnt_number.value)
-      if (contour !== undefined){
-
-        for (let i = 0; i < contours.size(); ++i){
-          let contour = contours.get(i);
-          for (let j = 0; j < contour.rows; ++j){
-            let p = contour.intPtr(j, 0);
-            let pixel = points.ucharPtr(p[1],p[0])
-            pixel[0] = 255;
-            pixel[1] = 255;
-            pixel[2] = 255;
-          }
+      point_map = new cv.Mat(mat.rows, mat.cols, cv.CV_16SC1, new cv.Scalar(-1))
+      for (let i = 0; i < contours.size(); ++i){
+        let contour = contours.get(i);
+        for (let j = 0; j < contour.rows; ++j){
+          let p = contour.intPtr(j, 0);
+          point_map.data16S[p[1] * mat.cols + p[0]] = i;
+          let pixel = point_map_img.ucharPtr(p[1],p[0])
+          pixel[0] = 255;
         }
-        
-        
-        cv.drawContours(cnt_img, contours, +cnt_number.value, new cv.Scalar(255, 255, 255), cv.FILLED)
+      }
+      if (contours.get(+cnt_number.value) !== undefined){
+        cv.drawContours(cnt_img, contours, +cnt_number.value, new cv.Scalar(255), cv.FILLED)
         cv.drawContours( filled, contours, +cnt_number.value, new cv.Scalar(255,   0,   0), cv.FILLED)
       }
-
-
-      
-      let kernel = cv.Mat.ones(3,3, cv.CV_8U)
-      let closed = new cv.Mat();
-      cv.morphologyEx(filled, closed, cv.MORPH_CLOSE, kernel)
-      cv.morphologyEx(closed, closed, cv.MORPH_OPEN, kernel)
+     
       cv.imshow('canvasOutput1', cnt_img);
       cv.imshow('canvasOutput2', filled);
-      cv.imshow('canvasOutput3', points);
+      cv.imshow('canvasOutput3', point_map_img);
       document.getElementById("output").style = "display: block;"
 
       mat.delete();
@@ -153,20 +145,13 @@
     }
     
     imgElement.onload = processImg;
-    
-    slider.oninput = async function (){
-      document.getElementById("th_display").innerHTML = slider.value
-      Array.from(document.getElementsByTagName("canvas")).forEach(canvas => {
-        ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      });
-      await processImg();
-    }
+
     
     cL_slider.oninput = async function (){
       document.getElementById("cLow_display").innerHTML = cL_slider.value
       clear_canvas("canvasOutput3")
       cnt_number.value = 0
+      cannyChanged = true;
       await processImg();
     }
     
@@ -174,6 +159,7 @@
       document.getElementById("cHigh_display").innerHTML = cH_slider.value
       clear_canvas("canvasOutput3")
       cnt_number.value = 0
+      cannyChanged = true;
       await processImg();
     }
 
@@ -181,42 +167,30 @@
     
     canvas2.addEventListener('click', (event) =>{
       var rect = canvas2.getBoundingClientRect();
-      var x = event.clientX - rect.left; //x position within the element.
-      var y = event.clientY - rect.top;  //y position within the element.
-      console.log("Left? : " + x + " ; Top? : " + y + ".");
-      if (contours === undefined) return;
-
-      x_topLeft  = Math.max(x-5, 0)
-      y_topLeft  = Math.max(y-5, 0)
-      x_botRight = Math.min(x+5, rect.width)
-      y_botRight = Math.min(y+5, rect.height)
+      var cx = Math.round(event.clientX - rect.left); //x position within the element.
+      var cy = Math.round(event.clientY - rect.top);  //y position within the element.
       
+      if (contours === undefined) return;
+      const r = 9;
+      const r2 = r*r;
 
-
-      let clickArea = new cv.Rect(x_topLeft, y_topLeft, x_botRight - x_topLeft, y_botRight - y_topLeft)
-      console.log(clickArea)
-      for (let i = 0; i < contours.size(); ++i){
-          let contour = contours.get(i);
-          for (let j = 0; j < contour.rows; ++j){
-            let p = contour.intPtr(j, 0);
-            if (
-                p[0] >= clickArea.x &&
-                p[0] < clickArea.x + clickArea.width &&
-                p[1] >= clickArea.y &&
-                p[1] < clickArea.y + clickArea.height)
-                {
-                  if (Math.abs(x - p[0]) < 1 && Math.abs(y-p[1])){
-                    realClosePoint = {x : p[0], y : p[1]};
-                    console.log(realClosePoint)
-                    cnt_number.value = i;
-                    cnt_number.oninput();
-                    return;
-                  }
-
+      let closest;
+      for (let x = Math.max(cx - r, 0); x < Math.min(cx + r, point_map.rows); ++x){
+        for (let y = Math.max(cy - r, 0) ; y < Math.min(cy + r, point_map.cols) ; ++y){
+            let sqDist = (x-cx)**2 + (y-cy)**2;
+            let val = point_map.data16S[y * point_map.cols + x]
+            if (sqDist <= r2 && val !== -1){
+              if (closest === undefined || closest.sqDist > sqDist){
+                closest = {contour_idx : val, sqDist : sqDist}
               }
-          }
+            }
         }
-        //processImg();
+      }
+      if (closest !== undefined){
+        cnt_number.value = closest.contour_idx
+        cnt_number.oninput();
+      }
+
 
     })
 
