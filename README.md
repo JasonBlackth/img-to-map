@@ -1,16 +1,135 @@
+<details>
+<summary><h2>Nem funkcionális követelmények</h2></summary>
 
-## Use cases
+### 1\. Hatékonyság
 
-<img src="documentation/Overall.svg"></img>
-<img src="documentation/Preprocess.svg"></img>
-<img src="documentation/FindContours.svg"></img>
-<img src="documentation/Erosion.svg"></img>
+* Minimális terhelés egy mai átlagos felhasználású számítógép illetve okostelefon porcesszorára, memóriájára nézve
+* Hálózati kapcsolatot igényel
+* Gyors (< 1 mp) válaszidő egy mai átlagos számítógépen vagy okostelefonon, megfelelő internetkapcsolat mellett
+* Általánosságban szinte azonnali (0.3 mp) válaszidő
+
+### 2\. Megbízhatóság
+
+* Szabványos használat esetén nem fordul elő hibajelenség, nem jelenik meg hibaüzenet
+* A szoftver "bolondbiztos", a felhasználó nem tud elrontani semmit
+* Hibás bevitelt a program hibajelenség nélkül képes kezelni - vagy kijavítja, vagy újat kér
+* A lemezen nem tárol adatokat
+* A program nem áll le váratlanul
+
+### 3\. Biztonság:
+
+* A program nem kezel érzékeny adatokat, így nem releváns
+
+### 4\. Hordozhatóság
+
+* Bármilyen mai böngészőprogram segítségével használható, eszköztől és operációs rendszertől függetlenül
+
+### 5\. Felhasználhatóság
+
+* Intuitív, könnyen kezelhető felhasználói felület
+* A felület elrendezése alkalmazkodik a kijelző méretéhez, hogy az könnyen kezelhető maradjon
+* A használathoz nem szükséges külön segédlet vagy leírás
+* A program funkciói gyorsan elsajátíthatók az átlag felhasználó számára
+
+### 6\. Környezeti
+
+* Korszerű böngészőprogram és internetkapcsolat szükséges a futtatáshoz
+
+### 7\. Működési:
+
+* Általában rövid futási idő, várhatóan 20-30 perc
+* Gyakori használat
+* Felhasználók száma: 1
+
+### 8\. Fejlesztési
+
+* HTML, JavaScript
+* OpenCV könyvtár használata
+* Objektumorientált paradigma
+* Unit testing
+* GitHub
+* Dokumentáció
 
 
+</details>
 
-## User Stories
+<details>
+<summary><h2>Funkcionális követelmények</h2></summary>
 
-<link href="documentation/us_style.css" rel="stylesheet"/>
+### Általánosan
+* Lehessen képet feltölteni
+* A szerkesztési folyamat során legyen lehetőség a végrehajtott műveletek
+    * Visszavonására
+    * Újbóli végrehasjtására (visszavonás ellenkezője)
+    * Ez a funkcionalitás legyen biztosított legalább 5 lépés erejéig
+* A különböző szerkesztők között tetszőlegesen váltani
+    * A sorrend ne befolyásolja a program működését, vagy a végleges kimeneti képet 
+    * (Elképzelhető, hogy ez a harmadik szerkesztő esetén nem megvalósítható)
+* Minden szerkesztő alig észrevehető idő alatt dolgozza fel a képen tett változtatásokat
+* Az előnézet dinamikusan változzon az adott szerkesztő paramétereinek megfelelően
+* Lehessen a képet bármely szerkesztő szerinti állapotában letölteni
+* A letöltött kép mindig az eredetivel megegyező felbontású legyen
+    * Akár történt kicsinyítés a megjelenítés során, akár nem
+    * Az eredeti kép itt az alaki transzformációk (vágás, forgatás, stb.) utáni állapotát jelentse
+
+
+### Az első szerkesztőben
+* A feltöltött képet lehessen:
+    * Elforgatni
+    * Kisebbre vágni, tetszőleges képarányban
+    * Horizontálisan és vertikálisan megnyújtani
+    * Torzítani
+    * Tükrözni
+* Illetve a következő effektusokat alkalmazni rá:
+    * Kontrasztarány változtatása
+    * Kontraszt középpontjának kiválasztása
+    * Fehéregyensúly módosítása
+    * Színek korrigálása
+    * Zajcsökkentés
+* A program nyújtson lehetőséget a szürkeárnyalatos filter ki- és bekapcsolására
+
+### A második szerkesztőben
+* A körvonalak keresését lehessen az alábbi módon finomhangolni:
+    * Különböző keresési algoritmusok használatával, kombinálásával
+    * Keresési paraméterek beállításával
+    * Körvonalak törlésével
+    * Körvonalak mentésével, hogy más paraméterek mellett is megmaradjanak
+    * Törlés illetve mentés visszavonásával
+    * Körvonalak egyéni javításával különböző algoritmusok segítségével
+* Lehessen körvonalakat kijelölni
+    * Kattintásra, vagy egér használata nélkül is
+* A program jelenítse meg az utoljára kijelölt körvonalat egy külön vásznon
+* Legyen lehetőség a mentett körvonalak megjelenítésére és elrejtésére
+
+
+### A harmadik szerkesztőben
+* A felhasználó számára álljanak rendelkezésre a következő funkciók:
+    * A töredezettség növelése vagy csökkentése, az általános alakzat megtartása mellett 
+    * A partvonal automatikus alakítása, természetessé, változatossá tétele
+    * A kép egy kijelölt részén a partvonal:
+        * Fjordokkal való kibővítése
+        * Apró szigetekkel való körbevétele
+        * Apró szigetekké való szétdarabolása
+        * Kiegyenlítése/Elsimítása
+        * Egyenetlenebbé tétele
+
+</details>
+
+
+<details>
+<summary><h2>Felhasználói eset diagramok</h2></summary>
+
+<img src="documentation/Overall.svg" />
+<img src="documentation/Preprocess.svg" />
+<img src="documentation/FindContours.svg" />
+<img src="documentation/Erosion.svg" />
+
+</details>
+
+<details>
+<summary><h2>Felhasználói történetek</h2></summary>
+
+<link href="documentation/docu_style.css" rel="stylesheet"/>
 
 ### Képfeltöltés
 
@@ -24,7 +143,7 @@
 </table>
 
 
-### Szerkesztők Általánosan
+### Szerkesztők általánosan
 
 
 <table>
@@ -64,7 +183,7 @@
 
 
 
-### Második Szerkesztő (Körvonalak keresése)
+### Második szerkesztő (Körvonalak keresése)
 
 
 <table>
@@ -124,7 +243,7 @@
 
 
 
-### Harmadik Szerkesztő (Partvonal javítása)
+### Harmadik szerkesztő (Partvonal javítása)
 
 
 <table>

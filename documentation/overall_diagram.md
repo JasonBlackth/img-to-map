@@ -18,14 +18,15 @@ package "Szerkesztők" as Editors{
 actor :Felhasználó: as User
 
 User --> (U)
-User --> (UnD)
-User --> (R)
-User --> (D)
-User --> (P)
-User --> (F)
-User --> (E)
+User -d-> (UnD)
+User -d-> (R)
+User -d-> (D)
+User -u-> (E)
+User -u-> (F)
+User -u-> (P)
 
 U ..> Editors : precedes
 U ..> UA : precedes
+UnD .r.> R : precedes
 
 @enduml
