@@ -3,7 +3,7 @@
 
 ### 1\. Hatékonyság
 
-* Minimális terhelés egy mai átlagos felhasználású számítógép illetve okostelefon porcesszorára, memóriájára nézve
+* Minimális terhelés egy mai átlagos felhasználású számítógép illetve okostelefon processzorára, memóriájára nézve
 * Hálózati kapcsolatot igényel
 * Gyors (< 1 mp) válaszidő egy mai átlagos számítógépen vagy okostelefonon, megfelelő internetkapcsolat mellett
 * Általánosságban szinte azonnali (0.3 mp) válaszidő
