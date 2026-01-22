@@ -3,7 +3,7 @@ body{
     color: rgb(232, 230, 227);
 }
 img {
-    max-width: 300px;
+  max-width: 300px;
 }
 .slidecontainer {
   width: 100%; /* Width of the outside container */
