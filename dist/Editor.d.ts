@@ -1,11 +1,16 @@
 export declare class Editor {
-    private image;
-    private contours;
-    private selected;
+    contours: any;
+    selected: number;
+    contourImage: any;
+    rows: number;
+    cols: number;
+    private grayscaleImage;
+    private contourMap;
     constructor(imageElement: HTMLImageElement);
-    getGrayscaleImage(): any;
-    getContourImage(low: number, high: number): any;
-    selectContour(index: number): any;
+    createContourImage(low: number, high: number): void;
     deleteSelectedContour(): void;
+    logSelectedContour(): void;
+    private createContourMap;
+    selectContourClosestTo(clickX: number, clickY: number): boolean;
 }
 //# sourceMappingURL=Editor.d.ts.map

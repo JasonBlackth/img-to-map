@@ -1,32 +1,32 @@
+import { Colours } from "./Colours.js";
+
 declare let cv: any;
 
 export class Editor {
-    private image: any;
-    private contours: any;
-    private selected: number;
+    public contours: any;
+    public selected: number;
+    public contourImage: any;
+    public rows: number;
+    public cols: number;
+
+    private grayscaleImage: any;
+    private contourMap: any;
 
     public constructor(imageElement: HTMLImageElement) {
-        this.image = cv.imread(imageElement);
-        let temp = this.getGrayscaleImage();
-        this.image = temp.clone();
+        let inputImage = cv.imread(imageElement)
+        this.rows = inputImage.rows;
+        this.cols = inputImage.cols;
+        
+        this.grayscaleImage = new cv.Mat();
+        cv.cvtColor(inputImage, this.grayscaleImage, cv.COLOR_RGBA2GRAY);
     }
 
-    public getGrayscaleImage(): any {
-        if (!this.image) throw new Error("Image not loaded");
-
-        let output = new cv.Mat();
-        cv.cvtColor(this.image, output, cv.COLOR_RGBA2GRAY);
-        return output;
-    }
-
-    public getContourImage(low :number, high :number): any {
-        if (!this.image) throw new Error("Image not loaded");
-
-        const output = cv.Mat.zeros(this.image.rows, this.image.cols, cv.CV_8UC3);
-        const canny = cv.Mat.zeros(output.rows, output.cols, cv.CV_8UC1);
+    public createContourImage(low :number, high :number) : void {
+        this.contourImage = cv.Mat.zeros(this.rows, this.cols, cv.CV_8UC3);
+        const canny = cv.Mat.zeros(this.rows, this.cols, cv.CV_8UC1);
         const hierarchy = new cv.Mat();
         this.contours = new cv.MatVector();
-        cv.Canny(this.image, canny, low, high);
+        cv.Canny(this.grayscaleImage, canny, low, high);
         cv.findContours(
             canny,
             this.contours,
@@ -34,23 +34,69 @@ export class Editor {
             cv.RETR_EXTERNAL,
             cv.CHAIN_APPROX_SIMPLE
         );
-        cv.drawContours(output, this.contours, -1, new cv.Scalar(255, 255, 255), cv.FILLED);
-        return output;
-    }
-
-    public selectContour(index :number): any {
-        this.selected = index;
-        return this.contours.get(index);
+        cv.drawContours(this.contourImage, this.contours, -1, new cv.Scalar(255, 255, 255), cv.FILLED);
+        this.createContourMap();
     }
 
     public deleteSelectedContour() : void {
+        if (!this.selected) return;
         const replacement = new cv.Mat(
-            this.contours.get(this.selected),
-            -1,
+            this.contours.get(this.selected).rows,
+            1,
             cv.CV_32SC2,
             new cv.Scalar(-1)
         );
+        cv.drawContours(this.contourImage, this.contours, this.selected, Colours.BLACK, cv.FILLED);
         this.contours.set(this.selected, replacement);
+    }
+
+    public logSelectedContour() : void {
+        if (!this.selected) return;
+        const contour = this.contours.get(this.selected);
+        const area = cv.contourArea(contour, false);
+        const rect = cv.boundingRect(contour);
+        const rectArea = rect.width * rect.height;
+        console.log(rect)
+
+        const hull = new cv.Mat();
+        cv.convexHull(contour, hull, false, true);
+        const hullArea = cv.contourArea(hull, false);
+
+        console.log(`
+            Area: ${area}
+            Arc Length: ${cv.arcLength(contour, true)}
+            Extent: ${area / rectArea}
+            Solidity: ${area / hullArea}`
+        );
+
+        hull.delete();
+    }
+
+    private createContourMap(){
+        this.contourMap = cv.Mat.zeros(this.rows, this.cols, cv.CV_16UC1)
+        for (let i = 0; i < this.contours.size(); ++i) {
+            cv.drawContours(this.contourMap, this.contours, i, new cv.Scalar(i + 1), cv.FILLED);
+        }
+    }
+
+    public selectContourClosestTo(clickX :number, clickY :number) : boolean {
+        const r = 9;
+        const r2 = r * r;
+        let closest: { contour_idx: number; sqDist: number } = undefined;
+
+        for (let x = Math.max(clickX - r, 0); x < Math.min(clickX + r, this.contourMap.rows); ++x) {
+          for (let y = Math.max(clickY - r, 0); y < Math.min(clickY + r, this.contourMap.cols); ++y) {
+            const sqDist = (x - clickX) ** 2 + (y - clickY) ** 2;
+            const val = this.contourMap.data16U[y * this.contourMap.cols + x] -1;
+            if (sqDist <= r2 && val !== -1) {
+                if (!closest || closest.sqDist > sqDist) {
+                    closest = { contour_idx: val, sqDist: sqDist };
+                }
+            }
+            }
+        }
+        if (closest) this.selected = closest.contour_idx;
+        return Boolean(closest);
     }
 
 }
