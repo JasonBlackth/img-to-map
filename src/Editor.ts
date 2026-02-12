@@ -1,3 +1,4 @@
+//import { makeAction, type Action } from "./Action.js";
 import { Colours } from "./Colours.js";
 
 declare let cv: any;
@@ -8,6 +9,8 @@ export class Editor {
     public contourImage: any;
     public rows: number;
     public cols: number;
+    public low = 0;
+    public high = 0;
 
     private grayscaleImage: any;
     private contourMap: any;
@@ -20,6 +23,22 @@ export class Editor {
         this.grayscaleImage = new cv.Mat();
         cv.cvtColor(inputImage, this.grayscaleImage, cv.COLOR_RGBA2GRAY);
     }
+
+    // public deleteSelectedContour :Action = makeAction(
+    //     {
+    //         internalState : {
+    //            // deletedIndex: this.selected,
+    //         },
+    //         apply: (state :any) => {
+    //             state.deletedIndex = this.selected;
+    //             state.deletedCountour = this.deleteSelected();   
+    //         },
+    //         revert: (state :any) => {
+
+    //         }
+    //     }
+    // );
+
 
     public createContourImage(low :number, high :number) : void {
         this.contourImage = cv.Mat.zeros(this.rows, this.cols, cv.CV_8UC3);
@@ -38,16 +57,18 @@ export class Editor {
         this.createContourMap();
     }
 
-    public deleteSelectedContour() : void {
-        if (!this.selected) return;
+    private deleteSelected() : any {
+        if (!this.selected) return undefined;
+        const contourToDelete = this.contours.get(this.selected).clone();
         const replacement = new cv.Mat(
-            this.contours.get(this.selected).rows,
+            contourToDelete.rows,
             1,
             cv.CV_32SC2,
             new cv.Scalar(-1)
         );
         cv.drawContours(this.contourImage, this.contours, this.selected, Colours.BLACK, cv.FILLED);
         this.contours.set(this.selected, replacement);
+        return contourToDelete;
     }
 
     public logSelectedContour() : void {

@@ -1,0 +1,31 @@
+@startuml Action
+
+
+interface ActionType{
+    - dataStorage? : Object
+    + apply(data? : Object) : void
+    + revert(data? : Object) : void
+}
+
+abstract class Action{
+    - dataStorage : Object
+    + apply() : void
+    + revert() : void
+    + static createAndPerform(template : ActionType) : Action
+}
+
+class "ChangeValueAction<T>" {
+    - editor : Editor
+    - propertyName : String
+    - originalValue : T
+    - newValue : T
+    - setEditorProperty(to: T) : void
+    + apply() : void
+    + revert() : void
+    + static createAndPerform(editor : Editor, propertyName: String, newValue: T)
+}
+
+ActionType <|.. Action
+Action <|.. "ChangeValueAction<T>"
+
+@enduml

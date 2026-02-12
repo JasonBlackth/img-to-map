@@ -4,11 +4,13 @@ export declare class Editor {
     contourImage: any;
     rows: number;
     cols: number;
+    low: number;
+    high: number;
     private grayscaleImage;
     private contourMap;
     constructor(imageElement: HTMLImageElement);
     createContourImage(low: number, high: number): void;
-    deleteSelectedContour(): void;
+    private deleteSelected;
     logSelectedContour(): void;
     private createContourMap;
     selectContourClosestTo(clickX: number, clickY: number): boolean;

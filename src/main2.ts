@@ -1,3 +1,4 @@
+import { type Action, type ActionType } from "./Action.js";
 import { Colours } from "./Colours.js";
 import { Editor } from "./Editor.js";
 
@@ -27,6 +28,7 @@ const cannyLowSlider = document.getElementById('cannyLow') as HTMLInputElement;
 const cannyHighSlider = document.getElementById('cannyHigh') as HTMLInputElement;
 const canvas2 = document.querySelector('#canvasOutput2') as HTMLCanvasElement;
 const outputDiv = document.getElementById("output") as HTMLDivElement;
+
 
 let editor :Editor = undefined;
 
@@ -73,3 +75,61 @@ addEventListener('keydown', (event: KeyboardEvent) => {
   if (event.key === 'Delete')
     (window as any).deleteContour();
 });
+
+// let testAction = new Action(
+//   {
+//     isInEffect: false,
+//     p: document.getElementById("actionText")
+//   },
+//   (o) => { 
+//     o.p.innerHTML = "Action was perfomed :)"
+//     o.isInEffect = true;
+//     return o;
+//   },
+//   (o) => {
+//     o.p.innerHTML = "Action was reverted :)"
+//     o.isInEffect = false;
+//     return o;
+//   }
+// ); 
+
+let testCounter = 3;
+
+let testCounterWrapper = {
+  counter: 0
+}
+
+let actionPerformed = false;
+
+let actionTypeTest :ActionType = {
+    internalState: 1,
+    apply: test,
+    revert: testRevert
+}
+
+function toggleActionText(){
+    if (!actionPerformed)
+      actionTypeTest.apply();
+    else
+      actionTypeTest.revert();
+    actionPerformed = !actionPerformed;
+}
+
+
+
+
+document
+    .getElementById("actionTestButton")
+    .addEventListener("click", () => {
+      toggleActionText();
+  });
+
+  function test(){
+    console.log("apply");
+  }
+  function testRevert(){
+    console.log("revert")
+  }
+
+
+

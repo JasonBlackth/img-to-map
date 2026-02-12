@@ -1,0 +1,52 @@
+@startuml Editor
+
+interface Editor{
+    - inputImage : cv.Mat
+    - currentImage : cv.Mat
+    + rows : int
+    + cols : int
+    + getImage() : cv.Mat
+}
+
+class Editor1{
+    - denoiseMode : denoiseModeEnum
+    - contrast : int
+    - contrastCentre : int
+    + denoiseMode(to: denoiseModeEnum) : Action
+    + setContrast(to: int) : Action
+    + setContrastCentre(to: int) : Action
+}
+' Ha valamit, akkor az Editor2-t kéne egyszerűsíteni azzal, hogy "elég jó" lesz az alap contour finding
+class Editor2{
+    - contours : cv.MatVector
+    - contourMap : cv.Mat
+    - selectedContour : int
+    - lowThreshold : int
+    - highThreshold : int
+    - declutterThreshold : int
+    + deleteSelectedContour() : Action
+    + setLowThreshold(to: int) : Action
+    + setHighThreshold(to: int) : Action
+    + setDeclutterThreshold(to: int) : Action
+    + drawNewContour(input: cv.Mat) : Action
+
+    + createContourImage(low: int, high: int) : void
+    + selectContourClosestTo(clickX: int, clickY: int) : cv.Mat
+    
+    - createContourMap() : void
+    
+}
+
+class Editor3{
+    + createFjords(subImage: cv.Mat) : Action
+    + createSmallIslands(subImage: cv.Mat) : Action
+    + evenOutCoastLine(subImage: cv.Mat) : Action
+    + makeCoastlineUneven(subImage: cv.Mat) : Action
+}
+
+Editor <|.. Editor1
+Editor <|.. Editor2
+Editor <|.. Editor3 
+
+
+@enduml
