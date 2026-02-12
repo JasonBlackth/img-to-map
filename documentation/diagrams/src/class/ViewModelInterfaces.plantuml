@@ -1,0 +1,47 @@
+@startuml ViewModelInterfaces
+
+
+interface Initializable{
+    + initialize()
+}
+abstract class Showable{
+    - outputTarget : HTMLElement
+    - outputContent : HTMLElement
+    + show() : void
+    + hide() : void
+}
+
+abstract class EditorViewModel{
+    - editorView : HTMLElement
+    - editorModel : Editor
+    - buttonMap : Map<HTMLElement, Action>
+}
+
+class ImageUploader{
+    - imageInput : HTMLInputElement
+    - onInput() : void
+}
+class ImageDownloadWindow{
+    - imageDisplay : HTMLCanvasElement
+    - editedImage : cv.Mat
+    - imageStyle : imageStyleEnum
+    - enableImageGraphics : boolean
+    - getCurrentImage() : cv.Mat
+    + setImageStyle(to: imageStyleEnum)
+    + setImageGraphics(to: boolean)
+    + updateImageDisplay() : void
+}
+
+Showable <|.. EditorViewModel
+Showable <|.. ImageUploader
+Showable <|.. ImageDownloadWindow
+
+Initializable <|.. EditorViewModel
+Initializable <|.. ImageUploader
+Initializable <|.. ImageDownloadWindow
+
+
+
+
+
+@enduml

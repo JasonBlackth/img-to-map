@@ -119,10 +119,10 @@
 <details>
 <summary><h2>Felhasználói eset diagramok</h2></summary>
 
-<img src="documentation/Overall.svg" />
-<img src="documentation/Preprocess.svg" />
-<img src="documentation/FindContours.svg" />
-<img src="documentation/Erosion.svg" />
+<img src="documentation/diagrams/out/Overall.svg" />
+<img src="documentation/diagrams/out/Preprocess.svg" />
+<img src="documentation/diagrams/out/FindContours.svg" />
+<img src="documentation/diagrams/out/Erosion.svg" />
 
 </details>
 

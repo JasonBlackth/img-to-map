@@ -1,0 +1,69 @@
+@startuml ViewModel
+
+package ViewModel <<Frame>>{
+
+    interface Initializable{
+        + initialize()
+    }
+
+    class Application{
+        - actionHistory : Action[]
+        - undoneActions : Action[]
+        - editor1View : EditorViewModel
+        - editor2View : EditorViewModel
+        - editor3View : EditorViewModel
+        - imageUploader : ImageUploader
+
+        + undo() : void
+        + redo() : void
+        + registerAction() : void
+    }
+
+
+    abstract class EditorViewModel{
+        - editorView : HTMLElement
+        - editorModel : Editor
+        - buttonMap : Map<HTMLElement, Action>
+    }
+
+    class Editor1ViewModel{
+        - editorModel : Editor1
+        + constructor(editor: Editor1)
+    }
+    class Editor2ViewModel{
+        - editorModel : Editor2
+        + constructor(editor: Editor2)
+    }
+    class Editor3ViewModel{
+        - editorModel : Editor2
+        + constructor(editor: Editor3)
+    }
+
+    class ImageUploader{
+        - imageInput : HTMLInputElement
+        - onInput() : void
+    }
+    class ImageDownloadWindow{
+        - imageDisplay : HTMLCanvasElement
+        - editedImage : cv.Mat
+        - imageStyle : imageStyleEnum
+        - enableImageGraphics : boolean
+        - getCurrentImage() : cv.Mat
+        + setImageStyle(to: imageStyleEnum)
+        + setImageGraphics(to: boolean)
+        + updateImageDisplay() : void
+    }
+
+
+    Initializable <|.right. Application
+
+    Application *-- EditorViewModel
+    Application *-- ImageUploader
+    Application *-- ImageDownloadWindow
+
+    EditorViewModel <|.. Editor1ViewModel
+    EditorViewModel <|.. Editor2ViewModel
+    EditorViewModel <|.. Editor3ViewModel
+
+}
+@enduml

@@ -24,3 +24,10 @@
 - A legközelebbi nem szomszédos pont távolsága minden pontra nagyon kicsi
     - ez egy "rendes" alakzatnál nem lenne igaz (legalábbis nem minden pontra)
    
+
+### ReversibleAction
+- Editor.függvény
+- ez jelentsen egy Action.apply()-t
+- aminek megadom a revert()-jét
+- és az bekerül az Application.actionHistory-ba
+
