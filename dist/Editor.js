@@ -1,5 +1,5 @@
 //import { makeAction, type Action } from "./Action.js";
-import { Colours } from "./Colours.js";
+import { Colours } from "./ts/Model/Colours.js";
 export class Editor {
     constructor(imageElement) {
         this.low = 0;

@@ -1,5 +1,5 @@
 import { type Action, type ActionType } from "./Action.js";
-import { Colours } from "./Colours.js";
+import { Colours } from "./ts/Model/Colours.js";
 import { Editor } from "./Editor.js";
 
 declare let cv: any;
@@ -68,7 +68,7 @@ canvas2.addEventListener('click', (event: MouseEvent) => {
 (window as any).getContourImage = getContourImage;
 (window as any).logContour = () => editor.logSelectedContour();
 (window as any).deleteContour = () => {
-    editor.deleteSelectedContour();
+    //editor.deleteSelectedContour();
     cv.imshow('canvasOutput2', editor.contourImage);
 }
 addEventListener('keydown', (event: KeyboardEvent) => {
@@ -102,7 +102,7 @@ let testCounterWrapper = {
 let actionPerformed = false;
 
 let actionTypeTest :ActionType = {
-    internalState: 1,
+    dataStorage: 1,
     apply: test,
     revert: testRevert
 }

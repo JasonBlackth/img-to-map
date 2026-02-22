@@ -1,4 +1,4 @@
-import { Application } from "./Application";
+import { Application } from "./Application.js";
 export class Action {
     static create(from) {
         let action = new Action(from);
@@ -42,4 +42,13 @@ class ShearX {
         this.internalState = amount;
     }
 }
+function setField(obj, key, value) {
+    obj[key] = value;
+}
+// Example
+const user = {
+    name: "Alice",
+    age: 30,
+};
+setField(user, "name", "Bob");
 //# sourceMappingURL=Action.js.map

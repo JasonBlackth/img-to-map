@@ -1,23 +1,33 @@
-// import {Editor} from "./Editor.js";
+import {Application} from "./ts/ViewModel/Application.js";
 
-// declare let cv: any;
+declare let cv: any;
 
-// declare global {
-//   interface Window {
-//     Module: any;
-//   }
-// }
+declare global {
+  interface Window {
+    Module: any;
+  }
+}
 
-// window.Module = {
-//   async onRuntimeInitialized() {
-//     const status = document.getElementById('status');
-//     if (status) {
-//       status.innerHTML = 'OpenCV.js is ready.';
-//     }
-//   }
-// };
+window.Module = {
+  async onRuntimeInitialized() {
+    const status = document.getElementById('status');
+    if (status) {
+      status.innerHTML = 'OpenCV.js is ready.';
+    }
+  }
+};
 
-
+Application.initialize();
+window.addEventListener('keydown', (event: KeyboardEvent) => {
+  if (event.ctrlKey){
+    if (event.key === 'z') {
+      Application.undo();
+    }
+    if (event.key === 'y') {
+      Application.redo();
+    }
+  }
+});
 // let contours: any | undefined;
 // let inputImage: any | undefined;
 

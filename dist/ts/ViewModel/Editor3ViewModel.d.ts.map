@@ -1,0 +1,1 @@
+{"version":3,"file":"Editor3ViewModel.d.ts","sourceRoot":"","sources":["../../../src/ts/ViewModel/Editor3ViewModel.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,sBAAsB,CAAC;AACvD,OAAO,EAAE,OAAO,EAAE,MAAM,qBAAqB,CAAC;AAE9C,qBAAa,gBAAiB,SAAQ,eAAe;IACjD,SAAS,CAAC,WAAW,EAAE,OAAO,CAAC;gBAEnB,UAAU,EAAE,WAAW,EAAE,MAAM,EAAE,OAAO;IAKpD,UAAU,IAAI,IAAI;CAGrB"}
