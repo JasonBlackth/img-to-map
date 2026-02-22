@@ -1,0 +1,48 @@
+import { Editor1 } from '../../editor1/editor1.js';
+import { Editor2 } from '../../editor2/editor2.js';
+import { Action } from './Action.js';
+import type { Editor } from './Editor.js';
+
+export class ChangeValueAction<T> extends Action {
+    private editor: Editor;
+    private propertyName: string;
+    private originalValue: T;
+    private newValue: T;
+
+    private constructor(editor: Editor, propertyName: string, originalValue: T, newValue: T) {
+        super();
+        this.editor = editor;
+        this.propertyName = propertyName;
+        this.originalValue = originalValue;
+        this.newValue = newValue;
+    }
+
+    apply(): void {
+        this.setEditorProperty(this.newValue);
+    }
+
+    revert(): void {
+        this.setEditorProperty(this.originalValue);
+    }
+
+    static createAndChangeValue<T>(editor: Editor, propertyName: string, newValue: T): ChangeValueAction<T> {
+        const originalValue = (editor as any)[propertyName];
+        if (originalValue === newValue) {
+            return null as any;
+        }
+        const action = new ChangeValueAction<T>(editor, propertyName, originalValue, newValue);
+        action.apply();
+        ActiveProject.registerAction(action);
+        console.log(action);
+        return action;
+    }
+    
+    private setEditorProperty(to: T): void {
+        (this.editor as any)[this.propertyName] = to;
+        if (this.editor instanceof Editor1) {
+            (this.editor as Editor1).updatePreviewValues();
+        } else if (this.editor instanceof Editor2) {
+            (this.editor as Editor2).updatePreviewValues();
+        }
+    }
+}

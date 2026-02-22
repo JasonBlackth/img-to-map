@@ -1,0 +1,9 @@
+<label for="">Test slider {{previewValue}}</label>
+<input type="range"
+[min]="0"
+[max]="24"
+step="1"
+[value] ="previewValue"
+(input)="onInput($event.target.value)"
+(change)="actualValue = previewValue"
+/>
