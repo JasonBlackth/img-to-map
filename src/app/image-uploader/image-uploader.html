@@ -1,0 +1,17 @@
+<div>
+    <h2>Image Uploader</h2>
+    <img id="imageDisplay"
+        [src]="fileUrl"
+        [hidden]="fileUrl.length === 0"
+    />
+    <div>
+        Upload Image:
+        <input type="file" id="fileInput" name="file"
+            (change)="onFileUpload($event)"/>
+            <img id="uploadedImage"
+            [src]="fileUrl"
+            hidden
+            (load)="onImageLoaded($event)"
+        />
+    </div>
+</div>
