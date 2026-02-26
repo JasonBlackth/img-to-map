@@ -14,7 +14,6 @@ import { Slider } from "../slider/slider";
   styleUrl: './editor1.css',
 })
 export class Editor1 implements Editor {
-
     protected _denoiseMode: DenoiseModeEnum = DenoiseModeEnum.NONE;
 
 
@@ -22,6 +21,8 @@ export class Editor1 implements Editor {
     protected contrast = 1;
     protected contrastCenter = 128;
     protected denoiseAmount = 0;
+
+    private mask: any;
 
 
     private _inputImage: any;
@@ -34,6 +35,8 @@ export class Editor1 implements Editor {
 
     @ViewChild('editorCanvas')
     canvasRef!: ElementRef<HTMLCanvasElement>;
+    bgdModel: any;
+    fgdModel: any;
 
 
     @Input()
@@ -95,18 +98,38 @@ export class Editor1 implements Editor {
         this.updateDisplayImage();
     }
 
+    onMouseOverCanvas(event: MouseEvent) {
+      if (event.buttons == 1 || event.buttons == 2){
+        const rect = this.canvasRef.nativeElement.getBoundingClientRect();
+        let x = event.offsetX;
+        let y = event.offsetY;
+        if (x > 0 && x < rect.width
+            && y > 0 && y < rect.height){
+            const newValue = (event.buttons == 1) ? cv.GC_FGD : cv.GC_BGD;
+            const X = Math.round(x * (this.cols / rect.width));
+            const Y = Math.round(y * (this.rows / rect.height));       
+            this.mask.ucharPtr(X, Y)[0] = newValue;
+            this.mask.ucharPtr(X, Y)[1] = newValue;
+            this.mask.ucharPtr(X, Y)[2] = newValue;
+            console.log(`Value at (${X}, ${Y}): ${this.mask.ucharPtr(X, Y)}`);
+            
+        }
+      }  
+      
+    }
+
     extractForeground(){
         let src = this._inputImage.clone();
         cv.cvtColor(src, src, cv.COLOR_RGBA2RGB, 0);
-        let mask = new cv.Mat();
-        let bgdModel = new cv.Mat();
-        let fgdModel = new cv.Mat();
-        let rect = new cv.Rect(260, 260, 460, 460);
-        cv.grabCut(src, mask, rect, bgdModel, fgdModel, 1, cv.GC_INIT_WITH_RECT);
+        this.mask = new cv.Mat();
+        this.bgdModel = new cv.Mat();
+        this.fgdModel = new cv.Mat();
+        let rect = new cv.Rect(0, 0, this.rows, this.cols);
+        cv.grabCut(src, this.mask, rect, this.bgdModel, this.fgdModel, 1, cv.GC_INIT_WITH_RECT);
         // draw foreground
         for (let i = 0; i < src.rows; i++) {
             for (let j = 0; j < src.cols; j++) {
-                if (mask.ucharPtr(i, j)[0] == 0 || mask.ucharPtr(i, j)[0] == 2) {
+                if (this.mask.ucharPtr(i, j)[0] == 0 || this.mask.ucharPtr(i, j)[0] == 2) {
                     src.ucharPtr(i, j)[0] = 0;
                     src.ucharPtr(i, j)[1] = 0;
                     src.ucharPtr(i, j)[2] = 0;
@@ -114,13 +137,30 @@ export class Editor1 implements Editor {
             }
         }
         // draw grab rect
-        let color = new cv.Scalar(0, 0, 255);
-        let point1 = new cv.Point(rect.x, rect.y);
-        let point2 = new cv.Point(rect.x + rect.width, rect.y + rect.height);
-        cv.rectangle(src, point1, point2, color);
         this.displayImage = src.clone();
         this.updateDisplayImage();
-        src.delete(); mask.delete(); bgdModel.delete(); fgdModel.delete();
+        src.delete();
+    }
+
+    iterExtractForeground() {
+        console.log("iterating")
+        let src = this._inputImage.clone();
+        let rect = new cv.Rect(0, 0, this.rows, this.cols);
+        cv.grabCut(src, this.mask, rect, this.bgdModel, this.fgdModel, 1, cv.GC_INIT_WITH_MASK);
+
+        for (let i = 0; i < src.rows; i++) {
+            for (let j = 0; j < src.cols; j++) {
+                if (this.mask.ucharPtr(i, j)[0] == 0 || this.mask.ucharPtr(i, j)[0] == 2) {
+                    src.ucharPtr(i, j)[0] = 0;
+                    src.ucharPtr(i, j)[1] = 0;
+                    src.ucharPtr(i, j)[2] = 0;
+                }
+            }
+        }
+
+        this.displayImage = src.clone();
+        this.updateDisplayImage();
+        src.delete();
     }
 
     updateDisplayImage(): void {

@@ -3,7 +3,8 @@
     <div class="left">
         <canvas
           id="editor1canvas"
-          #editorCanvas>
+          #editorCanvas
+          (mousemove)="onMouseOverCanvas($event)">
         </canvas>
     </div>
     <div class="right">
@@ -36,6 +37,7 @@
       </slider>
       <button (click)="applyClahe()">Apply CLAHE</button>
       <button (click)="extractForeground()">Extract Foreground</button>
+      <button (click)="iterExtractForeground()">New iteration</button>
       <div>
         <label for="DenoiseMode">Denoise Mode:</label>
         <select id="DenoiseMode" name="denoiseMode" [ngModel]="_denoiseMode" (ngModelChange)="setDenoiseMode($event)">
