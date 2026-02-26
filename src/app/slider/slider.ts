@@ -1,36 +1,37 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-slider',
-  imports: [],
-  templateUrl: './slider.html',
-  styleUrl: './slider.css',
+  selector: 'slider',
+  templateUrl: './slider.html'
 })
 export class Slider {
+  static count: number = 0;
+
   @Input() min = 0;
-  @Input() max = 100;
+  @Input() max = 255;
   @Input() step = 1;
-  @Input() id?: string;
+  @Input() id = `unnamedSlider${Slider.count++}`;
 
+  private actualValue: number = 0;
+  protected previewValue: number = this.actualValue;
 
-  @Input() value: number = 0;
+  @Input()
+  set value(v: number) {
+    this.actualValue = v;
+    this.previewValue = v;
+  }
+  get value(): number {
+    return this.actualValue;
+  }
   @Output() valueChange = new EventEmitter<number>();
-
-
-//  set value(newValue: number) {
-//     this.actualValue = newValue;
-//     this.previewValue = newValue;
-//   }
-
-//   get value(): number {
-//     return this.actualValue;
-//   }
-
-  protected actualValue: number = 0;
-  protected previewValue: number = 0;
 
   onInput(newValue: string) {
     this.previewValue = parseFloat(newValue);
+  }
+
+  onChange() {
+    this.actualValue = this.previewValue;
+    this.valueChange.emit(this.actualValue);
   }
 
 }

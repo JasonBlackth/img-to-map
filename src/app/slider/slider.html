@@ -1,9 +1,14 @@
-<label for="">Test slider {{previewValue}}</label>
-<input type="range"
-[min]="0"
-[max]="24"
-step="1"
-[value] ="previewValue"
-(input)="onInput($event.target.value)"
-(change)="actualValue = previewValue"
-/>
+<div>
+    <label><ng-content></ng-content>: {{previewValue}}
+        <br>
+        <input type="range"
+        [id]="id"
+        [min]="min"
+        [max]="max"
+        [step]="step"
+        [value] ="previewValue"
+        (input)="onInput($event.target.value)"
+        (change)="onChange()"
+        />
+    </label>
+</div>

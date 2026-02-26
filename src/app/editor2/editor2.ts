@@ -1,12 +1,13 @@
 import { Component, ElementRef, HostListener, Input, Output, ViewChild } from '@angular/core';
-import { type ActionType, Action, ChangeValueAction, Editor } from '../ts';
-import { Colours } from '../ts/Model/Colours';
+import { Action, ChangeValueAction, Editor } from '../ts';
+import { Colors } from '../ts/Model/Colors';
+import { Slider } from "../slider/slider";
 
 
 
 @Component({
   selector: 'editor2',
-  imports: [],
+  imports: [Slider],
   templateUrl: './editor2.html',
   styleUrl: './editor2.css',
 })
@@ -14,8 +15,8 @@ export class Editor2 implements Editor {
     public contours: any;
     private contourMap: any;
     private selectedContours: Set<number> = new Set();
-    public lowThreshold: number = 0;
-    public highThreshold: number = 255;
+    protected lowThreshold: number = 0;
+    protected highThreshold: number = 255;
     public declutterThreshold: number = 0;
 
     rows: number = 0;
@@ -24,13 +25,11 @@ export class Editor2 implements Editor {
     @Output()
     public contourImage: any;
 
-    
-    previewLowThreshold: any;
-    previewHighThreshold: any;
 
     @ViewChild('editorCanvas')
     canvasRef!: ElementRef<HTMLCanvasElement>;
     private inputImageGrayScale: any;
+
 
     @Input()
     set inputImage(image: any) {
@@ -43,11 +42,6 @@ export class Editor2 implements Editor {
         this.contourMap = new cv.Mat();
         this.contourImage = new cv.Mat();
         this.createContourImage();
-    }
-
-
-    getImage(): any {
-        return this.contourImage;
     }
 
 
@@ -76,7 +70,7 @@ export class Editor2 implements Editor {
                 this.dropSelection();
             }
             this.selectedContours.add(selectedIndex);
-            this.reDrawContour(selectedIndex, Colours.RED);
+            this.reDrawContour(selectedIndex, Colors.RED);
         }
         
     }
@@ -99,20 +93,10 @@ export class Editor2 implements Editor {
                 });
                 ds.editor.reDrawContours(
                     ds.deletedIndices,
-                    Colours.WHITE
+                    Colors.WHITE
                 );
             }
         });
-    }
-    
-    setLowThreshold(): void {
-        this.setProperty("lowThreshold", this.previewLowThreshold);
-        this.createContourImage();
-    }
-
-    setHighThreshold(): void {
-        this.setProperty("highThreshold", this.previewHighThreshold);
-        this.createContourImage();
     }
 
     setDeclutterThreshold(to: number): void {
@@ -137,7 +121,7 @@ export class Editor2 implements Editor {
             cv.RETR_EXTERNAL,
             cv.CHAIN_APPROX_SIMPLE
         );
-        this.reDrawAllContours(Colours.WHITE);
+        this.reDrawAllContours(Colors.WHITE);
         this.createContourMap();
         cv.imshow(this.canvasRef.nativeElement, this.contourImage);
         canny.delete();
@@ -203,7 +187,7 @@ export class Editor2 implements Editor {
 
     public deleteContoursAtIndices(indices: number[]) : void {
         if (!indices) return;
-        this.reDrawContours(indices, Colours.BLACK);
+        this.reDrawContours(indices, Colors.BLACK);
         for (const index of indices) {
             const contourToDelete = this.contours.get(index).clone();
             const dummyReplacement = new cv.Mat(
@@ -216,23 +200,14 @@ export class Editor2 implements Editor {
         }
     }
 
-    onDragHighThreshold(newValue: string) {
-        this.previewHighThreshold = parseInt(newValue);
-    }
-    onDragLowThreshold(newValue: string) {
-        this.previewLowThreshold = parseInt(newValue);
-    }
 
 
-    private setProperty<T>(propertyName: string, newValue: T): void {
+    protected setProperty<T>(propertyName: string, newValue: T): void {
         ChangeValueAction.createAndChangeValue(this, propertyName, newValue);
     }
 
-    updatePreviewValues(): void {
-       this.previewHighThreshold = this.highThreshold;
-       this.previewLowThreshold = this.lowThreshold;
+    handleValuesChanged(): void {
        this.createContourImage();
-       console.log(this.inputImage);
     }
 
     private reDrawAllContours(colour: any): void{
@@ -249,7 +224,7 @@ export class Editor2 implements Editor {
     }
 
     private dropSelection(): void {
-        this.reDrawContours(Array.from(this.selectedContours), Colours.WHITE);
+        this.reDrawContours(Array.from(this.selectedContours), Colors.WHITE);
         this.selectedContours.clear();
     }
 

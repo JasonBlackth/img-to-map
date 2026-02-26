@@ -1,45 +1,48 @@
-<div>
-    <h2>Prepare Image</h2>
-    <div float="left">
+<h2>Prepare Image</h2>
+<div class="editor">
+    <div class="left">
         <canvas
           id="editor1canvas"
           #editorCanvas>
         </canvas>
     </div>
-    <div float="right">
-    <label for="Brightness">
-      Brightness: {{ previewBrightness }}
-    </label>
-    <input type="range"
-      id="Brightness"
-      name="brightness"
-      min="0"
-      max="255"
-      [value]="previewBrightness"
-      (input)="onDragBrightness($event.target.value)"
-      (change)="setBrightness()">
-
-    <label for="Contrast">
-      Contrast: {{ previewContrast }}
-    </label>
-    <input type="range"
-      id="Contrast"
-      name="contrast"
-      min="0"
-      max="255"
-      [value]="previewContrast"
-      (input)="onDragContrast($event.target.value)"
-      (change)="setContrast()">
-    <label for="ContrastCentre">Contrast Centre: {{ previewContrastCentre }}</label>
-    <input type="range" id="ContrastCentre" name="contrastCentre" min="0" max="255"
-    [value]="previewContrastCentre"
-      (input)="onDragContrastCentre($event.target.value)"
-      (change)="setContrastCentre()">
-    <label for="DenoiseMode">Denoise Mode:</label>
-    <select id="DenoiseMode" name="denoiseMode" [ngModel]="_denoiseMode" (ngModelChange)="setDenoiseMode($event)">
-        <option value="NONE">None</option>
-        <option value="MEDIUM">Medium</option>
-        <option value="HIGH">High</option>
-    </select>
+    <div class="right">
+      <slider
+        id="brightnessSlider"
+        [min]="-128" [max]="128"
+        [value]="brightness"
+        (valueChange)="setProperty('brightness', $event)"
+        >Brightness</slider>
+      <slider
+        id="contrastSlider"
+        [min]="0.5" [max]="3" [step]="0.01"
+        [value]="contrast"
+        (valueChange)="setProperty('contrast', $event)"
+        >Contrast
+      </slider>
+      <slider
+        id="contrastCenterSlider"
+        [min]="0" [max]="255"
+        [value]="contrastCenter"
+        (valueChange)="setProperty('contrastCenter', $event)"
+        >Contrast Center
+      </slider>
+      <slider
+        id="denoiseAmountSlider"
+        [min]="0" [max]="255"
+        [value]="denoiseAmount"
+        (valueChange)="setProperty('denoiseAmount', $event)"
+        >Denoise Amount
+      </slider>
+      <button (click)="applyClahe()">Apply CLAHE</button>
+      <button (click)="extractForeground()">Extract Foreground</button>
+      <div>
+        <label for="DenoiseMode">Denoise Mode:</label>
+        <select id="DenoiseMode" name="denoiseMode" [ngModel]="_denoiseMode" (ngModelChange)="setDenoiseMode($event)">
+          <option value="NONE">None</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="HIGH">High</option>
+        </select>
+      </div>
     </div>
 </div>

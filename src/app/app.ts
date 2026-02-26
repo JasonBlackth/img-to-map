@@ -1,4 +1,4 @@
-import { Component, HostListener, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Project } from './project/project';
 
@@ -9,6 +9,5 @@ import { Project } from './project/project';
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('angular');
-
+ 
 }

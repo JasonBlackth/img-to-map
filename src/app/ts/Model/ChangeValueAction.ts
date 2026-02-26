@@ -1,5 +1,3 @@
-import { Editor1 } from '../../editor1/editor1.js';
-import { Editor2 } from '../../editor2/editor2.js';
 import { Action } from './Action.js';
 import type { Editor } from './Editor.js';
 
@@ -39,10 +37,6 @@ export class ChangeValueAction<T> extends Action {
     
     private setEditorProperty(to: T): void {
         (this.editor as any)[this.propertyName] = to;
-        if (this.editor instanceof Editor1) {
-            (this.editor as Editor1).updatePreviewValues();
-        } else if (this.editor instanceof Editor2) {
-            (this.editor as Editor2).updatePreviewValues();
-        }
+        this.editor.handleValuesChanged();
     }
 }

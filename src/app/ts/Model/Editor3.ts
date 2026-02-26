@@ -2,7 +2,7 @@
 import type { Editor } from './Editor.js';
 import { Action } from './Action.js';
 
-export class Editor3 implements Editor {
+export class Editor3 {//} implements Editor {
     private inputImage: any;
     private currentImage: any;
 
@@ -10,7 +10,7 @@ export class Editor3 implements Editor {
     readonly cols: number;
 
     constructor(prevEditor: Editor) {
-        this.inputImage = prevEditor.getImage();
+        //this.inputImage = prevEditor.getImage();
         this.currentImage = this.inputImage.clone();
         this.rows = this.inputImage.rows;
         this.cols = this.inputImage.cols;

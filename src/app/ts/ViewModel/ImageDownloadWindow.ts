@@ -1,10 +1,9 @@
 
 import { Showable } from './Showable.js';
-import type { Initializable } from './Initializable.js';
 import { ImageStyleEnum } from './ImageStyleEnum.js';
 import type { Editor } from '../Model/Editor.js';
 
-export class ImageDownloadWindow extends Showable implements Initializable {
+export class ImageDownloadWindow extends Showable {
     private imageDisplay: HTMLCanvasElement;
     private editedImage: any;
     private imageStyle: ImageStyleEnum = ImageStyleEnum.ORIGINAL;
@@ -13,7 +12,7 @@ export class ImageDownloadWindow extends Showable implements Initializable {
     constructor(outputTarget: HTMLElement, imageDisplay: HTMLCanvasElement, prevEditor: Editor) {
         super(outputTarget, outputTarget);
         this.imageDisplay = imageDisplay;
-        this.editedImage = prevEditor.getImage().clone();
+        //this.editedImage = prevEditor.getImage().clone();
     }
 
     initialize(): void {

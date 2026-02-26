@@ -1,18 +1,16 @@
-<image-uploader
+
+  <image-uploader
     (uploadedImage)="onImageUploaded($event)">
-</image-uploader>
-<div [hidden]="!displayEditors">
-    <editor1 (displayImageChanged)="onEditor1ImageChanged($event)">
-    </editor1>
-    <editor2>
-    </editor2>
-    <editor3 >
-    </editor3>
-    <image-downloader>
-    </image-downloader>
-</div>
-<app-slider>slider innerHTML</app-slider>
-
-
-
-
+  </image-uploader>
+  <div
+    [hidden]="!displayEditors">
+      <editor1
+        (displayImageChanged)="onEditor1ImageChanged($event)">
+      </editor1>
+      <editor2>
+      </editor2>
+      <editor3 >
+      </editor3>
+      <image-downloader>
+      </image-downloader>
+  </div>

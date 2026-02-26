@@ -1,6 +1,6 @@
-<div>   
-    <h2>Find Contours</h2>
-    <div float="left">
+<h2>Find Contours</h2>
+<div class="editor">   
+    <div class="left">
         <canvas
           id="editor2canvas"
           tabindex="0"
@@ -8,27 +8,21 @@
           (click)="onCanvasClicked($event)">
         </canvas>
     </div>
-    <div>
-        <label for="lowThreshold">
-            Low Threshold: {{ previewLowThreshold }}
-        </label>
-        <input type="range"
-            id="lowThreshold"
-            name="lowThreshold"
-            min="0" max="255"
-            [value]="previewLowThreshold"
-            (input)="onDragLowThreshold($event.target.value)"
-            (change)="setLowThreshold()"/>
-        <label for="highThreshold">
-            High Threshold: {{ previewHighThreshold }}
-        </label>
-        <input type="range"
-            id="highThreshold"
-            name="highThreshold"
-            min="0" max="255"
-            [value]="previewHighThreshold"
-            (input)="onDragHighThreshold($event.target.value)"
-            (change)="setHighThreshold()"/>
+    <div class="right">
+        <slider
+            id="lowThresholdSlider"
+            [min]="0"
+            [max]="500"
+            [value]="lowThreshold"
+            (valueChange)="setProperty('lowThreshold', $event)"
+            >Low Threshold</slider>
+        <slider
+            id="highThresholdSlider"
+            [min]="0"
+            [max]="500"
+            [value]="highThreshold"
+            (valueChange)="setProperty('highThreshold', $event)"
+        >High Threshold</slider>
         <button (click)="deleteSelectedContours()">Delete Selected</button>
     </div>
 </div>

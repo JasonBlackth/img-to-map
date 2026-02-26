@@ -11,14 +11,18 @@ import { Slider } from "../slider/slider";
 
 @Component({
   selector: 'project',
-  imports: [CommonModule, ImageUploader, Editor1, Editor2, Editor3, ImageDownloader, Slider],
+  imports: [CommonModule, ImageUploader, Editor1, Editor2, Editor3, ImageDownloader],
   templateUrl: './project.html',
   styleUrl: './project.css',
 })
 export class Project{
+logSliderValue() {
+ console.log(this.testSliderValue);
+}
     private actionHistory: Action[] = [];
     private undoneActions: Action[] = [];
     protected displayEditors = false;
+    protected testSliderValue = 85;
 
     @ViewChild(ImageUploader) imageUploader!: ImageUploader;
     @ViewChild(Editor1) editor1!: Editor1;
