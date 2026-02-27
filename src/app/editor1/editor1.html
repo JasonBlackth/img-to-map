@@ -1,3 +1,7 @@
+<!--
+  ~ <<licensetext>>
+  -->
+
 <h2>Prepare Image</h2>
 <div class="editor">
     <div class="left">
@@ -38,6 +42,7 @@
       <button (click)="applyClahe()">Apply CLAHE</button>
       <button (click)="extractForeground()">Extract Foreground</button>
       <button (click)="iterExtractForeground()">New iteration</button>
+      <button (click)="adaptiveThres()">Adaptive Thresholding</button>
       <div>
         <label for="DenoiseMode">Denoise Mode:</label>
         <select id="DenoiseMode" name="denoiseMode" [ngModel]="_denoiseMode" (ngModelChange)="setDenoiseMode($event)">

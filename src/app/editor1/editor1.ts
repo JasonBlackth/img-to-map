@@ -1,3 +1,7 @@
+/*
+ * <<licensetext>>
+ */
+
 
 import { Component, ElementRef, EventEmitter, input, Input, Output, ViewChild } from '@angular/core';
 import type { Editor } from '../ts/Model/Editor.js';
@@ -68,6 +72,24 @@ export class Editor1 implements Editor {
         dst.delete();
 
         this.updateDisplayImage();
+    }
+
+    adaptiveThres(){
+        let src = this._inputImage.clone();
+        let dst = new cv.Mat();
+        cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+        // You can try more different parameters
+        cv.adaptiveThreshold(src, dst, 200, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 13, 12);
+        
+        const displayMat = new cv.Mat();
+        cv.cvtColor(dst, displayMat, cv.COLOR_GRAY2BGR, 0);
+        
+        this.displayImage = displayMat.clone();
+        this.updateDisplayImage();
+
+        src.delete();
+        dst.delete();
+        displayMat.delete();
     }
 
     applyClahe() {

@@ -1,3 +1,7 @@
+/*
+ * <<licensetext>>
+ */
+
 import { Component, ElementRef, HostListener, Input, Output, ViewChild } from '@angular/core';
 import { Action, ChangeValueAction, Editor } from '../ts';
 import { Colors } from '../ts/Model/Colors';
@@ -229,5 +233,48 @@ export class Editor2 implements Editor {
     }
 
 }
+
+
+///let src = cv.imread('canvasInput');
+// let dst = new cv.Mat();
+// let canny = new cv.Mat();
+// cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+// // You can try more different parameters
+
+// let ksize = new cv.Size(3, 3);
+// let anchor = new cv.Point(-1, -1);
+// // You can try more different parameters
+// cv.blur(src, dst, ksize, anchor, cv.BORDER_DEFAULT);
+// cv.adaptiveThreshold(dst, src, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 21, 3);
+// cv.imshow('canvasOutput', src);
+// src.delete();
+// dst.delete();
+// canny.delete();
+
+
+// Még Erosion + Dilation segíthet
+// Illetve fordítva
+
+// aztán findContours-ban a hierarchiában a külsőket megtartani csak
+
+// let src = cv.imread('canvasInput');
+// let dst = new cv.Mat();
+// let canny = new cv.Mat();
+// cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+// // You can try more different parameters
+
+// let ksize = new cv.Size(3, 3);
+// let anchor = new cv.Point(-1, -1);
+// // You can try more different parameters
+// cv.blur(src, dst, ksize, anchor, cv.BORDER_DEFAULT);
+// cv.adaptiveThreshold(dst, src, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 31, 4);
+// let M = cv.Mat.ones(3, 3, cv.CV_8U);
+// // You can try more different parameters
+// cv.dilate(src, src, M, anchor, 3, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+// cv.erode(src, src, M, anchor, 3, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+// cv.imshow('canvasOutput', src);
+// src.delete();
+// dst.delete();
+// canny.delete();
 
 
