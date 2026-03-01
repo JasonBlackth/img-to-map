@@ -6,7 +6,6 @@ import { ImageDownloader } from '../image-downloader/image-downloader';
 import { Editor1 } from "../editor1/editor1";
 import { Editor2 } from "../editor2/editor2";
 import { Editor3 } from '../editor3/editor3';
-import { Slider } from "../slider/slider";
 
 
 @Component({
@@ -16,9 +15,6 @@ import { Slider } from "../slider/slider";
   styleUrl: './project.css',
 })
 export class Project{
-logSliderValue() {
- console.log(this.testSliderValue);
-}
     private actionHistory: Action[] = [];
     private undoneActions: Action[] = [];
     protected displayEditors = false;
@@ -58,6 +54,17 @@ logSliderValue() {
     onEditor1ImageChanged(image: any): void {
         this.editor2.inputImage = image;
     }
+    onEditor2ImageChanged(image: any) {
+        const gray = new cv.Mat();
+        cv.cvtColor(image, gray, cv.COLOR_RGBA2GRAY);
+        cv.threshold(gray, gray, 0, 255, cv.THRESH_BINARY);
+        this.editor3.inputImage = gray;
+        gray.delete();
+    }
+    onEditor3ImageChanged(image: any) {
+        this.imageDownloader.inputImage = image;
+    }
+
 
     undo(): void {
         const action = this.actionHistory.pop();

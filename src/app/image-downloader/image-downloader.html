@@ -1,1 +1,23 @@
-<p>image-downloader works!</p>
+<h2>Download Image</h2>
+<div class="editor">
+    <div class="left">
+        <canvas
+          id="imageDownloadCanvas"
+          #editorCanvas>
+        </canvas>
+    </div>
+    <div class="right">
+        <label for="imageStyleSelect">Image Style</label>
+        <br>
+        <select id="imageStyleSelect" [ngModel]="imageStyle" (ngModelChange)="onStyleChange($event)">
+          <option value="BINARY">Binary</option>
+          <option value="CLASSIC_FANTASY">Classic Fantasy</option>
+          <option value="VINTAGE">Vintage</option>
+        </select>
+        <br>
+        <button (click)="downloadImage()">Download Image</button>
+        <a #downloadLink
+        download="map.jpg"
+        ></a>
+    </div>
+</div>

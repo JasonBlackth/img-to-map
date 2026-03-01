@@ -2,54 +2,42 @@
   ~ <<licensetext>>
   -->
 
-<h2>Prepare Image</h2>
+<h2>Adaptive Threshold</h2>
 <div class="editor">
     <div class="left">
         <canvas
           id="editor1canvas"
-          #editorCanvas
-          (mousemove)="onMouseOverCanvas($event)">
+          #editorCanvas>
         </canvas>
     </div>
     <div class="right">
       <slider
-        id="brightnessSlider"
-        [min]="-128" [max]="128"
-        [value]="brightness"
-        (valueChange)="setProperty('brightness', $event)"
-        >Brightness</slider>
-      <slider
-        id="contrastSlider"
-        [min]="0.5" [max]="3" [step]="0.01"
-        [value]="contrast"
-        (valueChange)="setProperty('contrast', $event)"
-        >Contrast
+        id="sampleSizeSlider"
+        [min]="1" [max]="100" [step]="2"
+        [value]="sampleSize"
+        (valueChange)="setProperty('sampleSize', $event)"
+        >Sample Size
       </slider>
       <slider
-        id="contrastCenterSlider"
-        [min]="0" [max]="255"
-        [value]="contrastCenter"
-        (valueChange)="setProperty('contrastCenter', $event)"
-        >Contrast Center
+        id="addedConstantSlider"
+        [min]="0" [max]="15"
+        [value]="addedConstant"
+        (valueChange)="setProperty('addedConstant', $event)"
+        >Added Constant
       </slider>
       <slider
-        id="denoiseAmountSlider"
-        [min]="0" [max]="255"
-        [value]="denoiseAmount"
-        (valueChange)="setProperty('denoiseAmount', $event)"
-        >Denoise Amount
+        id="dilationItersSlider"
+        [min]="0" [max]="15"
+        [value]="dilationIters"
+        (valueChange)="setProperty('dilationIters', $event)"
+        >Dilation
       </slider>
-      <button (click)="applyClahe()">Apply CLAHE</button>
-      <button (click)="extractForeground()">Extract Foreground</button>
-      <button (click)="iterExtractForeground()">New iteration</button>
-      <button (click)="adaptiveThres()">Adaptive Thresholding</button>
-      <div>
-        <label for="DenoiseMode">Denoise Mode:</label>
-        <select id="DenoiseMode" name="denoiseMode" [ngModel]="_denoiseMode" (ngModelChange)="setDenoiseMode($event)">
-          <option value="NONE">None</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="HIGH">High</option>
-        </select>
-      </div>
+      <slider
+        id="erosionItersSlider"
+        [min]="0" [max]="15"
+        [value]="erosionIters"
+        (valueChange)="setProperty('erosionIters', $event)"
+        >Erosion
+      </slider>
     </div>
 </div>

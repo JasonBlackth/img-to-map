@@ -1,5 +1,5 @@
 export enum ImageStyleEnum {
-    ORIGINAL = 'ORIGINAL',
-    EDITED = 'EDITED',
-    PREVIEW = 'PREVIEW'
+    BINARY = 'BINARY',
+    CLASSIC_FANTASY = 'CLASSIC_FANTASY',
+    VINTAGE = 'VINTAGE'
 }

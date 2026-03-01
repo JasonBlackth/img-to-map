@@ -6,7 +6,7 @@ import type { Editor } from '../Model/Editor.js';
 export class ImageDownloadWindow extends Showable {
     private imageDisplay: HTMLCanvasElement;
     private editedImage: any;
-    private imageStyle: ImageStyleEnum = ImageStyleEnum.ORIGINAL;
+    private imageStyle: ImageStyleEnum = ImageStyleEnum.BINARY;
     private enableImageGraphics: boolean = false;
 
     constructor(outputTarget: HTMLElement, imageDisplay: HTMLCanvasElement, prevEditor: Editor) {

@@ -2,51 +2,59 @@
  * <<licensetext>>
  */
 
-import { Component, ElementRef, HostListener, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild, ɵgenerateStandaloneInDeclarationsError } from '@angular/core';
 import { Action, ChangeValueAction, Editor } from '../ts';
 import { Colors } from '../ts/Model/Colors';
-import { Slider } from "../slider/slider";
 
 
 
 @Component({
   selector: 'editor2',
-  imports: [Slider],
+  imports: [],
   templateUrl: './editor2.html',
   styleUrl: './editor2.css',
 })
 export class Editor2 implements Editor {
     public contours: any;
+    private contourHierarchy: any;
     private contourMap: any;
     private selectedContours: Set<number> = new Set();
     protected lowThreshold: number = 0;
     protected highThreshold: number = 255;
-    public declutterThreshold: number = 0;
+    protected hierarchy: number = 1;
+
+
 
     rows: number = 0;
     cols: number = 0;
 
     @Output()
-    public contourImage: any;
+    displayImageChanged = new EventEmitter<any>(); 
+
+    private contourImage: any;
 
 
     @ViewChild('editorCanvas')
     canvasRef!: ElementRef<HTMLCanvasElement>;
-    private inputImageGrayScale: any;
+    
 
-
+    private _inputImage: any;
     @Input()
     set inputImage(image: any) {
-        if (!image) return;  
+        if (!image) return;    
+        if (this._inputImage !== undefined){
+            this._inputImage.delete();
+        }
         this.rows = image.rows;
         this.cols = image.cols;
-        this.inputImageGrayScale = new cv.Mat();
-        cv.cvtColor(image, this.inputImageGrayScale, cv.COLOR_RGBA2GRAY);
-        
+        this._inputImage = image.clone();
+
         this.contourMap = new cv.Mat();
         this.contourImage = new cv.Mat();
+        this.contourHierarchy = new cv.Mat();
         this.createContourImage();
     }
+    get inputImage(){ return this._inputImage; }
 
 
     @HostListener('window:keydown', ['$event'])
@@ -57,6 +65,9 @@ export class Editor2 implements Editor {
             }
             if (event.key === 'Escape') {
                 this.dropSelection();
+            }
+            if (event.key === 'Enter') {
+                this.keepOnlySelected();
             }
         }
     }
@@ -73,8 +84,13 @@ export class Editor2 implements Editor {
             if (!ctrlHeld) {
                 this.dropSelection();
             }
-            this.selectedContours.add(selectedIndex);
-            this.reDrawContour(selectedIndex, Colors.RED);
+            if (this.selectedContours.has(selectedIndex)){
+                this.selectedContours.delete(selectedIndex);
+                this.reDrawContour(selectedIndex, Colors.WHITE);
+            } else {
+                this.selectedContours.add(selectedIndex);
+                this.reDrawContour(selectedIndex, Colors.RED);
+            }
         }
         
     }
@@ -89,7 +105,7 @@ export class Editor2 implements Editor {
             apply: (ds: any) => {
                 ds.editor.deleteContoursAtIndices(
                     ds.deletedIndices);             
-
+                ds.editor.displayImageChanged.emit(this.contourImage);        
             },
             revert: (ds: any) => {
                 ds.deletedIndices.forEach((originalIndex: number, index: number) => {
@@ -99,37 +115,26 @@ export class Editor2 implements Editor {
                     ds.deletedIndices,
                     Colors.WHITE
                 );
+                ds.editor.displayImageChanged.emit(this.contourImage);  
             }
         });
-    }
-
-    setDeclutterThreshold(to: number): void {
-        this.setProperty("declutterThreshold", to);
-    }
-
-    drawNewContour(input: any): Action {
-        throw new Error('Implement');
     }
 
     public createContourImage() : void {
         this.selectedContours.clear();
         this.contourImage = cv.Mat.zeros(this.rows, this.cols, cv.CV_8UC3);
-        const canny = cv.Mat.zeros(this.rows, this.cols, cv.CV_8UC1);
-        const hierarchy = new cv.Mat();
         this.contours = new cv.MatVector();
-        cv.Canny(this.inputImageGrayScale, canny, this.lowThreshold, this.highThreshold);
         cv.findContours(
-            canny,
+            this.inputImage,
             this.contours,
-            hierarchy,
+            this.contourHierarchy,
             cv.RETR_EXTERNAL,
-            cv.CHAIN_APPROX_SIMPLE
+            cv.CHAIN_APPROX_NONE
         );
         this.reDrawAllContours(Colors.WHITE);
         this.createContourMap();
         cv.imshow(this.canvasRef.nativeElement, this.contourImage);
-        canny.delete();
-        hierarchy.delete();
+        this.displayImageChanged.emit(this.contourImage);
     }
 
     public findContourClosestTo(clickX :number, clickY :number) : number {
@@ -165,28 +170,6 @@ export class Editor2 implements Editor {
         for (let i = 0; i < this.contours.size(); ++i) {
             cv.drawContours(this.contourMap, this.contours, i, new cv.Scalar(i + 1), cv.FILLED);
         }
-    }
-
-    public logSelectedContour() : void {
-        if (this.selectedContours.size === 0) return;
-        const contour = this.contours.get(Array.from(this.selectedContours)[0]);
-        const area = cv.contourArea(contour, false);
-        const rect = cv.boundingRect(contour);
-        const rectArea = rect.width * rect.height;
-        console.log(rect)
-
-        const hull = new cv.Mat();
-        cv.convexHull(contour, hull, false, true);
-        const hullArea = cv.contourArea(hull, false);
-
-        console.log(`
-            Area: ${area}
-            Arc Length: ${cv.arcLength(contour, true)}
-            Extent: ${area / rectArea}
-            Solidity: ${area / hullArea}`
-        );
-
-        hull.delete();
     }
 
     public deleteContoursAtIndices(indices: number[]) : void {
@@ -227,6 +210,14 @@ export class Editor2 implements Editor {
         cv.imshow(this.canvasRef.nativeElement, this.contourImage);
     }
 
+    keepOnlySelected() :Action{
+       const inverseOfSelection = Array.from(Array(this.contours.size()).keys()).filter(index => !this.selectedContours.has(index))
+       this.dropSelection();
+       this.selectedContours = new Set(inverseOfSelection);
+
+       return this.deleteSelectedContours()
+    }
+
     private dropSelection(): void {
         this.reDrawContours(Array.from(this.selectedContours), Colors.WHITE);
         this.selectedContours.clear();
@@ -235,46 +226,12 @@ export class Editor2 implements Editor {
 }
 
 
-///let src = cv.imread('canvasInput');
-// let dst = new cv.Mat();
-// let canny = new cv.Mat();
-// cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
-// // You can try more different parameters
-
-// let ksize = new cv.Size(3, 3);
-// let anchor = new cv.Point(-1, -1);
-// // You can try more different parameters
-// cv.blur(src, dst, ksize, anchor, cv.BORDER_DEFAULT);
-// cv.adaptiveThreshold(dst, src, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 21, 3);
-// cv.imshow('canvasOutput', src);
-// src.delete();
-// dst.delete();
-// canny.delete();
-
 
 // Még Erosion + Dilation segíthet
 // Illetve fordítva
 
 // aztán findContours-ban a hierarchiában a külsőket megtartani csak
 
-// let src = cv.imread('canvasInput');
-// let dst = new cv.Mat();
-// let canny = new cv.Mat();
-// cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
-// // You can try more different parameters
 
-// let ksize = new cv.Size(3, 3);
-// let anchor = new cv.Point(-1, -1);
-// // You can try more different parameters
-// cv.blur(src, dst, ksize, anchor, cv.BORDER_DEFAULT);
-// cv.adaptiveThreshold(dst, src, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 31, 4);
-// let M = cv.Mat.ones(3, 3, cv.CV_8U);
-// // You can try more different parameters
-// cv.dilate(src, src, M, anchor, 3, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-// cv.erode(src, src, M, anchor, 3, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-// cv.imshow('canvasOutput', src);
-// src.delete();
-// dst.delete();
-// canny.delete();
 
 

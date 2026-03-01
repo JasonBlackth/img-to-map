@@ -1,1 +1,21 @@
-<p>editor3 works!</p>
+<h2>Edit Coastlines</h2>
+<div class="editor">
+    <div class="left">
+        <canvas
+          id="editor3canvas"
+          #editorCanvas>
+        </canvas>
+    </div>
+    <div class="right">
+        <slider
+        id="coastlineSmoothnessSlider"
+        [min]="0" [max]="50"
+        [value]="coastlineSmoothness"
+        (valueChange)="setProperty('coastlineSmoothness', $event)"
+        >Coastline Smoothness
+        </slider>
+        <button (click)="makeCoastlinesJagged()">
+            Make Coastlines Jagged
+        </button>
+    </div>
+</div>

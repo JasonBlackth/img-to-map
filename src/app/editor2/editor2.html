@@ -1,4 +1,4 @@
-<h2>Find Contours</h2>
+<h2>Select Contours</h2>
 <div class="editor">   
     <div class="left">
         <canvas
@@ -9,20 +9,8 @@
         </canvas>
     </div>
     <div class="right">
-        <slider
-            id="lowThresholdSlider"
-            [min]="0"
-            [max]="500"
-            [value]="lowThreshold"
-            (valueChange)="setProperty('lowThreshold', $event)"
-            >Low Threshold</slider>
-        <slider
-            id="highThresholdSlider"
-            [min]="0"
-            [max]="500"
-            [value]="highThreshold"
-            (valueChange)="setProperty('highThreshold', $event)"
-        >High Threshold</slider>
         <button (click)="deleteSelectedContours()">Delete Selected</button>
+        <br>
+        <button (click)="keepOnlySelected()">Keep Only Selection</button>
     </div>
 </div>
