@@ -12,7 +12,6 @@ import { VintageStyle } from '../ts/ViewModel/VintageStyle';
   styleUrl: './image-downloader.css',
 })
 export class ImageDownloader {
-
   rows = 0;
   cols = 0;
 
@@ -102,6 +101,12 @@ export class ImageDownloader {
     const y = ($event.clientY - rect.top) * (this.displayImage.rows / rect.height);
     const pixel = this.displayImage.ucharPtr(y, x);
     console.log(`Clicked color: ${pixel[0]}`);
+  }
+
+  resetVintageSeeds() {
+    VintageStyle.resetSeeds();
+    this.displayImage = VintageStyle.apply(this.displayImage);
+    cv.imshow(this.canvasRef.nativeElement, this.displayImage);
   }
 
 }

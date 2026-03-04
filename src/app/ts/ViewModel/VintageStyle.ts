@@ -3,8 +3,9 @@ import { Colors } from "../Model/Colors";
 
 export class VintageStyle{
     private static seed = Math.random();
-    private static noise = new Perlin(0.5);
-    private static noise2 = new Perlin(0.75);
+    private static seed2 = Math.random();    
+    private static noise = new Perlin(0.5);       // 0.5 and 0.75 were the
+    private static noise2 = new Perlin(0.75);      // set seeds respoectively
     private static thresholds = [0.3, 0.6];
 
 
@@ -39,10 +40,20 @@ export class VintageStyle{
             for(let j = 0; j < dst.cols; ++j){
                 let value = Math.floor((this.perlinNoise(i, j) + this.smallerNoise(i, j)*0.5)*10/2)/10;
                 value = Math.min(((value + 0.5) **2) / 2, 1);     
-                value = this.perlinNoise(i, j);          
+                value = this.perlinNoise(i, j);
+                let smallValue = this.smallerNoise2(i, j);  
+                value = this.perlinNoise(i, j) + smallValue*0.06;
+                
+
+                if (value > 0.75) value = 0.4;
+                else if (value > 0.68) value = 0.5;
+                else if (value > 0.6) value = 0.55; 
+                else if (value > 0.5) value = 0.7;
+                else value = 0.75;
+
                 dst.ucharPtr(i,j)[0] = 192 + Math.floor(value * 50);
                 dst.ucharPtr(i,j)[1] = 112 + Math.floor(value * 90); 
-                dst.ucharPtr(i,j)[2] = 40 + Math.floor(value * 103);
+                dst.ucharPtr(i,j)[2] = 43 + Math.floor(value * 100);
             }
         }
         cv.drawContours(dst, contours, -1, Colors.BLACK, 4, cv.LINE_4);  
@@ -57,8 +68,8 @@ export class VintageStyle{
         // 242, 202, 143
         let value = VintageStyle.noise.perlin2(x *0.0025, y*0.0025); // Adjust frequency as needed
         value = (value + 1) / 2; // Normalize to [0, 1]
-        value = value*value + this.smallerNoise(x, y) * 0.1; // Add smaller noise for more texture
-        
+        return value;
+        value = value + this.smallerNoise(x, y) * 0.1; // Add smaller noise for more texture
         return Math.floor(value * 10 ) / 10;
     }
 
@@ -78,5 +89,13 @@ export class VintageStyle{
         let value = VintageStyle.noise2.perlin2(x *0.025, y*0.025);
         value = (value + 1) / 2;
         return value;
+    }
+
+    public static resetSeeds(): void {
+        this.seed = Math.random();
+        this.seed2 = Math.random();
+        this.noise = new Perlin(this.seed);
+        this.noise2 = new Perlin(this.seed2);
+
     }
 }
