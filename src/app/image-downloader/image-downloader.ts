@@ -2,6 +2,7 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { ChangeValueAction, ImageStyleEnum } from '../ts';
 import { FormsModule } from '@angular/forms';
 import { Colors } from '../ts/Model/Colors';
+import { VintageStyle } from '../ts/ViewModel/VintageStyle';
 
 
 @Component({
@@ -11,6 +12,7 @@ import { Colors } from '../ts/Model/Colors';
   styleUrl: './image-downloader.css',
 })
 export class ImageDownloader {
+
   rows = 0;
   cols = 0;
 
@@ -68,7 +70,7 @@ export class ImageDownloader {
     } else if (this.imageStyle === ImageStyleEnum.CLASSIC_FANTASY){
       this.continentColor = Colors.rgb(3, 100, 3);
       this.seaColor = Colors.rgb(108, 219, 253);
-    }
+    } 
     if (this.displayImage !== undefined){
       this.displayImage.delete();
     }
@@ -86,7 +88,20 @@ export class ImageDownloader {
         }
       }
     }
+    
+    if (this.imageStyle === ImageStyleEnum.VINTAGE){
+      this.displayImage = VintageStyle.apply(this.displayImage);
+    }
     cv.imshow(this.canvasRef.nativeElement, this.displayImage);
   } 
+
+
+  logClickedColor($event: PointerEvent) {
+    const rect = this.canvasRef.nativeElement.getBoundingClientRect();
+    const x = ($event.clientX - rect.left) * (this.displayImage.cols / rect.width);
+    const y = ($event.clientY - rect.top) * (this.displayImage.rows / rect.height);
+    const pixel = this.displayImage.ucharPtr(y, x);
+    console.log(`Clicked color: ${pixel[0]}`);
+  }
 
 }

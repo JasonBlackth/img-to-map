@@ -67,7 +67,7 @@ export class Editor3 implements Editor {
           cv.RETR_EXTERNAL,
           cv.CHAIN_APPROX_TC89_L1
       );
-      let amount = 10;
+      let amount = 3;
       for (let c = 0; c < this.contours.size() ; c++) { 
         const contour = this.contours.get(c);
         for (let i = 0; i < contour.data32S.length; i += 2) {
