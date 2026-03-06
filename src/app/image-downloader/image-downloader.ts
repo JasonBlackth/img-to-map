@@ -3,6 +3,7 @@ import { ChangeValueAction, ImageStyleEnum } from '../ts';
 import { FormsModule } from '@angular/forms';
 import { Colors } from '../ts/Model/Colors';
 import { VintageStyle } from '../ts/ViewModel/VintageStyle';
+import { ClassicFantasyStyle } from '../ts/ViewModel/ClassicFantasyStyle';
 
 
 @Component({
@@ -90,6 +91,8 @@ export class ImageDownloader {
     
     if (this.imageStyle === ImageStyleEnum.VINTAGE){
       this.displayImage = VintageStyle.apply(this.displayImage);
+    } else if (this.imageStyle === ImageStyleEnum.CLASSIC_FANTASY){
+      this.displayImage = ClassicFantasyStyle.apply(this._inputImage);
     }
     cv.imshow(this.canvasRef.nativeElement, this.displayImage);
   } 
@@ -105,8 +108,8 @@ export class ImageDownloader {
 
   resetVintageSeeds() {
     VintageStyle.resetSeeds();
-    this.displayImage = VintageStyle.apply(this.displayImage);
-    cv.imshow(this.canvasRef.nativeElement, this.displayImage);
+    ClassicFantasyStyle.resetSeeds();
+    this.applyStyleChanges();
   }
 
 }

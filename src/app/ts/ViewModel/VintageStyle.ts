@@ -35,21 +35,15 @@ export class VintageStyle{
             cv.CHAIN_APPROX_NONE
         );
 
+        console.log(new cv.Scalar(255, 0, 0));
+        console.log(dst.ucharPtr(0,0));
+        let u8 = new Uint8Array([255, 0, 0]);
         
         for (let i = 0; i < dst.rows; ++i){
             for(let j = 0; j < dst.cols; ++j){
-                let value = Math.floor((this.perlinNoise(i, j) + this.smallerNoise(i, j)*0.5)*10/2)/10;
-                value = Math.min(((value + 0.5) **2) / 2, 1);     
-                value = this.perlinNoise(i, j);
-                let smallValue = this.smallerNoise2(i, j);  
-                value = this.perlinNoise(i, j) + smallValue*0.06;
-                
+                let value = this.perlinNoise(i, j) + this.smallerNoise(i, j)*0.06;
+                value = this.getThreshold(value);
 
-                if (value > 0.75) value = 0.4;
-                else if (value > 0.68) value = 0.5;
-                else if (value > 0.6) value = 0.55; 
-                else if (value > 0.5) value = 0.7;
-                else value = 0.75;
 
                 dst.ucharPtr(i,j)[0] = 192 + Math.floor(value * 50);
                 dst.ucharPtr(i,j)[1] = 112 + Math.floor(value * 90); 
@@ -65,30 +59,23 @@ export class VintageStyle{
     }
 
     private static perlinNoise(x: number, y: number): number {
-        // 242, 202, 143
-        let value = VintageStyle.noise.perlin2(x *0.0025, y*0.0025); // Adjust frequency as needed
-        value = (value + 1) / 2; // Normalize to [0, 1]
+        let value = this.noise.perlin2(x *0.0025, y*0.0025);
+        value = (value + 1) / 2;
         return value;
-        value = value + this.smallerNoise(x, y) * 0.1; // Add smaller noise for more texture
-        return Math.floor(value * 10 ) / 10;
     }
 
     private static smallerNoise(x: number, y: number): number {
-        let value = VintageStyle.noise.perlin2(x *0.025, y*0.025); // Adjust frequency as needed
-        value = (value + 1) / 2; // Normalize to [0, 1]
-        
-        return Math.floor(value *value * 5) / 5; 
-    }
-
-    private static perlinNoise2(x: number, y: number): number {
-        let value = VintageStyle.noise2.perlin2(x *0.0025, y*0.0025);
-        value = (value + 1) / 2; // Normalize to [0, 1]
-        return value + this.smallerNoise2(x, y) * 0.1; 
-    }
-    private static smallerNoise2(x: number, y: number): number {
-        let value = VintageStyle.noise2.perlin2(x *0.025, y*0.025);
+        let value = this.noise2.perlin2(x *0.025, y*0.025);
         value = (value + 1) / 2;
         return value;
+    }
+
+    private static getThreshold(value: number): number {
+        if (value > 0.75) return 0.4;
+        else if (value > 0.68) return 0.5;
+        else if (value > 0.6) return 0.6; 
+        else if (value > 0.5) return 0.7;
+        else return 0.75;
     }
 
     public static resetSeeds(): void {
@@ -96,6 +83,5 @@ export class VintageStyle{
         this.seed2 = Math.random();
         this.noise = new Perlin(this.seed);
         this.noise2 = new Perlin(this.seed2);
-
     }
 }
