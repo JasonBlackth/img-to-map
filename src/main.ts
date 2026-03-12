@@ -23,6 +23,7 @@ async function waitForOpenCv(): Promise<void> {
 
 await waitForOpenCv(); 
 Colors.init();
+document.getElementById('openCvLoadingIndicator')?.remove();
 
 bootstrapApplication(App, appConfig)
   .catch((err) => console.error(err));

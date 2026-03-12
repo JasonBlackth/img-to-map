@@ -17,6 +17,8 @@ import { Slider } from "../slider/slider";
   styleUrl: './editor1.css',
 })
 export class Editor1 implements Editor {
+    isEditor1Collapsed: boolean = true;
+
     protected sampleSize = 31;
     protected addedConstant = 4;
     protected dilationIters = 3;
@@ -62,6 +64,10 @@ export class Editor1 implements Editor {
     }
     get inputImage(): any {
         return this._inputImage;
+    }
+
+    toggleEditor1() {
+        this.isEditor1Collapsed = !this.isEditor1Collapsed;
     }
 
     

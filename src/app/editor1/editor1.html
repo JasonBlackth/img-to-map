@@ -1,9 +1,26 @@
-<!--
-  ~ <<licensetext>>
-  -->
-
-<h2>Adaptive Threshold</h2>
-<div class="editor">
+<div class="editor-heading">
+  <table>
+    <tr>
+      <td>
+        <h2>Adaptive Threshold</h2>
+      </td>
+      <td class="collapse-toggle">
+       <a data-bs-toggle="collapse"
+          href="#editor1"
+          role="button"
+          (click)="toggleEditor1()"
+          aria-expanded="false"
+          aria-controls="editor1">
+        <img alt="Toggle editor"
+            src="collapse-icon.svg"
+            class="collapse-icon "
+            [class.collapsed]="isEditor1Collapsed">
+        </a>
+      </td>
+    </tr>
+  </table> 
+</div>
+<div class="editor collapse" id="editor1">
     <div class="left">
         <canvas
           id="editor1canvas"

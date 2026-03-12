@@ -3,23 +3,20 @@
     <div class="left">
         <canvas
           id="imageDownloadCanvas"
-          #editorCanvas
-          (click)="logClickedColor($event)">
+          #editorCanvas>
         </canvas>
     </div>
     <div class="right">
         <label for="imageStyleSelect">Image Style</label>
         <br>
-        <select id="imageStyleSelect" [ngModel]="imageStyle" (ngModelChange)="onStyleChange($event)">
+        <select id="imageStyleSelect" [ngModel]="imageStyleSelected" (ngModelChange)="onStyleChange($event)">
           <option value="BINARY">Binary</option>
           <option value="CLASSIC_FANTASY">Classic Fantasy</option>
           <option value="VINTAGE">Vintage</option>
         </select>
         <br>
-        <button (click)="downloadImage()">Download Image</button>
-        <button (click)="resetVintageSeeds()">Reset Vintage Seeds</button>
-        <a #downloadLink
-        download="map.jpg"
-        ></a>
+        <button class="btn btn-secondary" (click)="resetRandomSeeds()">Reset Random Seeds</button>
+        <br>
+        <button class="btn btn-primary" (click)="downloadImage()">Download Image</button>
     </div>
 </div>

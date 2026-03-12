@@ -1,9 +1,8 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { ChangeValueAction, ImageStyleEnum } from '../ts';
 import { FormsModule } from '@angular/forms';
-import { Colors } from '../ts/Model/Colors';
-import { VintageStyle } from '../ts/ViewModel/VintageStyle';
-import { ClassicFantasyStyle } from '../ts/ViewModel/ClassicFantasyStyle';
+import { ImageStyleManager } from '../ts/ViewModel/ImageStyleManager';
+
 
 
 @Component({
@@ -16,18 +15,14 @@ export class ImageDownloader {
   rows = 0;
   cols = 0;
 
-  public imageStyle = ImageStyleEnum.BINARY;
-  private continentColor: any;
-  private seaColor: any;
+  public imageStyleSelected = ImageStyleEnum.BINARY;
+  public imageStyle = ImageStyleManager.setActive(this.imageStyleSelected);
 
   private displayImage: any;
 
 
   @ViewChild('editorCanvas')
   canvasRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('downloadLink')
-  downloadLink!: ElementRef<HTMLAnchorElement>;
-
 
   private _inputImage: any;
   @Input()
@@ -39,20 +34,16 @@ export class ImageDownloader {
       this.rows = image.rows;
       this.cols = image.cols;
       this._inputImage = image.clone();
+      ImageStyleManager.setInputImage(this._inputImage);
 
       this.applyStyleChanges();
   }
   get inputImage(){ return this._inputImage; }
 
 
-  downloadImage() {
-    const link = this.downloadLink.nativeElement
-    link.href = this.canvasRef.nativeElement.toDataURL();
-    link.click();
-  }
 
   onStyleChange(newVal: ImageStyleEnum) {
-    this.setProperty('imageStyle', newVal as ImageStyleEnum)
+    this.setProperty('imageStyleSelected', newVal);
   }
 
   protected setProperty<T>(propertyName: string, newValue: T): void {
@@ -60,56 +51,34 @@ export class ImageDownloader {
   }
   
   handleValuesChanged(): void {
-      this.applyStyleChanges();
+    ImageStyleManager.setActive(this.imageStyleSelected);
+    this.applyStyleChanges();
   }
 
   applyStyleChanges(){
-    if (this.imageStyle === ImageStyleEnum.BINARY){
-      this.continentColor = Colors.WHITE;
-      this.seaColor = Colors.BLACK;
-    } else if (this.imageStyle === ImageStyleEnum.CLASSIC_FANTASY){
-      this.continentColor = Colors.rgb(3, 100, 3);
-      this.seaColor = Colors.rgb(108, 219, 253);
-    } 
-    if (this.displayImage !== undefined){
-      this.displayImage.delete();
-    }
-    this.displayImage = new cv.Mat(this.rows, this.cols, cv.CV_8UC3)
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.cols; j++) {
-        if (this._inputImage.ucharPtr(i, j)[0] == 0) {
-          this.displayImage.ucharPtr(i, j)[0] = this.seaColor[0];
-          this.displayImage.ucharPtr(i, j)[1] = this.seaColor[1];
-          this.displayImage.ucharPtr(i, j)[2] = this.seaColor[2];
-        } else {
-          this.displayImage.ucharPtr(i, j)[0] = this.continentColor[0];
-          this.displayImage.ucharPtr(i, j)[1] = this.continentColor[1];
-          this.displayImage.ucharPtr(i, j)[2] = this.continentColor[2];
-        }
-      }
-    }
-    
-    if (this.imageStyle === ImageStyleEnum.VINTAGE){
-      this.displayImage = VintageStyle.apply(this.displayImage);
-    } else if (this.imageStyle === ImageStyleEnum.CLASSIC_FANTASY){
-      this.displayImage = ClassicFantasyStyle.apply(this._inputImage);
-    }
+    if (!this._inputImage) return;
+    console.log(this._inputImage);
+    this.displayImage = ImageStyleManager.apply();
     cv.imshow(this.canvasRef.nativeElement, this.displayImage);
   } 
-
-
-  logClickedColor($event: PointerEvent) {
-    const rect = this.canvasRef.nativeElement.getBoundingClientRect();
-    const x = ($event.clientX - rect.left) * (this.displayImage.cols / rect.width);
-    const y = ($event.clientY - rect.top) * (this.displayImage.rows / rect.height);
-    const pixel = this.displayImage.ucharPtr(y, x);
-    console.log(`Clicked color: ${pixel[0]}`);
+  resetRandomSeeds() {
+    this.displayImage = ImageStyleManager.resetSeedsAndGetImage();
+    cv.imshow(this.canvasRef.nativeElement, this.displayImage);
   }
 
-  resetVintageSeeds() {
-    VintageStyle.resetSeeds();
-    ClassicFantasyStyle.resetSeeds();
-    this.applyStyleChanges();
+  downloadImage() {
+    const link = document.createElement('a');
+    link.href = this.canvasRef.nativeElement.toDataURL();
+    link.download = this.getSuggestedDownloadName();
+    link.click();
+    link.remove();
   }
+
+  private getSuggestedDownloadName(): string {
+    const date = new Date();
+    const localDate = date.toLocaleDateString().replace(/[^0-9]/g, '');
+    const localTime = date.toLocaleTimeString().replace(/[^0-9]/g, '');
+    return `${this.imageStyleSelected.toLowerCase().replace("_", "-")}-map-${localDate}-${localTime}.png`;
+  }  
 
 }
