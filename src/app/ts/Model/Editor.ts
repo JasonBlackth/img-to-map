@@ -1,8 +1,6 @@
-
-
 export interface Editor {
-    readonly rows: number;
-    readonly cols: number;
+  readonly rows: number;
+  readonly cols: number;
 
-    handleValuesChanged(): any;
+  handleValuesChanged(): any;
 }

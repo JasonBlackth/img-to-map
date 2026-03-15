@@ -2,100 +2,120 @@
  * <<licensetext>>
  */
 
-
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import type { Editor } from '../ts/Model/Editor.js';
 import { ChangeValueAction } from '../ts/index.js';
 import { FormsModule } from '@angular/forms';
-import { Slider } from "../slider/slider";
-
+import { Slider } from '../slider/slider';
+import { NgxPanZoomModule } from 'ngx-panzoom';
 
 @Component({
   selector: 'editor1',
-  imports: [FormsModule, Slider],
+  imports: [FormsModule, Slider, NgxPanZoomModule],
   templateUrl: './editor1.html',
   styleUrl: './editor1.css',
 })
 export class Editor1 implements Editor {
-    isEditor1Collapsed: boolean = true;
+  isEditor1Collapsed: boolean = true;
 
-    protected sampleSize = 31;
-    protected addedConstant = 4;
-    protected dilationIters = 3;
-    protected erosionIters = 3;
+  protected sampleSize = 31;
+  protected addedConstant = 4;
+  protected dilationIters = 3;
+  protected erosionIters = 3;
 
-    private _inputImage: any;
-    private _displayImage: any;
-    rows: number = 0;
-    cols: number = 0;
+  private _inputImage: any;
+  private _displayImage: any;
+  rows: number = 0;
+  cols: number = 0;
 
-    @Output()
-    displayImageChanged = new EventEmitter<any>(); 
+  @Output()
+  displayImageChanged = new EventEmitter<any>();
 
-    @ViewChild('editorCanvas')
-    canvasRef!: ElementRef<HTMLCanvasElement>;
-    bgdModel: any;
-    fgdModel: any;
+  @ViewChild('editorCanvas')
+  canvasRef!: ElementRef<HTMLCanvasElement>;
+  bgdModel: any;
+  fgdModel: any;
 
-    set displayImage(image: any){
-        if (this._displayImage !== undefined){
-            if (image.rows !== this.rows || image.cols !== this.cols){
-                throw new Error(`Cannot set image of differring size (${image.rows}, ${image.cols}) to display (${this.rows}, ${this.cols})`)
-            }
-            if (image.type() !== this._displayImage.type()){
-                image.convertTo(image, this._displayImage.type());
-            }
-            this._displayImage.delete();
-        }       
-        this._displayImage = image;
-        
-        cv.imshow(this.canvasRef.nativeElement, this._displayImage);
-        this.displayImageChanged.emit(this.displayImage);
+  set displayImage(image: any) {
+    if (this._displayImage !== undefined) {
+      if (image.rows !== this.rows || image.cols !== this.cols) {
+        throw new Error(
+          `Cannot set image of differring size (${image.rows}, ${image.cols}) to display (${this.rows}, ${this.cols})`,
+        );
+      }
+      if (image.type() !== this._displayImage.type()) {
+        image.convertTo(image, this._displayImage.type());
+      }
+      this._displayImage.delete();
     }
-    get displayImage(){ return this._displayImage; }
+    this._displayImage = image;
 
+    cv.imshow(this.canvasRef.nativeElement, this._displayImage);
+    this.displayImageChanged.emit(this.displayImage);
+  }
+  get displayImage() {
+    return this._displayImage;
+  }
 
-    @Input()
-    set inputImage(image: any) {
-        this.rows = image.rows;
-        this.cols = image.cols;
-        this._inputImage = image.clone();
-        this.newProcess();
-    }
-    get inputImage(): any {
-        return this._inputImage;
-    }
+  @Input()
+  set inputImage(image: any) {
+    this.rows = image.rows;
+    this.cols = image.cols;
+    this._inputImage = image.clone();
+    this.newProcess();
+  }
+  get inputImage(): any {
+    return this._inputImage;
+  }
 
-    toggleEditor1() {
-        this.isEditor1Collapsed = !this.isEditor1Collapsed;
-    }
+  toggleEditor1() {
+    this.isEditor1Collapsed = !this.isEditor1Collapsed;
+  }
 
-    
-    newProcess(){
-        const dst = new cv.Mat();
-        cv.cvtColor(this.inputImage, dst, cv.COLOR_RGBA2GRAY, 0);
+  newProcess() {
+    const dst = new cv.Mat();
+    cv.cvtColor(this.inputImage, dst, cv.COLOR_RGBA2GRAY, 0);
 
-        let ksize = new cv.Size(3, 3);
-        let anchor = new cv.Point(-1, -1);
-        cv.blur(dst, dst, ksize, anchor, cv.BORDER_DEFAULT);
-        cv.adaptiveThreshold(dst, dst, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-                cv.THRESH_BINARY_INV, this.sampleSize,
-                this.addedConstant);
-        let M = cv.Mat.ones(3, 3, cv.CV_8U);
-        cv.dilate(dst, dst, M, anchor, this.dilationIters,
-                cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-        cv.erode(dst, dst, M, anchor, this.erosionIters,
-                cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    let ksize = new cv.Size(3, 3);
+    let anchor = new cv.Point(-1, -1);
+    cv.blur(dst, dst, ksize, anchor, cv.BORDER_DEFAULT);
+    cv.adaptiveThreshold(
+      dst,
+      dst,
+      255,
+      cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+      cv.THRESH_BINARY_INV,
+      this.sampleSize,
+      this.addedConstant,
+    );
+    let M = cv.Mat.ones(3, 3, cv.CV_8U);
+    cv.dilate(
+      dst,
+      dst,
+      M,
+      anchor,
+      this.dilationIters,
+      cv.BORDER_CONSTANT,
+      cv.morphologyDefaultBorderValue(),
+    );
+    cv.erode(
+      dst,
+      dst,
+      M,
+      anchor,
+      this.erosionIters,
+      cv.BORDER_CONSTANT,
+      cv.morphologyDefaultBorderValue(),
+    );
 
-        this.displayImage = dst;
-    }
+    this.displayImage = dst;
+  }
 
-    protected setProperty<T>(propertyName: string, newValue: T): void {
-        ChangeValueAction.createAndChangeValue(this, propertyName, newValue);
-    }
+  protected setProperty<T>(propertyName: string, newValue: T): void {
+    ChangeValueAction.createAndChangeValue(this, propertyName, newValue);
+  }
 
-    handleValuesChanged(): void {
-        this.newProcess();
-    }
-
+  handleValuesChanged(): void {
+    this.newProcess();
+  }
 }

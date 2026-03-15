@@ -1,5 +1,5 @@
 import { BinaryStyle } from "./BinaryStyle";
-import { ClassicFantasyStyle } from "./ClassicFantasyStyle";
+import { ClassicStyle } from "./ClassicFantasyStyle";
 import { ImageStyle } from "./ImageStyle";
 import { ImageStyleEnum } from "./ImageStyleEnum";
 import { VintageStyle } from "./VintageStyle";
@@ -7,7 +7,7 @@ import { VintageStyle } from "./VintageStyle";
 export class ImageStyleManager {
     private static binaryStyle = new BinaryStyle();
     private static vintageStyle = new VintageStyle();
-    private static classicFantasyStyle = new ClassicFantasyStyle();
+    private static classicStyle = new ClassicStyle();
     private static activeStyle: ImageStyle;
     private static _inputImage: any;
 
@@ -27,7 +27,7 @@ export class ImageStyleManager {
     private static getStyle(style: ImageStyleEnum): ImageStyle {
         if (style === ImageStyleEnum.BINARY) return this.binaryStyle;
         if (style === ImageStyleEnum.VINTAGE) return this.vintageStyle;
-        if (style === ImageStyleEnum.CLASSIC_FANTASY) return this.classicFantasyStyle;
+        if (style === ImageStyleEnum.CLASSIC) return this.classicStyle;
         return this.binaryStyle;
     }
 
