@@ -2,9 +2,12 @@
   (myKeydown)="handleKeydown($event)"
   (canvasClick)="handleCanvasClick($event)"
   headingText="Select Contours"
-  id="editor2"
+  editorId="editor2"
 >
-  <button (click)="deleteSelectedContours()">Delete Selected</button>
+  <button (click)="deleteSelectedContours()">
+    <img class="icon" src="delete-icon.svg" />
+    Delete Selected
+  </button>
   <br />
   <button (click)="keepOnlySelected()">Keep Only Selection</button>
 </base-editor-component>

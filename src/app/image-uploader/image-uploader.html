@@ -1,17 +1,42 @@
 <div>
-    <h2>Image Uploader</h2>
-    <img id="imageDisplay"
-        [src]="fileUrl"
-        [hidden]="fileUrl.length === 0"
-    />
-    <div>
-        Upload Image:
-        <input type="file" id="fileInput" name="file"
-            (change)="onFileUpload($event)"/>
-            <img id="uploadedImage"
-            [src]="fileUrl"
-            hidden
-            (load)="onImageLoaded($event)"
-        />
-    </div>
+  <div
+    class="file-drop-area"
+    (drop)="onFileDrop($event)"
+    (dragover)="onDragOver($event)"
+    [hidden]="fileUrl.length !== 0"
+  >
+    <label class="input-label">
+      <img class="icon" id="upload-icon" src="upload-icon.svg" alt="" />
+      <br />
+      <strong>Upload Image</strong>
+      <input id="fileInput" type="file" (change)="onFileUpload($event)" />
+    </label>
+    <br />
+    or drag and drop a file here
+  </div>
+  <div class="uploaded-image-display container" [hidden]="fileUrl.length === 0">
+    <table style="width: 100%">
+      <tr>
+        <td style="width: 0%">
+          <img id="imageDisplay" [src]="fileUrl" />
+        </td>
+        <td>
+          <strong>Uploaded Image</strong>
+          <br />
+          {{ fileName }}
+        </td>
+        <td style="text-align: right">
+          <label class="upload-new-label input-label">
+            <img class="icon" id="upload-new-icon" src="upload-new-icon.svg" alt="" />
+            Upload New
+            <input id="fileInput" type="file" (change)="onFileUpload($event)" />
+          </label>
+        </td>
+      </tr>
+    </table>
+
+  </div>
+  <div>
+    <img id="uploadedImage" [src]="fileUrl" hidden (load)="onImageLoaded($event)" />
+  </div>
 </div>

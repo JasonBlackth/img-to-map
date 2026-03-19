@@ -1,32 +1,37 @@
-<div id="{{ id }}Container">
-  <table id="{{ id }}Heading">
-    <tr>
-      <td>
-        <h2>{{ headingText }}</h2>
-      </td>
-      <td class="collapse-toggle">
-        <a
-          data-bs-toggle="collapse"
-          href="#{{ id }}"
-          role="button"
-          (click)="toggleCollapse()"
-          aria-expanded="{{ !isCollapsed }}"
-          aria-controls="{{ id }}"
-        >
-          <img
-            alt="Toggle editor"
-            src="collapse-icon.svg"
-            class="collapse-icon"
-            [class.collapsed]="isCollapsed"
-          />
-        </a>
-      </td>
-    </tr>
-  </table>
-  <div class="editor collapse" id="{{ id }}">
+<div class="editor-container container" id="{{ editorId }}-container">
+  <div class="row" id="{{ editorId }}-heading">
+    <div class="col-11">
+      <h2>{{ headingText }}</h2>
+    </div>
+    <div class="col-1 collapse-toggle">
+      <a
+        data-bs-toggle="collapse"
+        href="#{{ editorId }}"
+        role="button"
+        (click)="toggleCollapse()"
+        aria-expanded="{{ !isCollapsed }}"
+        aria-controls="{{ editorId }}"
+      >
+        <img
+          alt="Toggle editor"
+          src="collapse-icon.svg"
+          class="collapse-icon"
+          [class.collapsed]="isCollapsed"
+        />
+      </a>
+    </div>
+  </div>
+  <div class="editor collapse" id="{{ editorId }}">
     <div class="left">
-      <canvas id="{{ id }}Canvas" tabindex="0" #editorCanvas (click)="handleCanvasClick($event)">
-      </canvas>
+      <div class="canvas-container">
+        <canvas
+          id="{{ editorId }}-canvas"
+          tabindex="0"
+          #editorCanvas
+          (click)="handleCanvasClick($event)"
+        >
+        </canvas>
+      </div>
     </div>
     <div class="right">
       <ng-content></ng-content>

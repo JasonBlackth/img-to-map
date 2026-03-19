@@ -26,9 +26,6 @@ export class Editor2 implements Editor {
 
   protected contourImage: any;
 
-  @ViewChild('editorCanvas')
-  canvasRef!: ElementRef<HTMLCanvasElement>;
-
   @ViewChild(BaseEditorComponent)
   baseEditor!: BaseEditorComponent;
 
@@ -180,6 +177,10 @@ export class Editor2 implements Editor {
     for (const ind of inds) {
       cv.drawContours(this.contourImage, this.contours, ind, colour, cv.FILLED);
     }
+    this.updateDisplayImage(doNotify);
+  }
+
+  updateDisplayImage(doNotify = true): void {
     this.baseEditor.setDisplayImage(this.contourImage);
     if (doNotify) {
       this.displayImageChanged.emit(this.contourImage);

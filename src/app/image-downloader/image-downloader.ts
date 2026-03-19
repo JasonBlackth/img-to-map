@@ -1,11 +1,12 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { ChangeValueAction, ImageStyleEnum } from '../ts';
 import { FormsModule } from '@angular/forms';
 import { ImageStyleManager } from '../ts/ViewModel/ImageStyleManager';
+import { BaseEditorComponent } from '../base-editor-component/base-editor-component';
 
 @Component({
   selector: 'image-downloader',
-  imports: [FormsModule],
+  imports: [FormsModule, BaseEditorComponent],
   templateUrl: './image-downloader.html',
   styleUrl: './image-downloader.css',
 })
@@ -16,10 +17,8 @@ export class ImageDownloader {
   public imageStyleSelected = ImageStyleEnum.BINARY;
   public imageStyle = ImageStyleManager.setActive(this.imageStyleSelected);
 
-  private displayImage: any;
-
-  @ViewChild('editorCanvas')
-  canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild(BaseEditorComponent)
+  baseEditor!: BaseEditorComponent;
 
   private _inputImage: any;
   @Input()
@@ -54,18 +53,15 @@ export class ImageDownloader {
 
   applyStyleChanges() {
     if (!this._inputImage) return;
-    console.log(this._inputImage);
-    this.displayImage = ImageStyleManager.apply();
-    cv.imshow(this.canvasRef.nativeElement, this.displayImage);
+    this.baseEditor.setDisplayImage(ImageStyleManager.apply());
   }
   resetRandomSeeds() {
-    this.displayImage = ImageStyleManager.resetSeedsAndGetImage();
-    cv.imshow(this.canvasRef.nativeElement, this.displayImage);
+    this.baseEditor.setDisplayImage(ImageStyleManager.resetSeedsAndGetImage());
   }
 
   downloadImage() {
     const link = document.createElement('a');
-    link.href = this.canvasRef.nativeElement.toDataURL();
+    link.href = this.baseEditor.canvasRef.nativeElement.toDataURL();
     link.download = this.getSuggestedDownloadName();
     link.click();
     link.remove();

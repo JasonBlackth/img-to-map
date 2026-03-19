@@ -1,19 +1,15 @@
-/*
- * <<licensetext>>
- */
-
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import type { Editor } from '../ts/Model/Editor.js';
 import { ChangeValueAction } from '../ts/index.js';
 import { FormsModule } from '@angular/forms';
 import { Slider } from '../slider/slider';
-import { NgxPanZoomModule } from 'ngx-panzoom';
+import { BaseEditorComponent } from "../base-editor-component/base-editor-component";
 
 @Component({
   selector: 'editor1',
-  imports: [FormsModule, Slider, NgxPanZoomModule],
+  imports: [FormsModule, Slider, BaseEditorComponent],
   templateUrl: './editor1.html',
-  styleUrl: './editor1.css',
+  styleUrls: ['./editor1.css'],
 })
 export class Editor1 implements Editor {
   isEditor1Collapsed: boolean = true;
@@ -31,10 +27,8 @@ export class Editor1 implements Editor {
   @Output()
   displayImageChanged = new EventEmitter<any>();
 
-  @ViewChild('editorCanvas')
-  canvasRef!: ElementRef<HTMLCanvasElement>;
-  bgdModel: any;
-  fgdModel: any;
+  @ViewChild(BaseEditorComponent)
+  baseEditor!: BaseEditorComponent;
 
   set displayImage(image: any) {
     if (this._displayImage !== undefined) {
@@ -50,8 +44,7 @@ export class Editor1 implements Editor {
     }
     this._displayImage = image;
 
-    cv.imshow(this.canvasRef.nativeElement, this._displayImage);
-    this.displayImageChanged.emit(this.displayImage);
+    this.updateDisplayImage();
   }
   get displayImage() {
     return this._displayImage;
@@ -62,17 +55,13 @@ export class Editor1 implements Editor {
     this.rows = image.rows;
     this.cols = image.cols;
     this._inputImage = image.clone();
-    this.newProcess();
+    this.adatptiveThreshold();
   }
   get inputImage(): any {
     return this._inputImage;
   }
 
-  toggleEditor1() {
-    this.isEditor1Collapsed = !this.isEditor1Collapsed;
-  }
-
-  newProcess() {
+  adatptiveThreshold() {
     const dst = new cv.Mat();
     cv.cvtColor(this.inputImage, dst, cv.COLOR_RGBA2GRAY, 0);
 
@@ -116,6 +105,13 @@ export class Editor1 implements Editor {
   }
 
   handleValuesChanged(): void {
-    this.newProcess();
+    this.adatptiveThreshold();
+  }
+
+  updateDisplayImage(doNotify = true): void {
+    this.baseEditor.setDisplayImage(this.displayImage);
+    if (doNotify) {
+      this.displayImageChanged.emit(this.displayImage);
+    }
   }
 }

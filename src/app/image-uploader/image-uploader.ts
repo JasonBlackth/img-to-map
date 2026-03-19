@@ -1,7 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 
-
-
 @Component({
   selector: 'image-uploader',
   imports: [],
@@ -13,28 +11,32 @@ export class ImageUploader {
   protected fileUrl: string = '';
 
   @Output()
-  uploadedImage = new EventEmitter<any>(); 
+  uploadedImage = new EventEmitter<any>();
 
   private validImageTypes = ['image/jpeg', 'image/png'];
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+  }
+  onFileDrop(event: DragEvent) {
+    throw new Error('Method not implemented.');
+  }
 
-    
   onFileUpload(event: Event) {
     const input = event.target as HTMLInputElement;
-    let file : File;
+    let file: File;
     if (input.files && (file = input.files[0])) {
-        if (!this.validImageTypes.includes(file.type)) {
-            input.files = null;
-            alert('Please upload a valid image format (JPEG or PNG).');
-            return;
-        }
-        this.fileName = file.name;
-        this.fileUrl = URL.createObjectURL(file);
-    } 
+      if (!this.validImageTypes.includes(file.type)) {
+        input.files = null;
+        alert('Please upload a valid image format (JPEG or PNG).');
+        return;
+      }
+      this.fileName = file.name;
+      this.fileUrl = URL.createObjectURL(file);
+    }
   }
 
   onImageLoaded(event: Event) {
     let imageCvMat = cv.imread(event.target as HTMLImageElement);
     this.uploadedImage.emit(imageCvMat);
-    console.log('Image loaded and converted to OpenCV Mat');
   }
 }

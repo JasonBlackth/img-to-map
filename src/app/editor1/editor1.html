@@ -1,74 +1,35 @@
-<div class="editor-heading">
-  <table>
-    <tr>
-      <td>
-        <h2>Adaptive Threshold</h2>
-      </td>
-      <td class="collapse-toggle">
-        <a
-          data-bs-toggle="collapse"
-          href="#editor1"
-          role="button"
-          (click)="toggleEditor1()"
-          aria-expanded="false"
-          aria-controls="editor1"
-        >
-          <img
-            alt="Toggle editor"
-            src="collapse-icon.svg"
-            class="collapse-icon"
-            [class.collapsed]="isEditor1Collapsed"
-          />
-        </a>
-      </td>
-    </tr>
-  </table>
-</div>
-<div class="editor collapse" id="editor1">
-  <div class="left" style="height: 300px; width: 300px">
-    <ngx-panzoom
-      #PanZoom
-      [zoomLevels]="10"
-      [zoomStepDuration]="0.2"
-      [freeMouseWheelFactor]="0.01"
-      [zoomToFitZoomLevelFactor]="0.9"
-    >
-      <canvas id="editor1canvas" #editorCanvas> </canvas>
-    </ngx-panzoom>
-  </div>
-  <div class="right">
-    <slider
-      id="sampleSizeSlider"
-      [min]="1"
-      [max]="100"
-      [step]="2"
-      [value]="sampleSize"
-      (valueChange)="setProperty('sampleSize', $event)"
-      >Sample Size
-    </slider>
-    <slider
-      id="addedConstantSlider"
-      [min]="0"
-      [max]="15"
-      [value]="addedConstant"
-      (valueChange)="setProperty('addedConstant', $event)"
-      >Added Constant
-    </slider>
-    <slider
-      id="dilationItersSlider"
-      [min]="0"
-      [max]="15"
-      [value]="dilationIters"
-      (valueChange)="setProperty('dilationIters', $event)"
-      >Dilation
-    </slider>
-    <slider
-      id="erosionItersSlider"
-      [min]="0"
-      [max]="15"
-      [value]="erosionIters"
-      (valueChange)="setProperty('erosionIters', $event)"
-      >Erosion
-    </slider>
-  </div>
-</div>
+<base-editor-component editorId="editor1" headingText="Adaptive Threshold">
+  <slider
+    id="sampleSizeSlider"
+    [min]="1"
+    [max]="100"
+    [step]="2"
+    [value]="sampleSize"
+    (valueChange)="setProperty('sampleSize', $event)"
+    >Sample Size
+  </slider>
+  <slider
+    id="addedConstantSlider"
+    [min]="0"
+    [max]="15"
+    [value]="addedConstant"
+    (valueChange)="setProperty('addedConstant', $event)"
+    >Added Constant
+  </slider>
+  <slider
+    id="dilationItersSlider"
+    [min]="0"
+    [max]="15"
+    [value]="dilationIters"
+    (valueChange)="setProperty('dilationIters', $event)"
+    >Dilation
+  </slider>
+  <slider
+    id="erosionItersSlider"
+    [min]="0"
+    [max]="15"
+    [value]="erosionIters"
+    (valueChange)="setProperty('erosionIters', $event)"
+    >Erosion
+  </slider>
+</base-editor-component>

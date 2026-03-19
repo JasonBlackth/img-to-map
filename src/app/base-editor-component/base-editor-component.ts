@@ -24,7 +24,7 @@ export class BaseEditorComponent {
   @Input()
   headingText: string = 'Untitled Editor';
   @Input()
-  id: string = 'noIdEditor';
+  editorId: string = 'noIdEditor';
 
   @Output()
   displayImageChanged = new EventEmitter<any>();
@@ -37,32 +37,30 @@ export class BaseEditorComponent {
 
   public setDisplayImage(image: any) {
     if (!image) return;
-    if (this.panzoomInstance) {
-      this.panzoomInstance.dispose();
+    if (!this.panzoomInstance) {
+      const panzoomOptions = {
+        maxZoom: 2,
+        minZoom: 0.8,
+        bounds: true,
+      };
+      this.panzoomInstance = panzoom(this.canvasRef.nativeElement, panzoomOptions);
+      this.panzoomInstance.pause();
     }
-
-    this.panzoomInstance = panzoom(this.canvasRef.nativeElement, {
-      maxZoom: 2,
-      minZoom: 0.8,
-      bounds: true,
-    });
-    this.panzoomInstance.pause();
     cv.imshow(this.canvasRef.nativeElement, image);
-    console.log('BaseEditorComponent: displayImage set');
   }
 
   @HostListener('window:keydown', ['$event'])
   keyboardEventHandler(event: KeyboardEvent) {
-    if (this.canvasRef.nativeElement === document.activeElement) {
-      if (event.key === 'Alt') {
-        this.panzoomInstance.resume();
-      } else if (this.panzoomInstance.isPaused()) {
-        this.myKeydown.emit(event);
-      }
+    if (!this.panzoomInstance) return;
+    if (event.key === 'Alt') {
+      this.panzoomInstance.resume();
+    } else if (this.panzoomInstance.isPaused()) {
+      this.myKeydown.emit(event);
     }
   }
   @HostListener('window:keyup', ['$event'])
   keyboardEventKeyUpHandler(event: KeyboardEvent) {
+    if (!this.panzoomInstance) return;
     if (event.key === 'Alt') {
       this.panzoomInstance.pause();
     }

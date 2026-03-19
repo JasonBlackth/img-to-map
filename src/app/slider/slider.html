@@ -1,14 +1,16 @@
-<div>
-    <label><ng-content></ng-content>: {{previewValue}}
-        <br>
-        <input type="range"
-        [id]="id"
-        [min]="min"
-        [max]="max"
-        [step]="step"
-        [value] ="previewValue"
-        (input)="onInput($event.target.value)"
-        (change)="onChange()"
-        />
-    </label>
+<div class="slider-container">
+  <label
+    ><ng-content></ng-content>: {{ previewValue }}
+    <br />
+    <input
+      type="range"
+      [id]="id"
+      [min]="min"
+      [max]="max"
+      [step]="step"
+      [value]="previewValue"
+      (input)="onInput($event.target.value)"
+      (change)="onChange()"
+    />
+  </label>
 </div>

@@ -1,23 +1,24 @@
-<h2>Download Image</h2>
-<div class="editor">
-  <div class="left">
-    <canvas id="imageDownloadCanvas" #editorCanvas> </canvas>
-  </div>
-  <div class="right">
-    <label for="imageStyleSelect">Image Style</label>
-    <br />
-    <select
-      id="imageStyleSelect"
-      [ngModel]="imageStyleSelected"
-      (ngModelChange)="onStyleChange($event)"
-    >
-      <option value="BINARY">Binary</option>
-      <option value="CLASSIC">Classic</option>
-      <option value="VINTAGE">Vintage</option>
-    </select>
-    <br />
-    <button class="btn btn-secondary" (click)="resetRandomSeeds()">Reset Random Seeds</button>
-    <br />
-    <button class="btn btn-primary" (click)="downloadImage()">Download Image</button>
-  </div>
+<base-editor-component editorId="image-downloader" headingText="Download Image">
+  <label for="imageStyleSelect">Image Style</label>
+  <br />
+  <select
+    id="imageStyleSelect"
+    [ngModel]="imageStyleSelected"
+    (ngModelChange)="onStyleChange($event)"
+  >
+    <option value="BINARY">Binary</option>
+    <option value="CLASSIC">Classic</option>
+    <option value="VINTAGE">Vintage</option>
+  </select>
+  <br />
+  <button (click)="resetRandomSeeds()">Reset Random Seeds</button>
+  <br />
+  <button (click)="downloadImage()">
+    <img class="icon" src="download-icon.svg" />
+    Download Image
+  </button>
+</base-editor-component>
+
+<div class="container col-md-8">
+
 </div>

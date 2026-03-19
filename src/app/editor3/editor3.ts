@@ -4,10 +4,11 @@ import { Slider } from '../slider/slider';
 import { ChangeValueAction } from '../ts';
 import { Colors } from '../ts/Model/Colors';
 import panzoom from 'panzoom';
+import { BaseEditorComponent } from '../base-editor-component/base-editor-component';
 
 @Component({
   selector: 'editor3',
-  imports: [Slider],
+  imports: [Slider, BaseEditorComponent],
   templateUrl: './editor3.html',
   styleUrl: './editor3.css',
 })
@@ -17,8 +18,8 @@ export class Editor3 implements Editor {
   coastlineSmoothness: number = 7;
   contours: any;
 
-  @ViewChild('editorCanvas')
-  canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild(BaseEditorComponent)
+  baseEditor!: BaseEditorComponent;
 
   @Output()
   displayImageChanged = new EventEmitter<any>();
@@ -34,11 +35,6 @@ export class Editor3 implements Editor {
     this.cols = image.cols;
 
     this._inputImage = image.clone();
-    panzoom(this.canvasRef.nativeElement, {
-      maxZoom: 2,
-      minZoom: 0.8,
-      bounds: true,
-    });
 
     this.blurCoastlines();
   }
@@ -53,13 +49,12 @@ export class Editor3 implements Editor {
     cv.blur(this._inputImage, dst, ksize, anchor, cv.BORDER_DEFAULT);
     cv.threshold(dst, dst, 200, 255, cv.THRESH_BINARY);
 
-    cv.imshow(this.canvasRef.nativeElement, dst);
-    this.displayImageChanged.emit(dst);
+    this.updateDisplayImage(dst);
     dst.delete();
   }
 
   makeCoastlinesJagged() {
-    let src = cv.imread(this.canvasRef.nativeElement);
+    let src = cv.imread(this.baseEditor.canvasRef.nativeElement);
     let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
     cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
     cv.threshold(src, src, 120, 255, cv.THRESH_BINARY);
@@ -76,8 +71,7 @@ export class Editor3 implements Editor {
     }
 
     cv.drawContours(dst, this.contours, -1, Colors.WHITE, cv.FILLED);
-    cv.imshow(this.canvasRef.nativeElement, dst);
-    this.displayImageChanged.emit(dst);
+    this.updateDisplayImage(dst);
 
     hierarchy.delete();
     src.delete();
@@ -90,5 +84,12 @@ export class Editor3 implements Editor {
 
   protected setProperty<T>(propertyName: string, newValue: T): void {
     ChangeValueAction.createAndChangeValue(this, propertyName, newValue);
+  }
+
+  updateDisplayImage(dst: any, doNotify = true): void {
+    this.baseEditor.setDisplayImage(dst);
+    if (doNotify) {
+      this.displayImageChanged.emit(dst);
+    }
   }
 }
