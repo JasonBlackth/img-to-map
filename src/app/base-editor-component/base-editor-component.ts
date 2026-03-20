@@ -1,3 +1,7 @@
+/*
+ * <<licensetext>>
+ */
+
 import {
   Component,
   ElementRef,
@@ -7,7 +11,7 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import panzoom from 'panzoom';
+import panzoom, { Transform, PanZoom } from 'panzoom';
 
 @Component({
   selector: 'base-editor-component',
@@ -16,7 +20,8 @@ import panzoom from 'panzoom';
   styleUrls: ['./base-editor-component.css'],
 })
 export class BaseEditorComponent {
-  protected panzoomInstance: any;
+  protected panzoomInstance!: PanZoom;
+  static globalPanzoomInstances: PanZoom[] = new Array(); 
 
   @ViewChild('editorCanvas')
   canvasRef!: ElementRef<HTMLCanvasElement>;
@@ -45,6 +50,8 @@ export class BaseEditorComponent {
       };
       this.panzoomInstance = panzoom(this.canvasRef.nativeElement, panzoomOptions);
       this.panzoomInstance.pause();
+      BaseEditorComponent.startListeningTo(this.panzoomInstance);
+      BaseEditorComponent.globalPanzoomInstances.push(this.panzoomInstance);
     }
     cv.imshow(this.canvasRef.nativeElement, image);
   }
@@ -74,5 +81,24 @@ export class BaseEditorComponent {
 
   toggleCollapse() {
     this.isCollapsed = !this.isCollapsed;
+  }
+  static setGlobalPanzoomTransform(t: Transform): void{
+    this.globalPanzoomInstances.forEach(p => {
+      BaseEditorComponent.stopListeningTo(p);
+      p.zoomTo(t.x, t.x, t.scale);
+      BaseEditorComponent.startListeningTo(p);
+    });
+    console.log('doin shit')
+  }
+  static stopListeningTo(p: PanZoom): void{
+    p.on('transform', function (e){
+      return;
+    });
+  }
+  static startListeningTo(p: PanZoom): void{
+    p.on('transform', function (panZoom: PanZoom){
+      console.log("I'm listening");
+      BaseEditorComponent.setGlobalPanzoomTransform(panZoom.getTransform());  
+    })
   }
 }

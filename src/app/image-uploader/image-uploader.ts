@@ -1,3 +1,7 @@
+/*
+ * <<licensetext>>
+ */
+
 import { Component, EventEmitter, Output } from '@angular/core';
 
 @Component({
@@ -36,7 +40,18 @@ export class ImageUploader {
   }
 
   onImageLoaded(event: Event) {
+    console.log((event.target as HTMLImageElement).width, event)
     let imageCvMat = cv.imread(event.target as HTMLImageElement);
     this.uploadedImage.emit(imageCvMat);
   }
 }
+
+// img méret mint "valid-e"
+// ne essen ennyire szét pici képernyőn
+// túl kicsi/nagy képnél üzenet, vagy ilyesmi
+// erre teszteset
+// disp flex nagyon hasznos
+
+//kezdjünk el írni
+
+
