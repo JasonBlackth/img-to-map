@@ -55,6 +55,8 @@ export class BaseEditorComponent {
     if (!this.panzoomInstance) return;
     if (event.key === 'Alt') {
       this.panzoomInstance.resume();
+    } else if (event.key === 'r') {
+      this.resetGlobalTransform();
     } else if (this.panzoomInstance.isPaused()) {
       this.myKeydown.emit(event);
     }
@@ -89,6 +91,9 @@ export class BaseEditorComponent {
       });
       BaseEditorComponent.isChangingTransforms = false;
     }
+  }
+  resetGlobalTransform() {
+    BaseEditorComponent.setGlobalPanzoomTransform({ x: 0, y: 0, scale: 1 });
   }
 
   private createPanzoomInstance() {

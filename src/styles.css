@@ -1,7 +1,8 @@
 :root {
   --background-color: rgb(25, 25, 25);
-  --highlight-color: rgb(85, 85, 85);
   --foreground-color: rgb(240, 240, 240);
+  --highlight-color: rgb(85, 85, 85);
+  --dark-highlight-color: rgb(20, 20, 20);
 }
 
 body {
@@ -21,7 +22,7 @@ h1 {
   margin: 50px;
 }
 button {
-  background-color: transparent;
+  background-color: var(--dark-highlight-color);
   color: var(--foreground-color);
   border: 1px solid var(--foreground-color);
   padding: 5px;
@@ -30,6 +31,12 @@ button {
 button:hover {
   background-color: var(--highlight-color);
   cursor: pointer;
+}
+.reset-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 0;
 }
 
 .uploaded-image-display {
@@ -43,35 +50,23 @@ button:hover {
   max-width: 250px;
   max-height: 100px;
 }
-
-#upload-icon {
-  width: 50px;
-  height: 50px;
-  margin-bottom: 10px;
-}
 #upload-new-icon {
   width: 30px;
   height: 30px;
-}
-.icon {
-  width: 25px;
-  height: 25px;
-  margin: auto;
-  filter: invert(1) brightness(0.85);
 }
 .upload-new-label {
   border: 1px solid var(--foreground-color);
   border-radius: 10px;
   padding: 10px;
-  padding-right: 20px;
   margin-right: 20px;
+  background-color: var(--dark-highlight-color);
 }
 .upload-new-label:hover {
   background-color: var(--highlight-color);
 }
 
 select {
-  background-color: var(--background-color);
+  background-color: var(--dark-highlight-color);
   color: var(--foreground-color);
   border: 1px solid var(--foreground-color);
   padding: 5px;
@@ -86,19 +81,27 @@ select:hover {
   cursor: pointer;
 }
 .file-drop-area {
-  border: 2px dashed var(--foreground-color);
-  border-radius: 20px;
-  padding: 20px;
+  border: 0.15rem dashed var(--foreground-color);
+  border-radius: 1.5rem;
   margin: auto;
-  height: 250px;
-  width: 500px;
-  background-color: rgb(20, 20, 20);
+  height: 16rem;
+  width: 100%;
+  max-width: 32rem;
+  background-color: var(--dark-highlight-color);
   text-align: center;
   align-content: center;
 }
 
-#fileInput {
-  display: none;
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: auto;
+  filter: invert(1) brightness(0.85);
+}
+#upload-icon {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.5rem;
 }
 
 .editor-container {
@@ -111,11 +114,11 @@ select:hover {
 
 .slider-container {
   display: flex;
-  width: 80%;
+  /* width: 80%; */
 }
 
 .slider-container > label {
-  padding: 5px;
+  padding: 0.5rem 0;
   width: 100%;
 }
 
@@ -126,33 +129,34 @@ select:hover {
 .editor {
   display: flex;
   flex-direction: row;
-  padding: 50px;
+  padding: 3rem;
 }
 
 .editor .left,
 .editor .right {
-  flex: 0 0 auto;
   align-content: center;
 }
-.editor .right {
-  padding: 50px;
-  width: 60%;
+.editor .divider {
+  height: 2.5rem;
 }
-.editor .right > button {
-  align-self: baseline;
+
+.editor .right {
+  /* padding: 50px; */
+  /* width: 40%;
+  min-width: 20rem; */
 }
 
 .canvas-container {
-  border: 1px solid var(--foreground-color);
+  position: relative;
+  border: 0.05rem solid var(--foreground-color);
   overflow: hidden;
   width: fit-content;
   height: fit-content;
 }
 
 canvas {
-  margin: 10px;
-  max-width: 300px;
-  max-height: 300px;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .collapse-toggle {

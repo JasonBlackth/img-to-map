@@ -9,7 +9,7 @@
       <img class="icon" id="upload-icon" src="icons/add.svg" alt="" />
       <br />
       <strong>Upload Image</strong>
-      <input id="fileInput" type="file" (change)="onFileUpload($event)" />
+      <input hidden type="file" (change)="onFileUpload($event)" />
     </label>
     <br />
     or drag and drop a file here
@@ -29,7 +29,7 @@
           <label class="upload-new-label input-label">
             <img class="icon" id="upload-new-icon" src="icons/upload.svg" alt="" />
             Upload New
-            <input id="fileInput" type="file" (change)="onFileUpload($event)" />
+            <input hidden type="file" (change)="onFileUpload($event)" />
           </label>
         </td>
       </tr>

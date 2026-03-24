@@ -1,9 +1,9 @@
 <div class="editor-container container" id="{{ editorId }}-container">
   <div class="row" id="{{ editorId }}-heading">
-    <div class="col-11">
+    <div class="col-lg-11 col-10">
       <h2>{{ headingText }}</h2>
     </div>
-    <div class="col-1 collapse-toggle">
+    <div class="col-lg-1 col-2 collapse-toggle">
       <a
         data-bs-toggle="collapse"
         href="#{{ editorId }}"
@@ -21,8 +21,8 @@
       </a>
     </div>
   </div>
-  <div class="editor collapse" id="{{ editorId }}">
-    <div class="left">
+  <div class="editor row collapse" id="{{ editorId }}">
+    <div class="left col-lg-6 col-12">
       <div class="canvas-container">
         <canvas
           id="{{ editorId }}-canvas"
@@ -31,9 +31,14 @@
           (click)="handleCanvasClick($event)"
         >
         </canvas>
+        <button class="reset-button" (click)="resetGlobalTransform()">
+          <img class="icon" src="icons/reset.svg" alt="" />
+          Reset
+        </button>
       </div>
     </div>
-    <div class="right">
+    <div class="divider col-lg-1 col-12"></div>
+    <div class="right col-lg-5 col-12">
       <ng-content></ng-content>
     </div>
   </div>
