@@ -6,7 +6,7 @@
     [hidden]="fileUrl.length !== 0"
   >
     <label class="input-label">
-      <img class="icon" id="upload-icon" src="upload-icon.svg" alt="" />
+      <img class="icon" id="upload-icon" src="icons/add.svg" alt="" />
       <br />
       <strong>Upload Image</strong>
       <input id="fileInput" type="file" (change)="onFileUpload($event)" />
@@ -27,14 +27,13 @@
         </td>
         <td style="text-align: right">
           <label class="upload-new-label input-label">
-            <img class="icon" id="upload-new-icon" src="upload-new-icon.svg" alt="" />
+            <img class="icon" id="upload-new-icon" src="icons/upload.svg" alt="" />
             Upload New
             <input id="fileInput" type="file" (change)="onFileUpload($event)" />
           </label>
         </td>
       </tr>
     </table>
-
   </div>
   <div>
     <img id="uploadedImage" [src]="fileUrl" hidden (load)="onImageLoaded($event)" />

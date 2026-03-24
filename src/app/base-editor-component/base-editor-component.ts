@@ -21,7 +21,9 @@ import panzoom, { Transform, PanZoom } from 'panzoom';
 })
 export class BaseEditorComponent {
   protected panzoomInstance!: PanZoom;
-  static globalPanzoomInstances: PanZoom[] = new Array(); 
+  static globalPanzoomInstances: PanZoom[] = new Array();
+  static isChangingTransforms: boolean = false;
+  static globalTransform: Transform = { x: 0, y: 0, scale: 1 };
 
   @ViewChild('editorCanvas')
   canvasRef!: ElementRef<HTMLCanvasElement>;
@@ -43,15 +45,7 @@ export class BaseEditorComponent {
   public setDisplayImage(image: any) {
     if (!image) return;
     if (!this.panzoomInstance) {
-      const panzoomOptions = {
-        maxZoom: 2,
-        minZoom: 0.8,
-        bounds: true,
-      };
-      this.panzoomInstance = panzoom(this.canvasRef.nativeElement, panzoomOptions);
-      this.panzoomInstance.pause();
-      BaseEditorComponent.startListeningTo(this.panzoomInstance);
-      BaseEditorComponent.globalPanzoomInstances.push(this.panzoomInstance);
+      this.createPanzoomInstance();
     }
     cv.imshow(this.canvasRef.nativeElement, image);
   }
@@ -81,24 +75,39 @@ export class BaseEditorComponent {
 
   toggleCollapse() {
     this.isCollapsed = !this.isCollapsed;
+    if (!this.isCollapsed) {
+      BaseEditorComponent.setGlobalPanzoomTransform(BaseEditorComponent.globalTransform);
+    }
   }
-  static setGlobalPanzoomTransform(t: Transform): void{
-    this.globalPanzoomInstances.forEach(p => {
-      BaseEditorComponent.stopListeningTo(p);
-      p.zoomTo(t.x, t.x, t.scale);
-      BaseEditorComponent.startListeningTo(p);
+  static setGlobalPanzoomTransform(t: Transform): void {
+    if (!BaseEditorComponent.isChangingTransforms) {
+      BaseEditorComponent.isChangingTransforms = true;
+      BaseEditorComponent.globalTransform = t;
+      this.globalPanzoomInstances.forEach((p) => {
+        p.zoomAbs(0, 0, t.scale);
+        p.moveTo(t.x, t.y);
+      });
+      BaseEditorComponent.isChangingTransforms = false;
+    }
+  }
+
+  private createPanzoomInstance() {
+    if (this.panzoomInstance) {
+      this.panzoomInstance.dispose();
+    }
+    const panzoomOptions = {
+      maxZoom: 2,
+      minZoom: 0.8,
+      bounds: true,
+    };
+    this.panzoomInstance = panzoom(this.canvasRef.nativeElement, panzoomOptions);
+    this.panzoomInstance.pause();
+    this.panzoomInstance.on('pan', (p: PanZoom) => {
+      BaseEditorComponent.setGlobalPanzoomTransform(p.getTransform());
     });
-    console.log('doin shit')
-  }
-  static stopListeningTo(p: PanZoom): void{
-    p.on('transform', function (e){
-      return;
+    this.panzoomInstance.on('zoom', (p: PanZoom) => {
+      BaseEditorComponent.setGlobalPanzoomTransform(p.getTransform());
     });
-  }
-  static startListeningTo(p: PanZoom): void{
-    p.on('transform', function (panZoom: PanZoom){
-      console.log("I'm listening");
-      BaseEditorComponent.setGlobalPanzoomTransform(panZoom.getTransform());  
-    })
+    BaseEditorComponent.globalPanzoomInstances.push(this.panzoomInstance);
   }
 }

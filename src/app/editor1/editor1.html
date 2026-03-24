@@ -1,3 +1,24 @@
+<ng-template #dilationSlider>
+  <slider
+    id="dilationItersSlider"
+    [min]="0"
+    [max]="15"
+    [value]="dilationIters"
+    (valueChange)="setProperty('dilationIters', $event)"
+    >Dilation
+  </slider>
+</ng-template>
+<ng-template #erosionSlider>
+  <slider
+    id="erosionItersSlider"
+    [min]="0"
+    [max]="15"
+    [value]="erosionIters"
+    (valueChange)="setProperty('erosionIters', $event)"
+    >Erosion
+  </slider>
+</ng-template>
+
 <base-editor-component editorId="editor1" headingText="Adaptive Threshold">
   <slider
     id="sampleSizeSlider"
@@ -16,20 +37,12 @@
     (valueChange)="setProperty('addedConstant', $event)"
     >Added Constant
   </slider>
-  <slider
-    id="dilationItersSlider"
-    [min]="0"
-    [max]="15"
-    [value]="dilationIters"
-    (valueChange)="setProperty('dilationIters', $event)"
-    >Dilation
-  </slider>
-  <slider
-    id="erosionItersSlider"
-    [min]="0"
-    [max]="15"
-    [value]="erosionIters"
-    (valueChange)="setProperty('erosionIters', $event)"
-    >Erosion
-  </slider>
+  <ng-container *ngTemplateOutlet="dilationFirst ? dilationSlider : erosionSlider"></ng-container>
+  <div class="slider-container">
+    <button (click)="toggleDilationFirst()" style="margin: auto">
+      <img class="icon" src="icons/swap.svg" />
+      Swap
+    </button>
+  </div>
+  <ng-container *ngTemplateOutlet="dilationFirst ? erosionSlider : dilationSlider"></ng-container>
 </base-editor-component>

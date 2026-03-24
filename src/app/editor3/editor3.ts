@@ -54,19 +54,36 @@ export class Editor3 implements Editor {
   }
 
   makeCoastlinesJagged() {
-    let src = cv.imread(this.baseEditor.canvasRef.nativeElement);
-    let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+    const src = cv.imread(this.baseEditor.canvasRef.nativeElement);
+    const dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC1);
     cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
     cv.threshold(src, src, 120, 255, cv.THRESH_BINARY);
     this.contours = new cv.MatVector();
     let hierarchy = new cv.Mat();
-    cv.findContours(src, this.contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_TC89_L1);
-    let amount = 3;
+    cv.findContours(src, this.contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE);
+    const amount = 20;
+    const jumpSize = 28;
     for (let c = 0; c < this.contours.size(); c++) {
       const contour = this.contours.get(c);
-      for (let i = 0; i < contour.data32S.length; i += 2) {
-        contour.data32S[i] += (Math.random() - 0.5) * amount; // x
-        contour.data32S[i + 1] += (Math.random() - 0.5) * amount; // y
+      for (let i = 0; i < contour.data32S.length; i += jumpSize) {
+        let x = contour.data32S[i] + (Math.random() - 0.5) * amount;
+        let y = contour.data32S[i + 1] + (Math.random() - 0.5) * amount;
+        contour.data32S[i] = x;
+        contour.data32S[i + 1] = y;
+
+        if (i > 0) {
+          let prevI = i - jumpSize;
+          let prevX = contour.data32S[prevI];
+          let prevY = contour.data32S[prevI + 1];
+          let f = (x: number) => Math.cos(x) ** 2 * 0.5 + 0.5;
+          for (let j = 2; j < jumpSize; j += 2) {
+            let iterCount = j / 2 - 1;
+            let t = iterCount / (jumpSize / 2);
+            t = f(t * Math.PI);
+            contour.data32S[prevI + j] = prevX + (x - prevX) * t;
+            contour.data32S[prevI + j + 1] = prevY + (y - prevY) * t;
+          }
+        }
       }
     }
 
@@ -91,5 +108,16 @@ export class Editor3 implements Editor {
     if (doNotify) {
       this.displayImageChanged.emit(dst);
     }
+  }
+
+  private getVertex(contour: any, index: number): { x: number; y: number } {
+    return {
+      x: contour.data32S[index * 2],
+      y: contour.data32S[index * 2 + 1],
+    };
+  }
+  private setVertex(contour: any, index: number, x: number, y: number): void {
+    contour.data32S[index * 2] = x;
+    contour.data32S[index * 2 + 1] = y;
   }
 }

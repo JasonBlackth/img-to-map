@@ -1,13 +1,14 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import type { Editor } from '../ts/Model/Editor.js';
 import { ChangeValueAction } from '../ts/index.js';
 import { FormsModule } from '@angular/forms';
 import { Slider } from '../slider/slider';
-import { BaseEditorComponent } from "../base-editor-component/base-editor-component";
+import { BaseEditorComponent } from '../base-editor-component/base-editor-component';
+import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
   selector: 'editor1',
-  imports: [FormsModule, Slider, BaseEditorComponent],
+  imports: [FormsModule, Slider, BaseEditorComponent, NgTemplateOutlet],
   templateUrl: './editor1.html',
   styleUrls: ['./editor1.css'],
 })
@@ -18,6 +19,7 @@ export class Editor1 implements Editor {
   protected addedConstant = 4;
   protected dilationIters = 3;
   protected erosionIters = 3;
+  protected dilationFirst: boolean = true;
 
   private _inputImage: any;
   private _displayImage: any;
@@ -77,31 +79,49 @@ export class Editor1 implements Editor {
       this.sampleSize,
       this.addedConstant,
     );
-    let M = cv.Mat.ones(3, 3, cv.CV_8U);
-    cv.dilate(
-      dst,
-      dst,
-      M,
-      anchor,
-      this.dilationIters,
-      cv.BORDER_CONSTANT,
-      cv.morphologyDefaultBorderValue(),
-    );
-    cv.erode(
-      dst,
-      dst,
-      M,
-      anchor,
-      this.erosionIters,
-      cv.BORDER_CONSTANT,
-      cv.morphologyDefaultBorderValue(),
-    );
+    this.performMorphology(dst, anchor);
 
     this.displayImage = dst;
   }
 
+  private performMorphology(dst: any, anchor: any): void {
+    let M = cv.Mat.ones(3, 3, cv.CV_8U);
+    let dilate = () =>
+      cv.dilate(
+        dst,
+        dst,
+        M,
+        anchor,
+        this.dilationIters,
+        cv.BORDER_CONSTANT,
+        cv.morphologyDefaultBorderValue(),
+      );
+    let erode = () =>
+      cv.erode(
+        dst,
+        dst,
+        M,
+        anchor,
+        this.erosionIters,
+        cv.BORDER_CONSTANT,
+        cv.morphologyDefaultBorderValue(),
+      );
+
+    if (this.dilationFirst) {
+      dilate();
+      erode();
+    } else {
+      erode();
+      dilate();
+    }
+  }
+
   protected setProperty<T>(propertyName: string, newValue: T): void {
     ChangeValueAction.createAndChangeValue(this, propertyName, newValue);
+  }
+
+  toggleDilationFirst(): void {
+    this.setProperty('dilationFirst', !this.dilationFirst);
   }
 
   handleValuesChanged(): void {

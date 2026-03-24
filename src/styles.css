@@ -11,7 +11,6 @@ body {
   margin: auto;
   background-color: var(--background-color);
   color: var(--foreground-color);
-  /*border: 1px solid blue;*/
 }
 app-root {
   width: 100%;
@@ -78,6 +77,10 @@ select {
   padding: 5px;
   margin: 5px;
 }
+select:hover {
+  background-color: var(--highlight-color);
+  cursor: pointer;
+}
 
 .input-label {
   cursor: pointer;
@@ -107,8 +110,8 @@ select {
 }
 
 .slider-container {
+  display: flex;
   width: 80%;
-  /* border: 1px solid var(--foreground-color); */
 }
 
 .slider-container > label {
