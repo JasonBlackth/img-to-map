@@ -81,27 +81,27 @@ select:hover {
   cursor: pointer;
 }
 .file-drop-area {
-  border: 0.15rem dashed var(--foreground-color);
-  border-radius: 1.5rem;
+  border: 0.15em dashed var(--foreground-color);
+  border-radius: 1.5em;
   margin: auto;
-  height: 16rem;
+  height: 16em;
   width: 100%;
-  max-width: 32rem;
+  max-width: 32em;
   background-color: var(--dark-highlight-color);
   text-align: center;
   align-content: center;
 }
 
 .icon {
-  width: 1.5rem;
-  height: 1.5rem;
-  margin: auto;
+  width: 1.5em;
+  height: 1.5em;
   filter: invert(1) brightness(0.85);
 }
 #upload-icon {
-  width: 3rem;
-  height: 3rem;
-  margin-bottom: 0.5rem;
+  width: 3em;
+  height: 3em;
+  margin-bottom: 0.5em;
+  margin-right: 0;
 }
 
 .editor-container {
@@ -118,7 +118,7 @@ select:hover {
 }
 
 .slider-container > label {
-  padding: 0.5rem 0;
+  padding: 0.5em 0;
   width: 100%;
 }
 
@@ -129,7 +129,7 @@ select:hover {
 .editor {
   display: flex;
   flex-direction: row;
-  padding: 3rem;
+  padding: 3em;
 }
 
 .editor .left,
@@ -137,18 +137,18 @@ select:hover {
   align-content: center;
 }
 .editor .divider {
-  height: 2.5rem;
+  height: 2.5em;
 }
 
 .editor .right {
   /* padding: 50px; */
   /* width: 40%;
-  min-width: 20rem; */
+  min-width: 20em; */
 }
 
 .canvas-container {
   position: relative;
-  border: 0.05rem solid var(--foreground-color);
+  border: 0.05em solid var(--foreground-color);
   overflow: hidden;
   width: fit-content;
   height: fit-content;

@@ -34,7 +34,7 @@ export class ChangeValueAction<T> extends Action {
     }
     const action = new ChangeValueAction<T>(editor, propertyName, originalValue, newValue);
     action.apply();
-    ActiveProject.registerAction(action);
+    window.ActiveProject.registerAction(action);
     return action;
   }
 

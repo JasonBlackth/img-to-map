@@ -8,7 +8,7 @@ export abstract class Action implements ActionType {
 
     static createAndApply(template: ActionType): Action {
         const action = Action.from(template);
-        ActiveProject.registerAction(action);
+        window.ActiveProject.registerAction(action);
         action.apply();
         return action;
     }
