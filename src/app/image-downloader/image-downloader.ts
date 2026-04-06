@@ -3,6 +3,7 @@ import { ChangeValueAction, ImageStyleEnum } from '../ts';
 import { FormsModule } from '@angular/forms';
 import { ImageStyleManager } from '../ts/ViewModel/ImageStyleManager';
 import { BaseEditorComponent } from '../base-editor-component/base-editor-component';
+import { AbstractEditor } from '../ts/Model/AbstractEditor';
 
 @Component({
   selector: 'image-downloader',
@@ -10,53 +11,25 @@ import { BaseEditorComponent } from '../base-editor-component/base-editor-compon
   templateUrl: './image-downloader.html',
   styleUrl: './image-downloader.css',
 })
-export class ImageDownloader {
-  rows = 0;
-  cols = 0;
-
+export class ImageDownloader extends AbstractEditor {
   public imageStyleSelected = ImageStyleEnum.BINARY;
-  public imageStyle = ImageStyleManager.setActive(this.imageStyleSelected);
+  private styleManager = new ImageStyleManager(this.imageStyleSelected);
 
   @ViewChild(BaseEditorComponent)
-  baseEditor!: BaseEditorComponent;
+  override baseEditor: BaseEditorComponent = undefined as any;
 
-  private _inputImage: any;
-  @Input()
-  set inputImage(image: any) {
-    if (!image) return;
-    if (this._inputImage !== undefined) {
-      this._inputImage.delete();
-    }
-    this.rows = image.rows;
-    this.cols = image.cols;
-    this._inputImage = image.clone();
-    ImageStyleManager.setInputImage(this._inputImage);
-
-    this.applyStyleChanges();
-  }
-  get inputImage() {
-    return this._inputImage;
-  }
-
-  onStyleChange(newVal: ImageStyleEnum) {
-    this.setProperty('imageStyleSelected', newVal);
-  }
-
-  protected setProperty<T>(propertyName: string, newValue: T): void {
-    ChangeValueAction.createAndChangeValue(this, propertyName, newValue);
-  }
-
-  handleValuesChanged(): void {
-    ImageStyleManager.setActive(this.imageStyleSelected);
+  override processImage() {
+    this.styleManager.setInputImage(this.inputImage);
+    this.styleManager.setActive(this.imageStyleSelected);
     this.applyStyleChanges();
   }
 
   applyStyleChanges() {
-    if (!this._inputImage) return;
-    this.baseEditor.setDisplayImage(ImageStyleManager.apply());
+    if (!this.inputImage) return;
+    this.baseEditor.setDisplayImage(this.styleManager.apply());
   }
   resetRandomSeeds() {
-    this.baseEditor.setDisplayImage(ImageStyleManager.resetSeedsAndGetImage());
+    this.baseEditor.setDisplayImage(this.styleManager.resetSeedsAndGetImage());
   }
 
   downloadImage() {

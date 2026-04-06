@@ -1,5 +1,5 @@
-export interface ActionType {
-    dataStorage?: object;
-    apply(data?: object): void;
-    revert(data?: object): void;
+export interface ActionType<T> {
+    dataStorage?: T;
+    apply(data?: T): void;
+    revert(data?: T): void;
 }

@@ -1,10 +1,10 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { Editor } from '../ts/Model/Editor';
 import { Slider } from '../slider/slider';
 import { ChangeValueAction } from '../ts';
 import { Colors } from '../ts/Model/Colors';
-import panzoom from 'panzoom';
 import { BaseEditorComponent } from '../base-editor-component/base-editor-component';
+import { AbstractEditor } from '../ts/Model/AbstractEditor';
 
 @Component({
   selector: 'editor3',
@@ -12,45 +12,27 @@ import { BaseEditorComponent } from '../base-editor-component/base-editor-compon
   templateUrl: './editor3.html',
   styleUrl: './editor3.css',
 })
-export class Editor3 implements Editor {
-  rows: number = 0;
-  cols: number = 0;
+export class Editor3 extends AbstractEditor {
   coastlineSmoothness: number = 7;
   contours: any;
 
-  @ViewChild(BaseEditorComponent)
-  baseEditor!: BaseEditorComponent;
-
   @Output()
-  displayImageChanged = new EventEmitter<any>();
+  override displayImageChanged = new EventEmitter<any>();
 
-  private _inputImage: any;
-  @Input()
-  set inputImage(image: any) {
-    if (!image) return;
-    if (this._inputImage !== undefined) {
-      this._inputImage.delete();
-    }
-    this.rows = image.rows;
-    this.cols = image.cols;
+  @ViewChild(BaseEditorComponent)
+  override baseEditor: BaseEditorComponent = undefined as any;
 
-    this._inputImage = image.clone();
-
+  override processImage() {
     this.blurCoastlines();
-  }
-  get inputImage() {
-    return this._inputImage;
   }
 
   blurCoastlines() {
     const dst = new cv.Mat();
     let ksize = new cv.Size(this.coastlineSmoothness + 1, this.coastlineSmoothness + 1);
     let anchor = new cv.Point(-1, -1);
-    cv.blur(this._inputImage, dst, ksize, anchor, cv.BORDER_DEFAULT);
+    cv.blur(this.inputImage, dst, ksize, anchor, cv.BORDER_DEFAULT);
     cv.threshold(dst, dst, 200, 255, cv.THRESH_BINARY);
-
-    this.updateDisplayImage(dst);
-    dst.delete();
+    this.displayImage = dst;
   }
 
   makeCoastlinesJagged() {
@@ -88,26 +70,10 @@ export class Editor3 implements Editor {
     }
 
     cv.drawContours(dst, this.contours, -1, Colors.WHITE, cv.FILLED);
-    this.updateDisplayImage(dst);
+    this.displayImage = dst;
 
     hierarchy.delete();
     src.delete();
-    dst.delete();
-  }
-
-  handleValuesChanged() {
-    this.blurCoastlines();
-  }
-
-  protected setProperty<T>(propertyName: string, newValue: T): void {
-    ChangeValueAction.createAndChangeValue(this, propertyName, newValue);
-  }
-
-  updateDisplayImage(dst: any, doNotify = true): void {
-    this.baseEditor.setDisplayImage(dst);
-    if (doNotify) {
-      this.displayImageChanged.emit(dst);
-    }
   }
 
   private getVertex(contour: any, index: number): { x: number; y: number } {

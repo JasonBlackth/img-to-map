@@ -1,7 +1,9 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { Action, ChangeValueAction, Editor } from '../ts';
+import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { Action } from '../ts';
 import { Colors } from '../ts/Model/Colors';
 import { BaseEditorComponent } from '../base-editor-component/base-editor-component';
+import { AbstractEditor } from '../ts/Model/AbstractEditor';
+import { EventPolicy } from '../ts/Model/EventPolicy';
 
 @Component({
   selector: 'editor2',
@@ -9,53 +11,29 @@ import { BaseEditorComponent } from '../base-editor-component/base-editor-compon
   templateUrl: './editor2.html',
   styleUrl: './editor2.css',
 })
-export class Editor2 implements Editor {
+export class Editor2 extends AbstractEditor {
   public contours: any;
-  private contourHierarchy: any;
   private contourMap: any;
   private selectedContours: Set<number> = new Set();
-  protected lowThreshold: number = 0;
-  protected highThreshold: number = 255;
-  protected hierarchy: number = 1;
 
-  rows: number = 0;
-  cols: number = 0;
+  private readonly ALL_CONTOURS = [-1];
 
   @Output()
-  displayImageChanged = new EventEmitter<any>();
-
-  protected contourImage: any;
+  override displayImageChanged = new EventEmitter<any>();
 
   @ViewChild(BaseEditorComponent)
-  baseEditor!: BaseEditorComponent;
+  override baseEditor: BaseEditorComponent = undefined as any;
 
-  private _inputImage: any;
-  @Input()
-  set inputImage(image: any) {
-    if (!image) return;
-    if (this._inputImage !== undefined) {
-      this._inputImage.delete();
-    }
-    this.rows = image.rows;
-    this.cols = image.cols;
-    this._inputImage = image.clone();
-
-    this.contourMap = new cv.Mat();
-    this.contourImage = new cv.Mat();
-    this.contourHierarchy = new cv.Mat();
-
+  override processImage(): void {
     this.createContourImage();
-  }
-  get inputImage() {
-    return this._inputImage;
   }
 
   handleCanvasClick(event: PointerEvent) {
     const ctrlHeld = event.ctrlKey || event.metaKey || event.shiftKey;
 
     const rect = this.baseEditor.canvasRef.nativeElement.getBoundingClientRect();
-    const clickX = (event.clientX - rect.left) * (this.cols / rect.width);
-    const clickY = (event.clientY - rect.top) * (this.rows / rect.height);
+    const clickX = (event.clientX - rect.left) * (this.inputImage.cols / rect.width);
+    const clickY = (event.clientY - rect.top) * (this.inputImage.rows / rect.height);
 
     const selectedIndex = this.findContourClosestTo(clickX, clickY);
     if (selectedIndex !== -1) {
@@ -64,10 +42,10 @@ export class Editor2 implements Editor {
       }
       if (this.selectedContours.has(selectedIndex)) {
         this.selectedContours.delete(selectedIndex);
-        this.reDrawContour(selectedIndex, Colors.WHITE);
+        this.reDrawContours([selectedIndex], Colors.WHITE);
       } else {
         this.selectedContours.add(selectedIndex);
-        this.reDrawContour(selectedIndex, Colors.RED, false);
+        this.reDrawContours([selectedIndex], Colors.RED, EventPolicy.SUPPRESS_EVENT);
       }
     }
   }
@@ -83,16 +61,16 @@ export class Editor2 implements Editor {
     }
   }
 
-  deleteSelectedContours(): Action {
+  deleteSelectedContours(): Action<deleteContourDataStorage> {
     const deletedIndices = Array.from(this.selectedContours);
     const deletedContours = deletedIndices.map((i) => this.contours.get(i).clone());
 
     return Action.createAndApply({
-      dataStorage: { editor: this, deletedIndices, deletedContours },
-      apply: (ds: any) => {
+      dataStorage: { editor: this, deletedIndices, deletedContours } as deleteContourDataStorage,
+      apply: (ds: deleteContourDataStorage) => {
         ds.editor.deleteContoursAtIndices(ds.deletedIndices);
       },
-      revert: (ds: any) => {
+      revert: (ds: deleteContourDataStorage) => {
         ds.deletedIndices.forEach((originalIndex: number, index: number) => {
           ds.editor.contours.set(originalIndex, ds.deletedContours[index]);
         });
@@ -101,22 +79,27 @@ export class Editor2 implements Editor {
     });
   }
 
-  public createContourImage(): void {
+  createContourImage(): void {
     this.selectedContours.clear();
-    this.contourImage = cv.Mat.zeros(this.rows, this.cols, cv.CV_8UC3);
+
     this.contours = new cv.MatVector();
+    let hierarchy = new cv.Mat();
     cv.findContours(
       this.inputImage,
       this.contours,
-      this.contourHierarchy,
+      hierarchy,
       cv.RETR_EXTERNAL,
       cv.CHAIN_APPROX_NONE,
     );
-    this.reDrawAllContours(Colors.WHITE);
+    hierarchy.delete();
+
+    this.displayImage = cv.Mat.zeros(this.inputImage.rows, this.inputImage.cols, cv.CV_8UC3);
+    this.reDrawContours(this.ALL_CONTOURS, Colors.WHITE);
+
     this.createContourMap();
   }
 
-  public findContourClosestTo(clickX: number, clickY: number): number {
+  findContourClosestTo(clickX: number, clickY: number): number {
     clickX = Math.round(clickX);
     clickY = Math.round(clickY);
     const r = 9;
@@ -142,14 +125,14 @@ export class Editor2 implements Editor {
     return -1;
   }
 
-  private createContourMap() {
-    this.contourMap = cv.Mat.zeros(this.rows, this.cols, cv.CV_16UC1);
+  createContourMap() {
+    this.contourMap = cv.Mat.zeros(this.inputImage.rows, this.inputImage.cols, cv.CV_16UC1);
     for (let i = 0; i < this.contours.size(); ++i) {
       cv.drawContours(this.contourMap, this.contours, i, new cv.Scalar(i + 1), cv.FILLED);
     }
   }
 
-  public deleteContoursAtIndices(indices: number[]): void {
+  deleteContoursAtIndices(indices: number[]): void {
     if (!indices) return;
     this.reDrawContours(indices, Colors.BLACK);
     for (const index of indices) {
@@ -159,35 +142,14 @@ export class Editor2 implements Editor {
     }
   }
 
-  protected setProperty<T>(propertyName: string, newValue: T): void {
-    ChangeValueAction.createAndChangeValue(this, propertyName, newValue);
-  }
-
-  handleValuesChanged(): void {
-    this.createContourImage();
-  }
-
-  private reDrawAllContours(colour: any, doNotify = true): void {
-    this.reDrawContours([-1], colour, doNotify);
-  }
-  private reDrawContour(ind: number, colour: any, doNotify = true): void {
-    this.reDrawContours([ind], colour, doNotify);
-  }
-  private reDrawContours(inds: number[], colour: any, doNotify = true): void {
+  reDrawContours(inds: number[], colour: any, eventPolicy = EventPolicy.EMIT_EVENT): void {
     for (const ind of inds) {
-      cv.drawContours(this.contourImage, this.contours, ind, colour, cv.FILLED);
+      cv.drawContours(this.displayImage, this.contours, ind, colour, cv.FILLED);
     }
-    this.updateDisplayImage(doNotify);
+    this.updateDisplayImage(eventPolicy);
   }
 
-  updateDisplayImage(doNotify = true): void {
-    this.baseEditor.setDisplayImage(this.contourImage);
-    if (doNotify) {
-      this.displayImageChanged.emit(this.contourImage);
-    }
-  }
-
-  keepOnlySelected(): Action {
+  keepOnlySelected(): Action<any> {
     const inverseOfSelection = Array.from(Array(this.contours.size()).keys()).filter(
       (index) => !this.selectedContours.has(index),
     );
@@ -197,8 +159,14 @@ export class Editor2 implements Editor {
     return this.deleteSelectedContours();
   }
 
-  private dropSelection(): void {
+  dropSelection(): void {
     this.reDrawContours(Array.from(this.selectedContours), Colors.WHITE);
     this.selectedContours.clear();
   }
+}
+
+interface deleteContourDataStorage {
+  editor: Editor2;
+  deletedIndices: number[];
+  deletedContours: any[];
 }

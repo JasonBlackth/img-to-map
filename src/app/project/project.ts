@@ -14,8 +14,8 @@ import { Editor2 } from '../editor2/editor2';
   styleUrls: ['./project.css'],
 })
 export class Project {
-  private actionHistory: Action[] = [];
-  private undoneActions: Action[] = [];
+  private actionHistory: Action<any>[] = [];
+  private undoneActions: Action<any>[] = [];
   protected displayEditors = false;
   protected testSliderValue = 85;
 
@@ -59,7 +59,6 @@ export class Project {
     cv.cvtColor(image, gray, cv.COLOR_RGBA2GRAY);
     cv.threshold(gray, gray, 0, 255, cv.THRESH_BINARY);
     this.editor3.inputImage = gray;
-    gray.delete();
   }
   onEditor3ImageChanged(image: any) {
     this.imageDownloader.inputImage = image;
@@ -83,7 +82,7 @@ export class Project {
     }
   }
 
-  registerAction(action: Action): void {
+  registerAction(action: Action<any>): void {
     this.actionHistory.push(action);
     this.undoneActions = [];
   }

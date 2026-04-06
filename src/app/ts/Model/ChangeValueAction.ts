@@ -1,13 +1,19 @@
 import { Action } from './Action.js';
 import type { Editor } from './Editor.js';
+import { AbstractEditor } from './AbstractEditor.js';
 
-export class ChangeValueAction<T> extends Action {
-  private editor: Editor;
+export class ChangeValueAction<T> extends Action<T> {
+  private editor: Editor | AbstractEditor;
   private propertyName: string;
   private originalValue: T;
   private newValue: T;
 
-  private constructor(editor: Editor, propertyName: string, originalValue: T, newValue: T) {
+  private constructor(
+    editor: Editor | AbstractEditor,
+    propertyName: string,
+    originalValue: T,
+    newValue: T,
+  ) {
     super();
     this.editor = editor;
     this.propertyName = propertyName;
@@ -24,7 +30,7 @@ export class ChangeValueAction<T> extends Action {
   }
 
   static createAndChangeValue<T>(
-    editor: Editor,
+    editor: Editor | AbstractEditor,
     propertyName: string,
     newValue: T,
   ): ChangeValueAction<T> {

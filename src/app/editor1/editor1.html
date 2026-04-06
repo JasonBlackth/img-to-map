@@ -23,7 +23,7 @@
   <slider
     id="sampleSizeSlider"
     [min]="1"
-    [max]="100"
+    [max]="1000"
     [step]="2"
     [value]="sampleSize"
     (valueChange)="setProperty('sampleSize', $event)"
@@ -37,12 +37,12 @@
     (valueChange)="setProperty('addedConstant', $event)"
     >Added Constant
   </slider>
-  <ng-container *ngTemplateOutlet="dilationFirst ? dilationSlider : erosionSlider"></ng-container>
+  <ng-container *ngTemplateOutlet="isDilationFirst ? dilationSlider : erosionSlider"></ng-container>
   <div class="slider-container">
-    <button (click)="toggleDilationFirst()" style="margin: auto">
+    <button (click)="toggleIsDilationFirst()" style="margin: auto">
       <img class="icon" src="icons/swap.svg" />
       Swap
     </button>
   </div>
-  <ng-container *ngTemplateOutlet="dilationFirst ? erosionSlider : dilationSlider"></ng-container>
+  <ng-container *ngTemplateOutlet="isDilationFirst ? erosionSlider : dilationSlider"></ng-container>
 </base-editor-component>

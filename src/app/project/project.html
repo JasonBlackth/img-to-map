@@ -4,7 +4,7 @@
       <image-uploader (uploadedImage)="onImageUploaded($event)"> </image-uploader>
       <div [hidden]="!displayEditors">
         <editor1 (displayImageChanged)="onEditor1ImageChanged($event)"> </editor1>
-        <editor2 (displayImageChanged)="onEditor2ImageChanged($event)"></editor2>
+        <editor2 (displayImageChanged)="onEditor2ImageChanged($event)"> </editor2>
         <editor3 (displayImageChanged)="onEditor3ImageChanged($event)"> </editor3>
         <image-downloader> </image-downloader>
       </div>
