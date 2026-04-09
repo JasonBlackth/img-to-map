@@ -8,9 +8,10 @@
         data-bs-toggle="collapse"
         href="#{{ editorId }}"
         role="button"
-        (click)="toggleCollapse()"
+        (click)="onCollapsePressed()"
         aria-expanded="{{ !isCollapsed }}"
         aria-controls="{{ editorId }}"
+        #collapseToggle
       >
         <img
           alt="Toggle editor"

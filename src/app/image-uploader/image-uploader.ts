@@ -22,26 +22,37 @@ export class ImageUploader {
     event.preventDefault();
   }
   onFileDrop(event: DragEvent) {
-    throw new Error('Method not implemented.');
+    event.preventDefault();
+    const input = event.dataTransfer as DataTransfer;
+    if (input && input.files) {
+      this.handleUploadedFile(input.files[0]);
+    }
   }
 
   onFileUpload(event: Event) {
     const input = event.target as HTMLInputElement;
-    let file: File;
-    if (input.files && (file = input.files[0])) {
-      if (!this.validImageTypes.includes(file.type)) {
-        input.files = null;
-        alert('Please upload a valid image format (JPEG or PNG).');
-        return;
-      }
-      this.fileName = file.name;
-      this.fileUrl = URL.createObjectURL(file);
+    if (input.files) {
+      this.handleUploadedFile(input.files[0]);
     }
   }
 
+  handleUploadedFile(file: File) {
+    if (!file) return;
+    if (!this.validImageTypes.includes(file.type)) {
+      alert('Please upload a valid image format (JPEG or PNG).');
+      return;
+    }
+    this.fileName = file.name;
+    this.fileUrl = URL.createObjectURL(file);
+  }
+
   onImageLoaded(event: Event) {
-    console.log((event.target as HTMLImageElement).width, event)
-    let imageCvMat = cv.imread(event.target as HTMLImageElement);
+    const img = event.target as HTMLImageElement;
+    if (img.width === 0 || img.height === 0) {
+      alert('Failed to load possibly corrupted image. Please try again with another file.');
+      return;
+    }
+    let imageCvMat = cv.imread(img);
     this.uploadedImage.emit(imageCvMat);
   }
 }
@@ -53,5 +64,3 @@ export class ImageUploader {
 // disp flex nagyon hasznos
 
 //kezdjünk el írni
-
-

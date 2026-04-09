@@ -9,8 +9,14 @@ export abstract class AbstractEditor {
 
   private _displayImage: any;
   private _inputImage: any;
+  private pendingProcessTimeoutId: number | null = null;
+  private readonly processingDebounceMs = 50;
 
   set displayImage(image: any) {
+    if (!image) return;
+    if (this._displayImage !== undefined) {
+      this._displayImage.delete();
+    }
     this._displayImage = image;
     this.updateDisplayImage();
   }
@@ -25,7 +31,8 @@ export abstract class AbstractEditor {
     }
     this._inputImage = image;
 
-    this.processImage();
+    this.onNewInputImage();
+    this.scheduleLatestOnlyProcessing();
   }
   get inputImage() {
     return this._inputImage;
@@ -42,13 +49,35 @@ export abstract class AbstractEditor {
     }
   }
 
+  protected onNewInputImage(): void {}
+
   abstract processImage(): any;
 
-  handleValuesChanged(): any {
-    this.processImage();
+  handlePropertyChanged(): any {
+    this.scheduleLatestOnlyProcessing();
   }
 
   setProperty<T>(propertyName: string, newValue: T): void {
     ChangeValueAction.createAndChangeValue(this, propertyName, newValue);
+  }
+
+  private scheduleLatestOnlyProcessing(): void {
+    if (this.pendingProcessTimeoutId !== null) {
+      window.clearTimeout(this.pendingProcessTimeoutId);
+    }
+
+    this.pendingProcessTimeoutId = window.setTimeout(() => {
+      this.pendingProcessTimeoutId = null;
+      if (!this._inputImage) {
+        return;
+      }
+      this.processImage();
+    }, this.processingDebounceMs);
+  }
+
+  public setIsCollapsed(isCollapsed: boolean): void {
+    if (this.baseEditor) {
+      this.baseEditor.setIsCollapsed(isCollapsed);
+    }
   }
 }

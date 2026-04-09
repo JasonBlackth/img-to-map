@@ -6,6 +6,7 @@ import { ImageDownloader } from '../image-downloader/image-downloader';
 import { Editor1 } from '../editor1/editor1';
 import { Editor3 } from '../editor3/editor3';
 import { Editor2 } from '../editor2/editor2';
+import { AbstractEditor } from '../ts/Model/AbstractEditor.js';
 
 @Component({
   selector: 'project',
@@ -35,12 +36,10 @@ export class Project {
       if (event.key === 'y') {
         event.preventDefault();
         this.redo();
-        console.log('Redo triggered');
       }
       if (event.key === 'z') {
         event.preventDefault();
         this.undo();
-        console.log('Undo triggered');
       }
     }
   }
@@ -48,10 +47,14 @@ export class Project {
   onImageUploaded(image: any): void {
     this.editor1.inputImage = image;
     this.displayEditors = true;
+
+    this.editor1.setIsCollapsed(false);
+    let collapsedEditors: AbstractEditor[] = [this.editor2, this.editor3, this.imageDownloader];
+    collapsedEditors.forEach((editor) => editor.setIsCollapsed(true));
   }
 
   onEditor1ImageChanged(image: any): void {
-    this.editor2.inputImage = image;
+    this.editor2.inputImage = image.clone();
   }
 
   onEditor2ImageChanged(image: any) {
@@ -61,7 +64,7 @@ export class Project {
     this.editor3.inputImage = gray;
   }
   onEditor3ImageChanged(image: any) {
-    this.imageDownloader.inputImage = image;
+    this.imageDownloader.inputImage = image.clone();
   }
 
   undo(): void {
@@ -69,7 +72,6 @@ export class Project {
     if (action) {
       action.revert();
       this.undoneActions.push(action);
-      console.log('Action undone. Current history length: ' + this.actionHistory.length);
     }
   }
 
@@ -78,7 +80,6 @@ export class Project {
     if (action) {
       action.apply();
       this.actionHistory.push(action);
-      console.log('Action redone. Current history length: ' + this.actionHistory.length);
     }
   }
 

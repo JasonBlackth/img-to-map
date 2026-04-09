@@ -27,6 +27,8 @@ export class BaseEditorComponent {
 
   @ViewChild('editorCanvas')
   canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('collapseToggle')
+  collapseToggleRef!: ElementRef<HTMLAnchorElement>;
 
   @Input()
   headingText: string = 'Untitled Editor';
@@ -48,6 +50,12 @@ export class BaseEditorComponent {
       this.createPanzoomInstance();
     }
     cv.imshow(this.canvasRef.nativeElement, image);
+  }
+
+  public setIsCollapsed(isCollapsed: boolean): void {
+    if (isCollapsed !== this.isCollapsed) {
+      this.collapseToggleRef.nativeElement.click();
+    }
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -75,7 +83,7 @@ export class BaseEditorComponent {
     }
   }
 
-  toggleCollapse() {
+  protected onCollapsePressed() {
     this.isCollapsed = !this.isCollapsed;
     if (!this.isCollapsed) {
       BaseEditorComponent.setGlobalPanzoomTransform(BaseEditorComponent.globalTransform);

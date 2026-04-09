@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'slider',
-  templateUrl: './slider.html'
+  templateUrl: './slider.html',
 })
 export class Slider {
   static count: number = 0;
@@ -31,7 +31,10 @@ export class Slider {
 
   onChange() {
     this.actualValue = this.previewValue;
-    this.valueChange.emit(this.actualValue);
+    try {
+      this.valueChange.emit(this.actualValue);
+    } catch (error) {
+      console.error('Error emitting valueChange event:', error);
+    }
   }
-
 }

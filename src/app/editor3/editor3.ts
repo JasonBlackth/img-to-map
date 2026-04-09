@@ -1,7 +1,5 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { Editor } from '../ts/Model/Editor';
 import { Slider } from '../slider/slider';
-import { ChangeValueAction } from '../ts';
 import { Colors } from '../ts/Model/Colors';
 import { BaseEditorComponent } from '../base-editor-component/base-editor-component';
 import { AbstractEditor } from '../ts/Model/AbstractEditor';
@@ -57,7 +55,9 @@ export class Editor3 extends AbstractEditor {
           let prevI = i - jumpSize;
           let prevX = contour.data32S[prevI];
           let prevY = contour.data32S[prevI + 1];
-          let f = (x: number) => Math.cos(x) ** 2 * 0.5 + 0.5;
+          let f = (x: number) => {
+            return Math.cos(x) ** 2 * 0.5 + 0.5;
+          };
           for (let j = 2; j < jumpSize; j += 2) {
             let iterCount = j / 2 - 1;
             let t = iterCount / (jumpSize / 2);

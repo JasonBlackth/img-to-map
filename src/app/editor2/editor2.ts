@@ -57,7 +57,7 @@ export class Editor2 extends AbstractEditor {
       this.dropSelection();
     }
     if (event.key === 'Enter') {
-      this.keepOnlySelected();
+      this.keepSelectedOnly();
     }
   }
 
@@ -149,7 +149,7 @@ export class Editor2 extends AbstractEditor {
     this.updateDisplayImage(eventPolicy);
   }
 
-  keepOnlySelected(): Action<any> {
+  keepSelectedOnly(): Action<any> {
     const inverseOfSelection = Array.from(Array(this.contours.size()).keys()).filter(
       (index) => !this.selectedContours.has(index),
     );

@@ -1,5 +1,5 @@
-import { Component, Input, ViewChild } from '@angular/core';
-import { ChangeValueAction, ImageStyleEnum } from '../ts';
+import { Component, ViewChild } from '@angular/core';
+import { ImageStyleEnum } from '../ts';
 import { FormsModule } from '@angular/forms';
 import { ImageStyleManager } from '../ts/ViewModel/ImageStyleManager';
 import { BaseEditorComponent } from '../base-editor-component/base-editor-component';
