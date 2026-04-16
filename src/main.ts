@@ -1,7 +1,7 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { App } from './app/app';
-import { Colors } from './app/ts/Model/Colors';
+import { Colors } from './app/common/Colors';
 
 export function initApp(): void {
   Colors.init();

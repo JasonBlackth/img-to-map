@@ -1,0 +1,22 @@
+@startuml Adaptive Threshold
+
+left to right direction
+
+package "Adaptive Threshold"{
+    usecase (P1) as "Sample méretének\nbeállítása"
+    usecase (P2) as "Threshold érték korrigálása"
+    usecase (P3) as "Eredmény invertálása"
+    usecase (P4) as "Morfológiai műveletek\nismétlésszámának beállítása"
+    usecase (P5) as "Morfológiai műveletek\nsorrendjének felcserélése"
+}
+
+actor :Felhasználó: as User1
+
+
+User1 --> (P1)
+User1 --> (P2)
+User1 --> (P3)
+User1 --> (P4)
+User1 --> (P5)
+
+@enduml

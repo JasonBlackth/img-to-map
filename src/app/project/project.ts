@@ -1,12 +1,12 @@
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Action } from '../ts/Model/Action.js';
 import { ImageUploader } from '../image-uploader/image-uploader';
-import { ImageDownloader } from '../image-downloader/image-downloader';
-import { Editor1 } from '../editor1/editor1';
-import { Editor3 } from '../editor3/editor3';
-import { Editor2 } from '../editor2/editor2';
-import { AbstractEditor } from '../ts/Model/AbstractEditor.js';
+import { ImageDownloader } from '../editors/image-downloader/image-downloader.js';
+import { Editor1 } from '../editors/editor1/editor1.js';
+import { Editor3 } from '../editors/editor3/editor3.js';
+import { Editor2 } from '../editors/editor2/editor2.js';
+import { AbstractEditor } from '../editors/AbstractEditor.js';
+import { ReversibleAction } from '../common/reversible-action/ReversibleAction';
 
 @Component({
   selector: 'project',
@@ -15,8 +15,8 @@ import { AbstractEditor } from '../ts/Model/AbstractEditor.js';
   styleUrls: ['./project.css'],
 })
 export class Project {
-  private actionHistory: Action<any>[] = [];
-  private undoneActions: Action<any>[] = [];
+  private actionHistory: ReversibleAction<any>[] = [];
+  private undoneActions: ReversibleAction<any>[] = [];
   protected displayEditors = false;
   protected testSliderValue = 85;
 
@@ -45,6 +45,12 @@ export class Project {
   }
 
   onImageUploaded(image: any): void {
+    if (!image) {
+      this.displayEditors = false;
+      this.actionHistory = [];
+      this.undoneActions = [];
+      return;
+    }
     this.editor1.inputImage = image;
     this.displayEditors = true;
 
@@ -83,7 +89,7 @@ export class Project {
     }
   }
 
-  registerAction(action: Action<any>): void {
+  registerAction(action: ReversibleAction<any>): void {
     this.actionHistory.push(action);
     this.undoneActions = [];
   }

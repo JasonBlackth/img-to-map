@@ -1,0 +1,296 @@
+@startuml
+interface ActionType<T> {
+    +dataStorage?: T | undefined
+    +apply(data?: T | undefined): void
+    +revert(data?: T | undefined): void
+}
+abstract class Action<T> implements ActionType {
+    +dataStorage: T
+    +{abstract} apply(): void
+    +{abstract} revert(): void
+    +{static} createAndApply(template: ActionType<T>): Action<T>
+    -{static} from(args: ActionType<T>): Action<T>
+}
+class ImageUploader {
+    #fileName: string
+    #fileUrl: string
+    -IMAGE_LOAD_TIMEOUT_MS: 2000
+    #loadTimeoutId: number | undefined
+    +uploadedImage: any
+    #isWarningVisible: boolean
+    -cdr: ChangeDetectorRef
+    -validImageTypes: string[]
+    +onDragOver(event: DragEvent): void
+    +onFileDrop(event: DragEvent): void
+    +onFileUpload(event: Event): void
+    +handleUploadedFile(file: File): void
+    +onImageLoaded(event: Event): void
+    +isFilePresent(): boolean
+    +isImageLoading(): boolean
+    +closeWarning(event: Event): void
+}
+class Grad {
+    +x: number
+    +y: number
+    +z: number
+    +dot2(x: number, y: number): number
+    +dot3(x: number, y: number, z: number): number
+}
+class Perlin {
+    +permutationTable: number[]
+    +grad3: Grad[]
+    +perm: number[]
+    +gradP: Grad[]
+    +F2: number
+    +G2: number
+    +F3: number
+    +G3: number
+    +simplex2(xin: number, yin: number): number
+    +simplex3(xin: number, yin: number, zin: number): number
+    -fade(t: number): number
+    -lerp(a: number, b: number, t: number): number
+    +perlin2(x: number, y: number): number
+    +perlin3(x: number, y: number, z: number): number
+}
+abstract class ImageStyle {
+    +{abstract} apply(image: any): any
+    +resetSeedsAndGetImage(): any
+    +{abstract} drawWithNewSeeds(): any
+    +getThreshold(value: number): number
+    +perlinNoise(x: number, y: number): number
+    +smallerNoise(x: number, y: number): number
+    +{static} seed: number
+    +{static} seed2: number
+    +{static} noise: Perlin
+    +{static} noise2: Perlin
+    +{static} contours: any
+    +{static} lastInputImage: any
+    +{static} setInputImage(inputImage: any): void
+    +{static} getStaticSeeds(): SeedsObject
+    +{static} setSeeds(s: SeedsObject): void
+    +{static} findContours(image: any): any
+}
+class BinaryStyle extends ImageStyle {
+    +apply(image: any): any
+    +drawWithNewSeeds(): any
+}
+class Colors {
+    +{static} WHITE: any
+    +{static} BLACK: any
+    +{static} RED: any
+    +{static} init(): void
+    +{static} rgb(r: number, g: number, b: number): any
+}
+class ClassicStyle extends ImageStyle {
+    -blurredInputImage: any
+    +apply(image: any): any
+    +getThreshold(value: number): number
+    +drawWithNewSeeds(): any
+    -calculateSeaDepth(): any
+    -getOutputImage(): any
+}
+enum ImageStyleEnum {
+    BINARY
+    CLASSIC
+    VINTAGE
+}
+class VintageStyle extends ImageStyle {
+    +apply(image: any): any
+    +drawWithNewSeeds(): any
+    +getThreshold(value: number): number
+}
+class ImageStyleManager {
+    -binaryStyle: BinaryStyle
+    -vintageStyle: VintageStyle
+    -classicStyle: ClassicStyle
+    -activeStyle: ImageStyle
+    -inputImage: any
+    +setActive(style: ImageStyleEnum): void
+    +apply(): any
+    +setInputImage(image: any): void
+    -getStyle(style: ImageStyleEnum): ImageStyle
+    +resetSeedsAndGetImage(): any
+    +setSeedsAndGetImage(seeds: SeedsObject): any
+}
+class BaseEditorComponent {
+    #panzoomInstance: PanZoom
+    +canvasRef: ElementRef<HTMLCanvasElement>
+    +collapseToggleRef: ElementRef<HTMLAnchorElement>
+    +headingText: string
+    +editorId: string
+    +displayImageChanged: any
+    +canvasClick: any
+    +myKeydown: any
+    +isCollapsed: boolean
+    +setDisplayImage(image: any): void
+    +setIsCollapsed(isCollapsed: boolean): void
+    +keyboardEventHandler(event: KeyboardEvent): void
+    +keyboardEventKeyUpHandler(event: KeyboardEvent): void
+    +handleCanvasClick(event: PointerEvent): void
+    #onCollapsePressed(): void
+    +resetGlobalTransform(): void
+    -createPanzoomInstance(): void
+    +{static} globalPanzoomInstances: PanZoom[]
+    +{static} isChangingTransforms: boolean
+    +{static} globalTransform: Transform
+    +{static} setGlobalPanzoomTransform(t: Transform): void
+}
+enum EventPolicy {
+    EMIT_EVENT
+    SUPPRESS_EVENT
+}
+class ChangeValueAction<T> extends Action {
+    -editor: AbstractEditor
+    -propertyName: string
+    -originalValue: T
+    -newValue: T
+    +apply(): void
+    +revert(): void
+    -setEditorProperty(to: T): void
+    +{static} createAndChangeValue(editor: AbstractEditor, propertyName: string, newValue: T): ChangeValueAction<T>
+}
+abstract class AbstractEditor {
+    #baseEditor: BaseEditorComponent | undefined
+    #displayImageChanged: any
+    -_displayImage: any
+    -_inputImage: any
+    -pendingProcessTimeoutId: number | null
+    -processingDebounceMs: 50
+    +displayImage: any
+    +displayImage: any
+    +inputImage: any
+    +inputImage: any
+    +updateDisplayImage(eventPolicy?: EventPolicy): void
+    #onNewInputImage(): void
+    +{abstract} processImage(): any
+    +handlePropertyChanged(): any
+    +setProperty(propertyName: string, newValue: T): void
+    -scheduleLatestOnlyProcessing(): void
+    +setIsCollapsed(isCollapsed: boolean): void
+}
+class ImageDownloader extends AbstractEditor {
+    +imageStyleSelected: any
+    -styleManager: ImageStyleManager
+    +baseEditor: BaseEditorComponent
+    +processImage(): void
+    +applyStyleChanges(): void
+    +resetRandomSeeds(): void
+    +downloadImage(): void
+    -getSuggestedDownloadName(): string
+}
+class Slider {
+    +min: number
+    +max: number
+    +step: number
+    +id: string
+    -actualValue: number
+    #previewValue: number
+    +value: number
+    +value: number
+    +valueChange: any
+    +onInput(newValue: string): void
+    +onChange(): void
+    +{static} count: number
+}
+class Editor1 extends AbstractEditor {
+    #sampleSize: number
+    #addedConstant: number
+    #dilationIters: number
+    #erosionIters: number
+    #isDilationFirst: boolean
+    -grayScaleInputImage: any
+    +displayImageChanged: any
+    +baseEditor: BaseEditorComponent
+    +processImage(): void
+    +onNewInputImage(): void
+    +adatptiveThreshold(dst: any): void
+    -performMorphology(dst: any): void
+    +toggleIsDilationFirst(): void
+}
+class Editor3 extends AbstractEditor {
+    +coastlineSmoothness: number
+    +contours: any
+    +displayImageChanged: any
+    +baseEditor: BaseEditorComponent
+    +processImage(): void
+    +blurCoastlines(): void
+    +makeCoastlinesJagged(): void
+    -getVertex(contour: any, index: number): { x: number; y: number; }
+    -setVertex(contour: any, index: number, x: number, y: number): void
+}
+class Editor2 extends AbstractEditor {
+    +contours: any
+    -contourMap: any
+    -selectedContours: Set<number>
+    -ALL_CONTOURS: number[]
+    +displayImageChanged: any
+    +baseEditor: BaseEditorComponent
+    +processImage(): void
+    +handleCanvasClick(event: PointerEvent): void
+    +handleKeydown(event: KeyboardEvent): void
+    +deleteSelectedContours(): Action<deleteContourDataStorage>
+    +createContourImage(): void
+    +findContourClosestTo(clickX: number, clickY: number): number
+    +createContourMap(): void
+    +deleteContoursAtIndices(indices: number[]): void
+    +reDrawContours(inds: number[], colour: any, eventPolicy?: EventPolicy): void
+    +keepSelectedOnly(): Action<any>
+    +dropSelection(): void
+}
+interface deleteContourDataStorage {
+    +editor: Editor2
+    +deletedIndices: number[]
+    +deletedContours: any[]
+}
+class Project {
+    -actionHistory: Action<any>[]
+    -undoneActions: Action<any>[]
+    #displayEditors: boolean
+    #testSliderValue: number
+    +imageUploader: ImageUploader
+    +editor1: Editor1
+    +editor2: Editor2
+    +editor3: Editor3
+    +imageDownloader: ImageDownloader
+    +keyboardEventHandler(event: KeyboardEvent): void
+    +onImageUploaded(image: any): void
+    +onEditor1ImageChanged(image: any): void
+    +onEditor2ImageChanged(image: any): void
+    +onEditor3ImageChanged(image: any): void
+    +undo(): void
+    +redo(): void
+    +registerAction(action: Action<any>): void
+}
+class App
+interface Editor {
+    +rows: number
+    +cols: number
+    +handleValuesChanged(): any
+}
+enum DenoiseModeEnum {
+    NONE
+    LOW
+    MEDIUM
+    HIGH
+}
+abstract class Showable {
+    #outputTarget: HTMLElement
+    #outputContent: HTMLElement
+    +show(): void
+    +hide(): void
+}
+class ContourUtils {
+    +{static} findContours(image: any): any
+}
+class ImageDownloadWindow extends Showable {
+    -imageDisplay: HTMLCanvasElement
+    -editedImage: any
+    -imageStyle: ImageStyleEnum
+    -enableImageGraphics: boolean
+    +initialize(): void
+    -getCurrentImage(): any
+    +setImageStyle(to: ImageStyleEnum): void
+    +setImageGraphics(to: boolean): void
+    +updateImageDisplay(): void
+}
+@enduml

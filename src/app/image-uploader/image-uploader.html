@@ -1,24 +1,43 @@
-<div>
+<ng-template #fileInput>
+  <input
+    hidden
+    type="file"
+    (change)="onFileUpload($event)"
+    [accept]="acceptedImageTypes.join(',')"
+  />
+</ng-template>
+<ng-template #fileDropArea>
   <div
     class="file-drop-area"
     (drop)="onFileDrop($event)"
     (dragover)="onDragOver($event)"
-    [hidden]="fileUrl.length !== 0"
+    [hidden]="isFilePresent()"
   >
     <label class="input-label">
       <img class="icon" id="upload-icon" src="icons/add.svg" alt="" />
       <br />
       <strong>Upload Image</strong>
-      <input hidden type="file" (change)="onFileUpload($event)" />
+      <ng-container *ngTemplateOutlet="fileInput"></ng-container>
     </label>
     <br />
     or drag and drop a file here
   </div>
-  <div class="uploaded-image-display container" [hidden]="fileUrl.length === 0">
+</ng-template>
+
+<ng-template #uploadedImageDisplay>
+  <div class="uploaded-image-container container">
     <table style="width: 100%">
       <tr>
         <td style="width: 0%">
-          <img id="imageDisplay" [src]="fileUrl" />
+          <img id="uploaded-image-display" [src]="fileUrl" [hidden]="isImageLoading()" />
+          <div
+            id="uploaded-image-loading-spinner"
+            class="spinner-border text-light"
+            [hidden]="!isImageLoading()"
+            role="status"
+          >
+            <span class="visually-hidden">Loading...</span>
+          </div>
         </td>
         <td>
           <strong>Uploaded Image</strong>
@@ -29,18 +48,39 @@
           <label class="upload-new-label input-label">
             <img class="icon" id="upload-new-icon" src="icons/upload.svg" alt="" />
             Upload New
-            <input hidden type="file" (change)="onFileUpload($event)" />
+            <ng-container *ngTemplateOutlet="fileInput"></ng-container>
           </label>
         </td>
       </tr>
     </table>
   </div>
-  <div>
-    <img id="uploadedImage" [src]="fileUrl" hidden (load)="onImageLoaded($event)" />
+</ng-template>
+
+<ng-template #warningDisplay>
+  <div
+    id="warning-div"
+    class="alert alert-warning fade show"
+    role="alert"
+    style="display: flex; flex-direction: row"
+  >
+    <img id="warning-icon" src="icons/bootstrap-warning.svg" />
+    <div>
+      <h4 class="alert-heading">Warning</h4>
+      <p>{{ warningMessage }}</p>
+    </div>
+    <button type="button" class="close-alert" aria-label="Close" (click)="closeWarning()">
+      <span aria-hidden="true">&times;</span>
+    </button>
   </div>
+</ng-template>
+
+<div>
+  @if (!isFilePresent()) {
+    <ng-container *ngTemplateOutlet="fileDropArea"></ng-container>
+    @if (isWarningVisible) {
+      <ng-container *ngTemplateOutlet="warningDisplay"></ng-container>
+    }
+  } @else {
+    <ng-container *ngTemplateOutlet="uploadedImageDisplay"></ng-container>
+  }
 </div>
-<!-- <div #alert 
-  class="alert alert-primary collapse" role="alert" style="display: flex; flex-direction: row">
-  <img class="icon" src="icons/bootstrap-info-primary.svg" alt="" style="filter: none" />
-  <div>An example alert with an icon</div>
-</div> -->

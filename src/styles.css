@@ -3,6 +3,10 @@
   --foreground-color: rgb(240, 240, 240);
   --highlight-color: rgb(85, 85, 85);
   --dark-highlight-color: rgb(20, 20, 20);
+
+  --alert-text-color: rgb(251, 215, 112);
+  --alert-background-color: rgb(61, 46, 0);
+  --alert-border-color: rgb(123, 92, 0);
 }
 
 body {
@@ -39,17 +43,21 @@ button:hover {
   z-index: 0;
 }
 
-.uploaded-image-display {
+.uploaded-image-container {
   border: 1px solid var(--foreground-color);
   margin: auto;
 }
 
-#imageDisplay {
-  border: 1px solid var(--foreground-color);
+#uploaded-image-loading-spinner,
+#uploaded-image-display {
   margin: 10px;
   max-width: 250px;
   max-height: 100px;
 }
+#uploaded-image-display {
+  border: 1px solid var(--foreground-color);
+}
+
 #upload-new-icon {
   width: 30px;
   height: 30px;
@@ -58,7 +66,7 @@ button:hover {
   border: 1px solid var(--foreground-color);
   border-radius: 10px;
   padding: 10px;
-  margin-right: 20px;
+  margin: 10px 20px 10px 0;
   background-color: var(--dark-highlight-color);
 }
 .upload-new-label:hover {
@@ -97,6 +105,7 @@ select:hover {
   height: 1.5em;
   filter: invert(1) brightness(0.85);
 }
+
 #upload-icon {
   width: 3em;
   height: 3em;
@@ -114,7 +123,6 @@ select:hover {
 
 .slider-container {
   display: flex;
-  /* width: 80%; */
 }
 
 .slider-container > label {
@@ -140,18 +148,12 @@ select:hover {
   height: 2.5em;
 }
 
-.editor .right {
-  /* padding: 50px; */
-  /* width: 40%;
-  min-width: 20em; */
-}
-
 .canvas-container {
   position: relative;
   border: 0.05em solid var(--foreground-color);
   overflow: hidden;
-  width: fit-content;
-  height: fit-content;
+  min-width: 250px;
+  min-height: 300px;
 }
 
 canvas {
@@ -175,4 +177,34 @@ canvas {
   -o-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   transform: rotate(90deg);
+}
+
+.alert-warning {
+  color: var(--alert-text-color);
+  background-color: var(--alert-background-color);
+  border-color: var(--alert-border-color);
+  position: relative;
+
+  width: 100%;
+  max-width: 32em;
+  margin: 2.5em auto;
+}
+
+#warning-icon {
+  width: 1.4em;
+  height: 1.4em;
+  margin-top: 0.25em;
+  margin-right: 0.7em;
+}
+
+button.close-alert {
+  background: none;
+  border: none;
+  color: var(--alert-text-color);
+
+  font-size: 1.5em;
+  position: absolute;
+  top: 0;
+  right: 0.5em;
+  cursor: pointer;
 }

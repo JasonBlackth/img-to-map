@@ -6,8 +6,6 @@ import { Project } from './project/project';
   selector: 'app-root',
   imports: [RouterOutlet, Project],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
-export class App {
- 
-}
+export class App {}

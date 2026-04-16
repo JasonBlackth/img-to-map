@@ -1,32 +1,55 @@
 @startuml Overall
 
-left to right direction
+' left to right direction
 
 usecase (U) as "Kép feltöltése"
 
-package "User actions" as UA{
+package "Általános műveletek" as UA{
     usecase (UnD) as "Visszavonás (Ctrl+Z)"
-    usecase (R) as "Ismét (Ctrl+Y)"
-    usecase (D) as "Kép letöltése"
+    usecase (ReD) as "Ismét (Ctrl+Y)"
+    usecase (G) as "Szerkesztő megnyitása"
+    usecase (H) as "Szerkesztő bezárása"
+    usecase (I) as "Kép mozgatása"
+    usecase (Z) as "Kép nagyítása/kicsinyítése"
+    usecase (R) as "Kép visszaállítása"
 }
 package "Szerkesztők" as Editors{
-    rectangle P as "Preprocess"
-    rectangle F as "Find Contours"
-    rectangle E as "Erode Coastlines"
+    rectangle E1 as "Bináris kép létrehozása"
+    rectangle E2 as "Kontúrok kiválasztása"
+    rectangle E3 as "Partvonalak javítása"
+    rectangle E4 as "Stílus választása és kép letöltése"
 } 
 
 actor :Felhasználó: as User
 
-User --> (U)
-User -d-> (UnD)
-User -d-> (R)
-User -d-> (D)
-User -u-> (E)
-User -u-> (F)
-User -u-> (P)
+User -u-> (U)
+UnD -[hidden]d-> (ReD)
+ReD -[hidden]d-> (G)
+G -[hidden]d-> (H)
+H -[hidden]d-> (I)
+I -[hidden]d-> (Z)
+Z -[hidden]d-> (R)
+' User --> (UnD)
+' User --> (ReD)
+' User --> (G)
+' User --> (H)
+' User --> (I)
+' User --> (Z)
+' User --> (R)
 
+
+
+User -l-> (Editors)
+' User -r-> (UA)
+UA <-[hidden]- User
+(E1) -[hidden]d-> (E2)
+(E2) -[hidden]d-> (E3)
+(E3) -[hidden]d-> (E4)
+' User --> (E3)
+' User --> (E4)
+' User -l-> (E2)
 U ..> Editors : precedes
 U ..> UA : precedes
-UnD .r.> R : precedes
+UnD .r.> ReD : precedes
 
 @enduml

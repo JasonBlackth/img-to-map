@@ -1,0 +1,27 @@
+@startuml TPlantAction
+
+class ChangeValueAction<T> extends Action {
+    -editor: AbstractEditor
+    -propertyName: string
+    -originalValue: T
+    -newValue: T
+    +apply(): void
+    +revert(): void
+    -setEditorProperty(to: T): void
+    +{static} createAndChangeValue(editor: AbstractEditor, propertyName: string, newValue: T): ChangeValueAction<T>
+}
+interface ActionType<T> {
+    +dataStorage?: T | undefined
+    +apply(data?: T | undefined): void
+    +revert(data?: T | undefined): void
+}
+abstract class Action<T> implements ActionType<T> {
+    +dataStorage: T
+    +{abstract} apply(): void
+    +{abstract} revert(): void
+    +{static} createAndApply(template: ActionType<T>): Action<T>
+    -{static} from(args: ActionType<T>): Action<T>
+}
+
+
+@enduml
