@@ -1,8 +1,8 @@
 <base-editor-component editorId="image-downloader" headingText="Download Image">
-  <label for="imageStyleSelect">Image Style</label>
+  <label for="image-style-select">Image Style</label>
   <br />
   <select
-    id="imageStyleSelect"
+    id="image-style-select"
     [ngModel]="imageStyleSelected"
     (ngModelChange)="setProperty('imageStyleSelected', $event)"
   >
@@ -16,8 +16,13 @@
     Reset Random Seeds
   </button>
   <br />
+  <label id="download-format-label" for="download-format-select"> Format: </label>
+  <select id="download-format-select" [(ngModel)]="downloadFormat">
+    <option value="image/jpeg">JPEG</option>
+    <option value="image/png">PNG</option>
+  </select>
   <button (click)="downloadImage()">
     <img class="icon" src="icons/download.svg" />
-    Download Image
+    Download Map
   </button>
 </base-editor-component>

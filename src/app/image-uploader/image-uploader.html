@@ -45,10 +45,9 @@
           {{ fileName }}
         </td>
         <td style="text-align: right">
-          <label class="upload-new-label input-label">
+          <label class="upload-new-label input-label" (click)="showNewUploadWarning()">
             <img class="icon" id="upload-new-icon" src="icons/upload.svg" alt="" />
             Upload New
-            <ng-container *ngTemplateOutlet="fileInput"></ng-container>
           </label>
         </td>
       </tr>
@@ -59,7 +58,7 @@
 <ng-template #warningDisplay>
   <div
     id="warning-div"
-    class="alert alert-warning fade show"
+    class="alert alert-warning"
     role="alert"
     style="display: flex; flex-direction: row"
   >
@@ -74,13 +73,34 @@
   </div>
 </ng-template>
 
-<div>
-  @if (!isFilePresent()) {
-    <ng-container *ngTemplateOutlet="fileDropArea"></ng-container>
-    @if (isWarningVisible) {
-      <ng-container *ngTemplateOutlet="warningDisplay"></ng-container>
-    }
-  } @else {
-    <ng-container *ngTemplateOutlet="uploadedImageDisplay"></ng-container>
-  }
-</div>
+<ng-template #newUploadWarning>
+  <div id="popup-background"></div>
+  <div id="new-upload-warning">
+    <h4>Discard changes?</h4>
+    Uploading a new image will cause you to lose all progress on your current image. Are you sure
+    you want to continue?
+    <div class="dialog-options">
+      <button (click)="hideNewUploadWarning()">Cancel</button>
+      <button>
+        <label class="input-label">
+          Yes, discard changes
+          <ng-container *ngTemplateOutlet="fileInput"></ng-container>
+        </label>
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+@if (!isFilePresent()) {
+  <ng-container *ngTemplateOutlet="fileDropArea"></ng-container>
+} @else {
+  <ng-container *ngTemplateOutlet="uploadedImageDisplay"></ng-container>
+}
+
+@if (isWarningVisible) {
+  <ng-container *ngTemplateOutlet="warningDisplay"></ng-container>
+}
+
+@if (isNewUploadWarningVisible) {
+  <ng-container *ngTemplateOutlet="newUploadWarning"></ng-container>
+}

@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ImageUploader } from '../image-uploader/image-uploader';
 import { ImageDownloader } from '../editors/image-downloader/image-downloader.js';
@@ -92,5 +92,9 @@ export class Project {
   registerAction(action: ReversibleAction<any>): void {
     this.actionHistory.push(action);
     this.undoneActions = [];
+  }
+
+  public getOriginalImageSize() {
+    return this.imageUploader.getOriginalImageSize();
   }
 }

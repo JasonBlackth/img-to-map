@@ -40,14 +40,10 @@
               }
             ],
             "browser": "src/main.ts",
-            "scripts": [
-              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
-            ],
-            "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "src/styles.css"
-            ],
-            "tsConfig": "tsconfig.app.json"
+            "scripts": ["node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"],
+            "styles": ["node_modules/bootstrap/dist/css/bootstrap.min.css", "src/styles.css"],
+            "tsConfig": "tsconfig.app.json",
+            "webWorkerTsConfig": "tsconfig.worker.json"
           }
         },
         "serve": {
@@ -63,7 +59,10 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "webWorkerTsConfig": "tsconfig.worker.json"
+          }
         }
       },
       "prefix": "app",

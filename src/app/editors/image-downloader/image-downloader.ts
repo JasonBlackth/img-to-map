@@ -20,6 +20,7 @@ export class ImageDownloader extends AbstractEditor {
 
   @ViewChild(BaseEditorComponent)
   override baseEditor: BaseEditorComponent = undefined as any;
+  downloadFormat: string = 'image/jpeg';
 
   override processImage() {
     this.styleManager.setInputImage(this.inputImage);
@@ -29,7 +30,7 @@ export class ImageDownloader extends AbstractEditor {
 
   applyStyleChanges() {
     if (!this.inputImage) return;
-    this.baseEditor.setDisplayImage(this.styleManager.apply());
+    this.displayImage = this.styleManager.apply();
   }
   resetRandomSeeds() {
     let oldSeeds = ImageStyle.getStaticSeeds();
@@ -37,26 +38,64 @@ export class ImageDownloader extends AbstractEditor {
     ReversibleAction.of<{ old: SeedsObject; new: SeedsObject }>({
       dataStorage: { old: oldSeeds, new: newSeeds },
       apply: () => {
-        this.baseEditor.setDisplayImage(this.styleManager.setSeedsAndGetImage(newSeeds));
+        this.displayImage = this.styleManager.setSeedsAndGetImage(newSeeds);
       },
       revert: (dataStorage: { old: SeedsObject; new: SeedsObject }) => {
-        this.baseEditor.setDisplayImage(this.styleManager.setSeedsAndGetImage(dataStorage.old));
+        this.displayImage = this.styleManager.setSeedsAndGetImage(dataStorage.old);
       },
     });
   }
 
-  downloadImage() {
+  async downloadImage() {
     const link = document.createElement('a');
-    link.href = this.baseEditor.canvasRef.nativeElement.toDataURL();
-    link.download = this.getSuggestedDownloadName();
-    link.click();
-    link.remove();
+    const imgToDownload = new cv.Mat();
+
+    try {
+      cv.resize(
+        this.displayImage,
+        imgToDownload,
+        window.ActiveProject.getOriginalImageSize(),
+        0,
+        0,
+        cv.INTER_CUBIC,
+      );
+
+      const blob = await this.matToBlob(imgToDownload);
+
+      link.href = URL.createObjectURL(blob);
+      link.download = this.getSuggestedDownloadName();
+      link.click();
+
+      URL.revokeObjectURL(link.href);
+      link.remove();
+    } finally {
+      imgToDownload.delete();
+    }
+  }
+
+  private matToBlob(mat: any): Promise<Blob> {
+    const canvas = document.createElement('canvas');
+    cv.imshow(canvas, mat);
+
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        canvas.remove();
+
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to create image blob.'));
+        }
+      }, this.downloadFormat);
+    });
   }
 
   private getSuggestedDownloadName(): string {
+    const styleName = this.imageStyleSelected.toLowerCase().replace('_', '-');
     const date = new Date();
     const localDate = date.toLocaleDateString().replace(/[^0-9]/g, '');
     const localTime = date.toLocaleTimeString().replace(/[^0-9]/g, '');
-    return `${this.imageStyleSelected.toLowerCase().replace('_', '-')}-map-${localDate}-${localTime}.png`;
+    const extension = this.downloadFormat.split('/')[1];
+    return `${styleName}-map-${localDate}-${localTime}.${extension}`;
   }
 }

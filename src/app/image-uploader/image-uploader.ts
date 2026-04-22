@@ -1,16 +1,5 @@
-/*
- * <<licensetext>>
- */
-
 import { NgTemplateOutlet } from '@angular/common';
-import {
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Output,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
 
 @Component({
   selector: 'image-uploader',
@@ -23,23 +12,28 @@ export class ImageUploader {
   protected fileName: string = '';
   protected fileUrl: string = '';
   private readonly IMAGE_LOAD_TIMEOUT_MS = 2000;
+  private readonly MAX_IMAGE_SIDELENGTH_PX = 2500;
   private readonly TIMEOUT_WARNING_MESSAGE =
     'Image loading timed out. Your file may be too large or corrupted.';
   private readonly INVALID_FORMAT_WARNING_MESSAGE =
     'Please upload a valid image format (JPEG, JPG or PNG).';
+  private readonly SIZE_WARNING_MESSAGE = `Image is larger than ${this.MAX_IMAGE_SIDELENGTH_PX}x${this.MAX_IMAGE_SIDELENGTH_PX} pixels and has been converted to a smaller size to prevent performance issues. Output will be upscaled to original size using interpolation.`;
   protected loadTimeoutId: number | undefined = undefined;
+  private originalImageSize: any = null;
 
   @Output()
   uploadedImage = new EventEmitter<any>();
   protected isWarningVisible: boolean = false;
 
   protected warningMessage: string = '';
+  protected isNewUploadWarningVisible: boolean = false;
 
   constructor(private readonly cdr: ChangeDetectorRef) {}
 
   onDragOver(event: DragEvent) {
     event.preventDefault();
   }
+
   onFileDrop(event: DragEvent) {
     event.preventDefault();
     const input = event.dataTransfer as DataTransfer;
@@ -55,6 +49,8 @@ export class ImageUploader {
   }
 
   onFileUpload(event: Event) {
+    console.log('File upload event:', event);
+    this.hideNewUploadWarning();
     const input = event.target as HTMLInputElement;
     if (input.files) {
       this.handleUploadedFile(input.files[0]);
@@ -99,8 +95,14 @@ export class ImageUploader {
     img.onload = () => {
       clearTimeout(this.loadTimeoutId);
       this.loadTimeoutId = undefined;
+      let cvImage = cv.imread(img);
+      this.originalImageSize = cvImage.size();
+      if (img.width * img.height > this.MAX_IMAGE_SIDELENGTH_PX ** 2) {
+        this.showWarning(this.SIZE_WARNING_MESSAGE);
+        cv.resize(cvImage, cvImage, this.getNewSize(cvImage), 0, 0, cv.INTER_AREA);
+      }
 
-      this.uploadedImage.emit(cv.imread(img));
+      this.uploadedImage.emit(cvImage);
       document.body.removeChild(img);
     };
     document.body.appendChild(img);
@@ -117,12 +119,23 @@ export class ImageUploader {
     this.isWarningVisible = true;
     this.cdr.detectChanges();
   }
+
+  public getOriginalImageSize() {
+    return this.originalImageSize;
+  }
+  getNewSize(cvImage: any): any {
+    const maxSide = Math.max(cvImage.cols, cvImage.rows);
+    const scale =
+      maxSide > this.MAX_IMAGE_SIDELENGTH_PX ? this.MAX_IMAGE_SIDELENGTH_PX / maxSide : 1;
+    return new cv.Size(cvImage.cols * scale, cvImage.rows * scale);
+  }
+
+  showNewUploadWarning() {
+    this.isNewUploadWarningVisible = true;
+    this.cdr.detectChanges();
+  }
+  hideNewUploadWarning() {
+    this.isNewUploadWarningVisible = false;
+    this.cdr.detectChanges();
+  }
 }
-
-// img méret mint "valid-e"
-// ne essen ennyire szét pici képernyőn
-// túl kicsi/nagy képnél üzenet, vagy ilyesmi
-// erre teszteset
-// disp flex nagyon hasznos
-
-//kezdjünk el írni
