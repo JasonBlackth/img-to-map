@@ -4,10 +4,11 @@ import { AbstractEditor } from '../AbstractEditor';
 import { Colors } from '../../common/Colors';
 import { EventPolicy } from '../../common/EventPolicy';
 import { ReversibleAction } from '../../common/reversible-action/ReversibleAction';
+import { Slider } from '../../slider/slider';
 
 @Component({
   selector: 'editor2',
-  imports: [BaseEditorComponent],
+  imports: [BaseEditorComponent, Slider],
   templateUrl: './editor2.html',
   styleUrl: './editor2.css',
 })
@@ -21,11 +22,18 @@ export class Editor2 extends AbstractEditor {
   @Output()
   override displayImageChanged = new EventEmitter<any>();
 
+  @Output()
+  override editorExpanded = new EventEmitter<void>();
+
   @ViewChild(BaseEditorComponent)
   override baseEditor: BaseEditorComponent = undefined as any;
+  minContourArea: number = 15000;
 
   override processImage(): void {
+    let startTime = performance.now();
     this.createContourImage();
+    let endTime = performance.now();
+    console.log(`Time taken to process image in editor2: ${endTime - startTime} ms`);
   }
 
   handleCanvasClick(event: PointerEvent) {
@@ -81,7 +89,7 @@ export class Editor2 extends AbstractEditor {
 
   createContourImage(): void {
     this.selectedContours.clear();
-
+    let startTime = performance.now();
     this.contours = new cv.MatVector();
     let hierarchy = new cv.Mat();
     cv.findContours(
@@ -92,11 +100,25 @@ export class Editor2 extends AbstractEditor {
       cv.CHAIN_APPROX_NONE,
     );
     hierarchy.delete();
+    let endTime = performance.now();
+    console.log(`Time taken to find contours in editor2: ${endTime - startTime} ms`);
+    startTime = performance.now();
 
     this.displayImage = cv.Mat.zeros(this.inputImage.rows, this.inputImage.cols, cv.CV_8UC3);
-    this.reDrawContours(this.ALL_CONTOURS, Colors.WHITE);
+    for (let i = 0; i < this.contours.size(); ++i) {
+      if (cv.contourArea(this.contours.get(i)) > this.minContourArea) {
+        cv.drawContours(this.displayImage, this.contours, i, Colors.WHITE, cv.FILLED);
+      }
+    }
+    this.updateDisplayImage();
+    // this.reDrawContours(this.ALL_CONTOURS, Colors.WHITE);
+    endTime = performance.now();
+    console.log(`Time taken to draw contours in editor2: ${endTime - startTime} ms`);
 
+    startTime = performance.now();
     this.createContourMap();
+    endTime = performance.now();
+    console.log(`Time taken to create contour map in editor2: ${endTime - startTime} ms`);
   }
 
   findContourClosestTo(clickX: number, clickY: number): number {
@@ -128,7 +150,9 @@ export class Editor2 extends AbstractEditor {
   createContourMap() {
     this.contourMap = cv.Mat.zeros(this.inputImage.rows, this.inputImage.cols, cv.CV_16UC1);
     for (let i = 0; i < this.contours.size(); ++i) {
-      cv.drawContours(this.contourMap, this.contours, i, new cv.Scalar(i + 1), cv.FILLED);
+      if (cv.contourArea(this.contours.get(i)) > this.minContourArea) {
+        cv.drawContours(this.contourMap, this.contours, i, new cv.Scalar(i + 1), cv.FILLED);
+      }
     }
   }
 

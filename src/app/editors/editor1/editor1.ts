@@ -13,24 +13,31 @@ import { AbstractEditor } from '../AbstractEditor.js';
 })
 export class Editor1 extends AbstractEditor {
   protected sampleSize = 501;
-  protected addedConstant = 0;
+  protected shiftThreshold = 0;
   protected dilationIters = 0;
   protected erosionIters = 0;
   protected isDilationFirst: boolean = true;
+  protected isResultInverted: boolean = false;
+  protected isChangeIgnorable: boolean = false;
 
   private grayScaleInputImage: any;
 
   @Output()
   override displayImageChanged = new EventEmitter<any>();
+  @Output()
+  override editorExpanded = new EventEmitter<void>();
 
   @ViewChild(BaseEditorComponent)
   override baseEditor: BaseEditorComponent = undefined as any;
 
   override processImage() {
+    let startTime = performance.now();
     const dst = this.grayScaleInputImage.clone();
     this.adatptiveThreshold(dst);
     this.performMorphology(dst);
     this.displayImage = dst;
+    let endTime = performance.now();
+    console.log(`Time taken to process image in editor1: ${endTime - startTime} ms`);
   }
 
   override onNewInputImage(): void {
@@ -50,9 +57,9 @@ export class Editor1 extends AbstractEditor {
       dst,
       255,
       cv.ADAPTIVE_THRESH_MEAN_C,
-      cv.THRESH_BINARY,
+      this.isResultInverted ? cv.THRESH_BINARY_INV : cv.THRESH_BINARY,
       this.sampleSize,
-      this.addedConstant,
+      -this.shiftThreshold,
     );
   }
 
@@ -92,6 +99,14 @@ export class Editor1 extends AbstractEditor {
   }
 
   toggleIsDilationFirst(): void {
+    this.isChangeIgnorable = this.dilationIters === 0 || this.erosionIters === 0;
     this.setProperty('isDilationFirst', !this.isDilationFirst);
+  }
+  override handlePropertyChanged(): void {
+    if (this.isChangeIgnorable) {
+      this.isChangeIgnorable = false;
+      return;
+    }
+    this.scheduleLatestOnlyProcessing();
   }
 }

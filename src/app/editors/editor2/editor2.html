@@ -3,7 +3,16 @@
   (canvasClick)="handleCanvasClick($event)"
   headingText="Select Contours"
   editorId="editor2"
+  (editorExpanded)="emitEditorExpanded()"
 >
+  <slider
+    id="minContourAreaSlider"
+    [min]="0"
+    [max]="30000"
+    [value]="minContourArea"
+    (valueChange)="setProperty('minContourArea', $event)"
+    >Minimum Contour Area
+  </slider>
   <button (click)="deleteSelectedContours()">
     <img class="icon" src="icons/bin.svg" />
     Delete Selected

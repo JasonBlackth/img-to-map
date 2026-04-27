@@ -1,16 +1,9 @@
 export class Colors {
-  public static WHITE: any;
-  public static BLACK: any;
-  public static RED: any;
+  public static WHITE = rgb(255, 255, 255);
+  public static BLACK = rgb(0, 0, 0);
+  public static RED = rgb(255, 0, 0);
+}
 
-  public static init(): void {
-    let rgb = Colors.rgb;
-    Colors.WHITE = rgb(255, 255, 255);
-    Colors.BLACK = rgb(0, 0, 0);
-    Colors.RED = rgb(255, 0, 0);
-  }
-
-  public static rgb(r: number, g: number, b: number): any {
-    return new cv.Scalar(r, g, b);
-  }
+export function rgb(r: number, g: number, b: number): any {
+  return [r, g, b, 255];
 }

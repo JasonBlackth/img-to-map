@@ -1,4 +1,8 @@
-<base-editor-component editorId="image-downloader" headingText="Download Image">
+<base-editor-component
+  editorId="image-downloader"
+  headingText="Download Image"
+  (editorExpanded)="emitEditorExpanded()"
+>
   <label for="image-style-select">Image Style</label>
   <br />
   <select
@@ -9,6 +13,8 @@
     <option value="BINARY">Binary</option>
     <option value="CLASSIC">Classic</option>
     <option value="VINTAGE">Vintage</option>
+    <option value="BIG_NOISE">Big Noise</option>
+    <option value="SMALL_NOISE">Small Noise</option>
   </select>
   <br />
   <button (click)="resetRandomSeeds()">
@@ -21,8 +27,12 @@
     <option value="image/jpeg">JPEG</option>
     <option value="image/png">PNG</option>
   </select>
+  <br />
   <button (click)="downloadImage()">
     <img class="icon" src="icons/download.svg" />
     Download Map
   </button>
 </base-editor-component>
+
+<img src="noise/initial-smaller-noise.jpeg" (load)="loadSmallerNoiseMat($event)" hidden />
+<img src="noise/initial-bigger-noise.jpeg" (load)="loadBiggerNoiseMat($event)" hidden />

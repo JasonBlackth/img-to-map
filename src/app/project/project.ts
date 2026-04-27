@@ -26,6 +26,8 @@ export class Project {
   @ViewChild(Editor3) editor3!: Editor3;
   @ViewChild(ImageDownloader) imageDownloader!: ImageDownloader;
 
+  private editors: AbstractEditor[] = [];
+
   constructor() {
     (window as any).ActiveProject = this;
   }
@@ -53,24 +55,34 @@ export class Project {
     }
     this.editor1.inputImage = image;
     this.displayEditors = true;
+    if (this.editors.length === 0) {
+      this.editors = [this.editor1, this.editor2, this.editor3, this.imageDownloader];
+    }
 
-    this.editor1.setIsCollapsed(false);
-    let collapsedEditors: AbstractEditor[] = [this.editor2, this.editor3, this.imageDownloader];
-    collapsedEditors.forEach((editor) => editor.setIsCollapsed(true));
+    this.editors.forEach((editor, index) => editor.setIsCollapsed(index > 0));
   }
 
-  onEditor1ImageChanged(image: any): void {
-    this.editor2.inputImage = image.clone();
+  propagateImageChangeFrom(editorIndex: number): void {
+    if (this.isAnyEditorExpandedAfter(editorIndex)) {
+      const currentEditor = this.editors[editorIndex];
+      const nextEditor = this.editors[editorIndex + 1];
+      nextEditor.inputImage = currentEditor.displayImage.clone();
+    }
   }
 
-  onEditor2ImageChanged(image: any) {
-    const gray = new cv.Mat();
-    cv.cvtColor(image, gray, cv.COLOR_RGBA2GRAY);
-    cv.threshold(gray, gray, 0, 255, cv.THRESH_BINARY);
-    this.editor3.inputImage = gray;
-  }
-  onEditor3ImageChanged(image: any) {
-    this.imageDownloader.inputImage = image.clone();
+  onEditorExpanded(expandedEditorIndex: number): void {
+    console.log(`Editor at index ${expandedEditorIndex} expanded`);
+    if (!this.isAnyEditorExpandedAfter(expandedEditorIndex)) {
+      console.log('No editors expanded after the current one, no need to propagate image change');
+      const lastExpandedEditorIndex = this.editors.findLastIndex(
+        (editor, index) => index < expandedEditorIndex && !editor.isCollapsed(),
+      );
+      if (lastExpandedEditorIndex !== -1) {
+        this.propagateImageChangeFrom(lastExpandedEditorIndex);
+      } else {
+        this.propagateImageChangeFrom(0);
+      }
+    }
   }
 
   undo(): void {
@@ -96,5 +108,9 @@ export class Project {
 
   public getOriginalImageSize() {
     return this.imageUploader.getOriginalImageSize();
+  }
+
+  private isAnyEditorExpandedAfter(editorIndex: number): boolean {
+    return this.editors.some((editor, index) => index > editorIndex && !editor.isCollapsed());
   }
 }

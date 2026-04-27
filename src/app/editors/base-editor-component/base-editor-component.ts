@@ -41,6 +41,8 @@ export class BaseEditorComponent {
   canvasClick = new EventEmitter<PointerEvent>();
   @Output()
   myKeydown = new EventEmitter<KeyboardEvent>();
+  @Output()
+  editorExpanded = new EventEmitter<void>();
 
   isCollapsed: boolean = true;
 
@@ -87,6 +89,7 @@ export class BaseEditorComponent {
     this.isCollapsed = !this.isCollapsed;
     if (!this.isCollapsed) {
       BaseEditorComponent.setGlobalPanzoomTransform(BaseEditorComponent.globalTransform);
+      this.editorExpanded.emit();
     }
   }
   static setGlobalPanzoomTransform(t: Transform): void {

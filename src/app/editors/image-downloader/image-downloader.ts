@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BaseEditorComponent } from '../base-editor-component/base-editor-component';
 import { AbstractEditor } from '../AbstractEditor';
@@ -18,14 +18,23 @@ export class ImageDownloader extends AbstractEditor {
   public imageStyleSelected = ImageStyleEnum.BINARY;
   private styleManager = new ImageStyleManager(this.imageStyleSelected);
 
+  @Output()
+  override editorExpanded = new EventEmitter<void>();
+
   @ViewChild(BaseEditorComponent)
   override baseEditor: BaseEditorComponent = undefined as any;
   downloadFormat: string = 'image/jpeg';
 
-  override processImage() {
+  protected override onNewInputImage(): void {
     this.styleManager.setInputImage(this.inputImage);
+  }
+
+  override processImage() {
+    let startTime = performance.now();
     this.styleManager.setActive(this.imageStyleSelected);
     this.applyStyleChanges();
+    let endTime = performance.now();
+    console.log(`Time taken to process image in image-downloader: ${endTime - startTime} ms`);
   }
 
   applyStyleChanges() {
@@ -97,5 +106,32 @@ export class ImageDownloader extends AbstractEditor {
     const localTime = date.toLocaleTimeString().replace(/[^0-9]/g, '');
     const extension = this.downloadFormat.split('/')[1];
     return `${styleName}-map-${localDate}-${localTime}.${extension}`;
+  }
+
+  loadBiggerNoiseMat($event: Event) {
+    const img = $event.target as HTMLImageElement;
+    const mat = cv.imread(img);
+    const singleChannel = new cv.Mat();
+    const floatMat = new cv.Mat();
+    cv.cvtColor(mat, singleChannel, cv.COLOR_RGBA2GRAY);
+    singleChannel.convertTo(floatMat, cv.CV_32F, 1 / 255);
+    ImageStyle.setBiggerNoiseMat(floatMat);
+    img.remove();
+    console.log('Loaded bigger noise mat');
+    mat.delete();
+    singleChannel.delete();
+  }
+  loadSmallerNoiseMat($event: Event) {
+    const img = $event.target as HTMLImageElement;
+    const mat = cv.imread(img);
+    const singleChannel = new cv.Mat();
+    const floatMat = new cv.Mat();
+    cv.cvtColor(mat, singleChannel, cv.COLOR_RGBA2GRAY);
+    singleChannel.convertTo(floatMat, cv.CV_32F, 1 / 255);
+    ImageStyle.setSmallerNoiseMat(floatMat);
+    img.remove();
+    console.log('Loaded smaller noise mat');
+    mat.delete();
+    singleChannel.delete();
   }
 }

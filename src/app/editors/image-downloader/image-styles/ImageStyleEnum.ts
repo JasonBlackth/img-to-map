@@ -2,4 +2,7 @@ export enum ImageStyleEnum {
   BINARY = 'BINARY',
   CLASSIC = 'CLASSIC',
   VINTAGE = 'VINTAGE',
+  QUICK_CLASSIC = 'QUICK_CLASSIC',
+  BIG_NOISE = "BIG_NOISE",
+  SMALL_NOISE = "SMALL_NOISE",
 }

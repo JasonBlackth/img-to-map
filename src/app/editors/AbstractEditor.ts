@@ -5,12 +5,13 @@ import { ChangeValueAction } from '../common/reversible-action/ChangeValueAction
 
 export abstract class AbstractEditor {
   protected baseEditor: BaseEditorComponent | undefined;
-  protected displayImageChanged = new EventEmitter<any>();
+  public displayImageChanged = new EventEmitter<any>();
+  public editorExpanded = new EventEmitter<void>();
 
   private _displayImage: any;
   private _inputImage: any;
   private pendingProcessTimeoutId: number | null = null;
-  private readonly processingDebounceMs = 50;
+  private readonly processingDebounceMs = 100;
 
   set displayImage(image: any) {
     if (!image) return;
@@ -51,17 +52,18 @@ export abstract class AbstractEditor {
 
   protected onNewInputImage(): void {}
 
-  abstract processImage(): any;
+  abstract processImage(): void;
 
-  handlePropertyChanged(): any {
+  handlePropertyChanged(): void {
     this.scheduleLatestOnlyProcessing();
   }
 
   setProperty<T>(propertyName: string, newValue: T): void {
     ChangeValueAction.for(this, propertyName, newValue);
+    this.handlePropertyChanged();
   }
 
-  private scheduleLatestOnlyProcessing(): void {
+  protected scheduleLatestOnlyProcessing(): void {
     if (this.pendingProcessTimeoutId !== null) {
       window.clearTimeout(this.pendingProcessTimeoutId);
     }
@@ -79,5 +81,11 @@ export abstract class AbstractEditor {
     if (this.baseEditor) {
       this.baseEditor.setIsCollapsed(isCollapsed);
     }
+  }
+  public isCollapsed(): boolean {
+    return this.baseEditor ? this.baseEditor.isCollapsed : true;
+  }
+  protected emitEditorExpanded(): void {
+    this.editorExpanded.emit();
   }
 }

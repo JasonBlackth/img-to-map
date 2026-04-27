@@ -40,6 +40,5 @@ export class ChangeValueAction<T> extends ReversibleAction<T> {
 
   private setEditorProperty(to: T): void {
     (this.editor as any)[this.propertyName] = to;
-    this.editor.handlePropertyChanged();
   }
 }

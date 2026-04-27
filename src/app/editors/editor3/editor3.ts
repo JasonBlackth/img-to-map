@@ -16,12 +16,22 @@ export class Editor3 extends AbstractEditor {
 
   @Output()
   override displayImageChanged = new EventEmitter<any>();
+  @Output()
+  override editorExpanded = new EventEmitter<void>();
 
   @ViewChild(BaseEditorComponent)
   override baseEditor: BaseEditorComponent = undefined as any;
 
   override processImage() {
+    let startTime = performance.now();
     this.blurCoastlines();
+    let endTime = performance.now();
+    console.log(`Time taken to process image in editor3: ${endTime - startTime} ms`);
+  }
+
+  protected override onNewInputImage(): void {
+    cv.cvtColor(this.inputImage, this.inputImage, cv.COLOR_RGBA2GRAY);
+    cv.threshold(this.inputImage, this.inputImage, 0, 255, cv.THRESH_BINARY);
   }
 
   blurCoastlines() {

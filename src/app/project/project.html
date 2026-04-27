@@ -3,10 +3,18 @@
     <div class="col-md-8" style="margin: auto">
       <image-uploader (uploadedImage)="onImageUploaded($event)"> </image-uploader>
       <div [hidden]="!displayEditors">
-        <editor1 (displayImageChanged)="onEditor1ImageChanged($event)"> </editor1>
-        <editor2 (displayImageChanged)="onEditor2ImageChanged($event)"> </editor2>
-        <editor3 (displayImageChanged)="onEditor3ImageChanged($event)"> </editor3>
-        <image-downloader> </image-downloader>
+        <editor1 (displayImageChanged)="propagateImageChangeFrom(0)"> </editor1>
+        <editor2
+          (displayImageChanged)="propagateImageChangeFrom(1)"
+          (editorExpanded)="onEditorExpanded(1)"
+        >
+        </editor2>
+        <editor3
+          (displayImageChanged)="propagateImageChangeFrom(2)"
+          (editorExpanded)="onEditorExpanded(2)"
+        >
+        </editor3>
+        <image-downloader (editorExpanded)="onEditorExpanded(3)"> </image-downloader>
       </div>
     </div>
   </div>
