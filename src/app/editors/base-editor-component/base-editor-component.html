@@ -28,6 +28,14 @@
         class="canvas-container {{ editorId === 'editor2' ? 'clickable' : '' }}"
         #canvasContainer
       >
+        <div class="canvas-loading-background" [hidden]="!isCanvasLoading"></div>
+        <div
+          class="spinner-border text-light canvas-loading-spinner"
+          role="status"
+          [hidden]="!isCanvasLoading"
+        >
+          <span class="visually-hidden">Loading...</span>
+        </div>
         <canvas
           id="{{ editorId }}-canvas"
           tabindex="0"

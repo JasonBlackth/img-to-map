@@ -10,7 +10,7 @@ import { CvUtils } from '../../common/CvUtils';
   selector: 'editor2',
   imports: [BaseEditorComponent, Slider],
   templateUrl: './editor2.html',
-  styleUrl: './editor2.css',
+  styleUrls: ['./editor2.css'],
 })
 export class Editor2 extends AbstractEditor {
   public contours: any;
@@ -34,7 +34,6 @@ export class Editor2 extends AbstractEditor {
     this.createContourMap();
     this.updateDisplayImage();
     let endTime = performance.now();
-    console.log(`Time taken to process image in editor2: ${endTime - startTime} ms`);
   }
 
   handleCanvasClick(event: PointerEvent) {
@@ -95,7 +94,6 @@ export class Editor2 extends AbstractEditor {
     let startTime = performance.now();
     this.contours = CvUtils.findContours(this.inputImage);
     let endTime = performance.now();
-    console.log(`Time taken to find contours in editor2: ${endTime - startTime} ms`);
 
     startTime = performance.now();
     this.setDisplayImageWithoutUpdate(
@@ -103,7 +101,6 @@ export class Editor2 extends AbstractEditor {
     );
     this.drawContoursAboveMinArea(this.getDisplayImage(), () => Colors.WHITE);
     endTime = performance.now();
-    console.log(`Time taken to draw contours in editor2: ${endTime - startTime} ms`);
   }
 
   getClickedContour(clickX: number, clickY: number): number {

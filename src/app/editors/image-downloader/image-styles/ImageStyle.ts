@@ -94,7 +94,7 @@ export abstract class ImageStyle {
       }
     }
     let endTime = performance.now();
-    console.log(`Finished generating noise mats in ${endTime - startTime} milliseconds`);
+
     ImageStyle.setSmallerNoiseMat(smallerNoiseMat);
     ImageStyle.setBiggerNoiseMat(biggerNoiseMat);
     this.scaleAndCropNoiseMats();

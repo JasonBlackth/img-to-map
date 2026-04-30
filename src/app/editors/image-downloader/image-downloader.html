@@ -8,7 +8,7 @@
   <select
     id="image-style-select"
     [ngModel]="imageStyleSelected"
-    (ngModelChange)="setProperty('imageStyleSelected', $event)"
+    (ngModelChange)="changePropertyAction('imageStyleSelected', $event)"
   >
     <option value="BINARY">Binary</option>
     <option value="CLASSIC">Classic</option>

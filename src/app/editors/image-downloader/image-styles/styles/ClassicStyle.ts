@@ -26,7 +26,7 @@ export class ClassicStyle extends ImageStyle {
     let output = this.getOutputImage();
 
     let endTime = performance.now();
-    console.log(`ClassicStyle apply method took ${endTime - startTime} milliseconds`);
+
     return output;
   }
 
@@ -85,7 +85,7 @@ export class ClassicStyle extends ImageStyle {
       }
     }
     let endTime = performance.now();
-    console.log(`Contour processing took ${endTime - startTime} milliseconds`);
+
     startTime = performance.now();
     cv.blur(dst, dst, ksize);
     cv.addWeighted(originalImage, 1.0, dst, 2.0, 0, dst);
@@ -94,7 +94,6 @@ export class ClassicStyle extends ImageStyle {
     ksize = new cv.Size(x, x);
     cv.blur(dst, dst, ksize);
     endTime = performance.now();
-    console.log(`Blurring took ${endTime - startTime} milliseconds`);
 
     this.blurredInputImageFloat = dst;
   }

@@ -10,7 +10,7 @@
     [min]="0"
     [max]="5000"
     [value]="minContourArea"
-    (valueChange)="setProperty('minContourArea', $event)"
+    (valueChange)="changePropertyAction('minContourArea', $event)"
     >Minimum Contour Area
   </slider>
   <button (click)="deleteSelectedContours()">

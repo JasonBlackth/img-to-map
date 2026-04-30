@@ -34,7 +34,6 @@ export class ImageDownloader extends AbstractEditor {
     this.styleManager.setActive(this.imageStyleSelected);
     this.applyStyleChanges();
     let endTime = performance.now();
-    console.log(`Time taken to process image in image-downloader: ${endTime - startTime} ms`);
   }
 
   applyStyleChanges() {
@@ -47,10 +46,16 @@ export class ImageDownloader extends AbstractEditor {
     ReversibleAction.of<{ old: number; new: number }>({
       dataStorage: { old: oldSeed, new: newSeed },
       apply: (dataStorage: { old: number; new: number }) => {
-        this.setDisplayImage(this.styleManager.setSeedAndGetImage(dataStorage.new));
+        this.baseEditor.setIsCanvasLoading(true);
+        window.setTimeout(() => {
+          this.setDisplayImage(this.styleManager.setSeedAndGetImage(dataStorage.new));
+        }, 0);
       },
       reverse: (dataStorage: { old: number; new: number }) => {
-        this.setDisplayImage(this.styleManager.setSeedAndGetImage(dataStorage.old));
+        this.baseEditor.setIsCanvasLoading(true);
+        window.setTimeout(() => {
+          this.setDisplayImage(this.styleManager.setSeedAndGetImage(dataStorage.old));
+        }, 0);
       },
     });
   }
@@ -69,7 +74,7 @@ export class ImageDownloader extends AbstractEditor {
         cv.INTER_CUBIC,
       );
 
-      const blob = await this.matToBlob(imgToDownload);
+      const blob = await this.convertMatToBlob(imgToDownload);
 
       link.href = URL.createObjectURL(blob);
       link.download = this.getDownloadName();
@@ -82,7 +87,7 @@ export class ImageDownloader extends AbstractEditor {
     }
   }
 
-  private matToBlob(mat: any): Promise<Blob> {
+  private convertMatToBlob(mat: any): Promise<Blob> {
     const canvas = document.createElement('canvas');
     cv.imshow(canvas, mat);
 

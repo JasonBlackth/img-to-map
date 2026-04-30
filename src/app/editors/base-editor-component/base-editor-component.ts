@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -43,6 +44,9 @@ export class BaseEditorComponent {
   editorExpanded = new EventEmitter<void>();
 
   isCollapsed: boolean = true;
+  isCanvasLoading: boolean = false;
+
+  constructor(private readonly cdr: ChangeDetectorRef) {}
 
   public setDisplayImage(image: any) {
     if (!image) return;
@@ -50,6 +54,8 @@ export class BaseEditorComponent {
       this.createPanzoomInstance();
     }
     cv.imshow(this.canvasRef.nativeElement, image);
+    this.isCanvasLoading = false;
+    this.cdr.detectChanges();
   }
 
   public setIsCollapsed(isCollapsed: boolean): void {
@@ -133,5 +139,10 @@ export class BaseEditorComponent {
       BaseEditorComponent.setGlobalPanzoomTransform(p.getTransform());
     });
     BaseEditorComponent.globalPanzoomInstances.push(this.panzoomInstance);
+  }
+
+  public setIsCanvasLoading(isLoading: boolean): void {
+    this.isCanvasLoading = isLoading;
+    this.cdr.detectChanges();
   }
 }

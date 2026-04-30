@@ -4,7 +4,7 @@
     [min]="0"
     [max]="15"
     [value]="dilationIters"
-    (valueChange)="setProperty('dilationIters', $event)"
+    (valueChange)="changePropertyAction('dilationIters', $event)"
     >Dilation
   </slider>
 </ng-template>
@@ -14,7 +14,7 @@
     [min]="0"
     [max]="15"
     [value]="erosionIters"
-    (valueChange)="setProperty('erosionIters', $event)"
+    (valueChange)="changePropertyAction('erosionIters', $event)"
     >Erosion
   </slider>
 </ng-template>
@@ -30,7 +30,7 @@
     [max]="2500"
     [step]="2"
     [value]="sampleSize"
-    (valueChange)="setProperty('sampleSize', $event)"
+    (valueChange)="changePropertyAction('sampleSize', $event)"
     >Sample Size
   </slider>
   <slider
@@ -38,7 +38,7 @@
     [min]="-15"
     [max]="15"
     [value]="shiftThreshold"
-    (valueChange)="setProperty('shiftThreshold', $event)"
+    (valueChange)="changePropertyAction('shiftThreshold', $event)"
     >Shift Threshold
   </slider>
   <label>
@@ -46,7 +46,7 @@
       type="checkbox"
       id="isResultInvertedCheckbox"
       [checked]="isResultInverted"
-      (change)="setProperty('isResultInverted', $event.target.checked)"
+      (change)="changePropertyAction('isResultInverted', $event.target.checked)"
       class="clickable"
     />
     Invert Result

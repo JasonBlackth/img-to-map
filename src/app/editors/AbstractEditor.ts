@@ -1,6 +1,7 @@
 import { EventEmitter } from '@angular/core';
 import { BaseEditorComponent } from './base-editor-component/base-editor-component';
 import { ChangeValueAction } from '../common/reversible-action/ChangeValueAction';
+import { ReversibleAction } from '../common/reversible-action/ReversibleAction';
 
 export abstract class AbstractEditor {
   protected baseEditor: BaseEditorComponent | undefined;
@@ -59,14 +60,20 @@ export abstract class AbstractEditor {
     this.scheduleProcessImage();
   }
 
-  setProperty<T>(propertyName: string, newValue: T): void {
-    ChangeValueAction.for(this, propertyName, newValue);
+  changePropertyAction<T>(propertyName: string, newValue: T): ReversibleAction<T> {
+    return ChangeValueAction.for(this, propertyName, newValue);
+  }
+
+  setProperty<T>(propertyName: string, value: T): void {
+    (this as any)[propertyName] = value;
+    this.handlePropertyChanged();
   }
 
   protected scheduleProcessImage(): void {
     if (this.pendingProcessTimeoutId !== null) {
       window.clearTimeout(this.pendingProcessTimeoutId);
     }
+    this.baseEditor?.setIsCanvasLoading(true);
 
     this.pendingProcessTimeoutId = window.setTimeout(() => {
       this.pendingProcessTimeoutId = null;
