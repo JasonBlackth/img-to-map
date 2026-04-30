@@ -49,7 +49,6 @@ export class ImageUploader {
   }
 
   onFileUpload(event: Event) {
-    console.log('File upload event:', event);
     this.hideNewUploadWarning();
     const input = event.target as HTMLInputElement;
     if (input.files) {
@@ -97,7 +96,7 @@ export class ImageUploader {
       this.loadTimeoutId = undefined;
       let cvImage = cv.imread(img);
       this.originalImageSize = cvImage.size();
-      if (img.width * img.height > this.MAX_IMAGE_SIDELENGTH_PX ** 2) {
+      if (img.width > this.MAX_IMAGE_SIDELENGTH_PX || img.height > this.MAX_IMAGE_SIDELENGTH_PX) {
         this.showWarning(this.SIZE_WARNING_MESSAGE);
         cv.resize(cvImage, cvImage, this.getNewSize(cvImage), 0, 0, cv.INTER_AREA);
       }

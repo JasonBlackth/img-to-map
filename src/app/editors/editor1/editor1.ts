@@ -4,6 +4,7 @@ import { Slider } from '../../slider/slider';
 import { BaseEditorComponent } from '../base-editor-component/base-editor-component';
 import { NgTemplateOutlet } from '@angular/common';
 import { AbstractEditor } from '../AbstractEditor.js';
+import { CvUtils } from '../../common/CvUtils';
 
 @Component({
   selector: 'editor1',
@@ -33,9 +34,9 @@ export class Editor1 extends AbstractEditor {
   override processImage() {
     let startTime = performance.now();
     const dst = this.grayScaleInputImage.clone();
-    this.adatptiveThreshold(dst);
-    this.performMorphology(dst);
-    this.displayImage = dst;
+    this.adaptiveThreshold(dst);
+    this.dilateAndErode(dst);
+    this.setDisplayImage(dst);
     let endTime = performance.now();
     console.log(`Time taken to process image in editor1: ${endTime - startTime} ms`);
   }
@@ -44,11 +45,10 @@ export class Editor1 extends AbstractEditor {
     if (this.grayScaleInputImage) {
       this.grayScaleInputImage.delete();
     }
-    this.grayScaleInputImage = new cv.Mat();
-    cv.cvtColor(this.inputImage, this.grayScaleInputImage, cv.COLOR_RGBA2GRAY, 0);
+    this.grayScaleInputImage = CvUtils.convertToGrayscale(this.inputImage);
   }
 
-  adatptiveThreshold(dst: any): void {
+  private adaptiveThreshold(dst: any): void {
     let ksize = new cv.Size(3, 3);
     let anchor = new cv.Point(-1, -1);
     cv.blur(dst, dst, ksize, anchor, cv.BORDER_DEFAULT);
@@ -63,7 +63,7 @@ export class Editor1 extends AbstractEditor {
     );
   }
 
-  private performMorphology(dst: any): void {
+  private dilateAndErode(dst: any): void {
     let anchor = new cv.Point(-1, -1);
     let M = cv.Mat.ones(3, 3, cv.CV_8U);
     let dilate = () => {
@@ -107,6 +107,6 @@ export class Editor1 extends AbstractEditor {
       this.isChangeIgnorable = false;
       return;
     }
-    this.scheduleLatestOnlyProcessing();
+    this.scheduleProcessImage();
   }
 }

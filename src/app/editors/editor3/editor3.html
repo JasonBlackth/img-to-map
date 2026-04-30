@@ -1,4 +1,8 @@
-<base-editor-component editorId="editor3" headingText="Edit Coastlines" (editorExpanded)="emitEditorExpanded()">
+<base-editor-component
+  editorId="editor3"
+  headingText="Edit Coastlines"
+  (editorExpanded)="emitEditorExpanded()"
+>
   <slider
     id="coastlineSmoothnessSlider"
     [min]="0"
@@ -7,5 +11,4 @@
     (valueChange)="setProperty('coastlineSmoothness', $event)"
     >Coastline Smoothness
   </slider>
-  <button (click)="makeCoastlinesJagged()">Make Coastlines Jagged</button>
 </base-editor-component>

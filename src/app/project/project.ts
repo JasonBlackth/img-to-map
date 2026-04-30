@@ -18,7 +18,6 @@ export class Project {
   private actionHistory: ReversibleAction<any>[] = [];
   private undoneActions: ReversibleAction<any>[] = [];
   protected displayEditors = false;
-  protected testSliderValue = 85;
 
   @ViewChild(ImageUploader) imageUploader!: ImageUploader;
   @ViewChild(Editor1) editor1!: Editor1;
@@ -26,14 +25,37 @@ export class Project {
   @ViewChild(Editor3) editor3!: Editor3;
   @ViewChild(ImageDownloader) imageDownloader!: ImageDownloader;
 
-  private editors: AbstractEditor[] = [];
-
   constructor() {
     (window as any).ActiveProject = this;
   }
 
+  public undo(): void {
+    const action = this.actionHistory.pop();
+    if (action) {
+      action.reverse();
+      this.undoneActions.push(action);
+    }
+  }
+
+  public redo(): void {
+    const action = this.undoneActions.pop();
+    if (action) {
+      action.apply();
+      this.actionHistory.push(action);
+    }
+  }
+
+  public registerAction(action: ReversibleAction<any>): void {
+    this.actionHistory.push(action);
+    this.undoneActions = [];
+  }
+
+  public getOriginalImageSize() {
+    return this.imageUploader.getOriginalImageSize();
+  }
+
   @HostListener('window:keydown', ['$event'])
-  keyboardEventHandler(event: KeyboardEvent) {
+  protected keyboardEventHandler(event: KeyboardEvent) {
     if (event.ctrlKey) {
       if (event.key === 'y') {
         event.preventDefault();
@@ -46,35 +68,30 @@ export class Project {
     }
   }
 
-  onImageUploaded(image: any): void {
+  protected onImageUploaded(image: any): void {
     if (!image) {
       this.displayEditors = false;
-      this.actionHistory = [];
-      this.undoneActions = [];
       return;
     }
-    this.editor1.inputImage = image;
+    this.actionHistory = [];
+    this.undoneActions = [];
     this.displayEditors = true;
-    if (this.editors.length === 0) {
-      this.editors = [this.editor1, this.editor2, this.editor3, this.imageDownloader];
-    }
+    this.editor1.inputImage = image;
 
-    this.editors.forEach((editor, index) => editor.setIsCollapsed(index > 0));
+    this.getEditors().forEach((editor, index) => editor.setIsCollapsed(index > 0));
   }
 
-  propagateImageChangeFrom(editorIndex: number): void {
+  protected propagateImageChangeFrom(editorIndex: number): void {
     if (this.isAnyEditorExpandedAfter(editorIndex)) {
-      const currentEditor = this.editors[editorIndex];
-      const nextEditor = this.editors[editorIndex + 1];
-      nextEditor.inputImage = currentEditor.displayImage.clone();
+      const currentEditor = this.getEditors()[editorIndex];
+      const nextEditor = this.getEditors()[editorIndex + 1];
+      nextEditor.inputImage = currentEditor.getDisplayImage().clone();
     }
   }
 
-  onEditorExpanded(expandedEditorIndex: number): void {
-    console.log(`Editor at index ${expandedEditorIndex} expanded`);
+  protected onEditorExpanded(expandedEditorIndex: number): void {
     if (!this.isAnyEditorExpandedAfter(expandedEditorIndex)) {
-      console.log('No editors expanded after the current one, no need to propagate image change');
-      const lastExpandedEditorIndex = this.editors.findLastIndex(
+      const lastExpandedEditorIndex = this.getEditors().findLastIndex(
         (editor, index) => index < expandedEditorIndex && !editor.isCollapsed(),
       );
       if (lastExpandedEditorIndex !== -1) {
@@ -85,32 +102,11 @@ export class Project {
     }
   }
 
-  undo(): void {
-    const action = this.actionHistory.pop();
-    if (action) {
-      action.revert();
-      this.undoneActions.push(action);
-    }
-  }
-
-  redo(): void {
-    const action = this.undoneActions.pop();
-    if (action) {
-      action.apply();
-      this.actionHistory.push(action);
-    }
-  }
-
-  registerAction(action: ReversibleAction<any>): void {
-    this.actionHistory.push(action);
-    this.undoneActions = [];
-  }
-
-  public getOriginalImageSize() {
-    return this.imageUploader.getOriginalImageSize();
-  }
-
   private isAnyEditorExpandedAfter(editorIndex: number): boolean {
-    return this.editors.some((editor, index) => index > editorIndex && !editor.isCollapsed());
+    return this.getEditors().some((editor, index) => index > editorIndex && !editor.isCollapsed());
+  }
+
+  private getEditors(): AbstractEditor[] {
+    return [this.editor1, this.editor2, this.editor3, this.imageDownloader];
   }
 }

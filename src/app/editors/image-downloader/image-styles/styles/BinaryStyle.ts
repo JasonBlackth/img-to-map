@@ -5,6 +5,6 @@ export class BinaryStyle extends ImageStyle {
     return image.clone();
   }
   override drawWithNewSeeds() {
-    return ImageStyle.lastInputImage;
+    return ImageStyle.lastInputImage.clone();
   }
 }

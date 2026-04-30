@@ -1,7 +1,3 @@
-/*
- * <<licensetext>>
- */
-
 import {
   Component,
   ElementRef,
@@ -27,6 +23,8 @@ export class BaseEditorComponent {
 
   @ViewChild('editorCanvas')
   canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasContainer')
+  canvasContainerRef!: ElementRef<HTMLDivElement>;
   @ViewChild('collapseToggle')
   collapseToggleRef!: ElementRef<HTMLAnchorElement>;
 
@@ -40,7 +38,7 @@ export class BaseEditorComponent {
   @Output()
   canvasClick = new EventEmitter<PointerEvent>();
   @Output()
-  myKeydown = new EventEmitter<KeyboardEvent>();
+  editorKeydown = new EventEmitter<KeyboardEvent>();
   @Output()
   editorExpanded = new EventEmitter<void>();
 
@@ -61,21 +59,30 @@ export class BaseEditorComponent {
   }
 
   @HostListener('window:keydown', ['$event'])
-  keyboardEventHandler(event: KeyboardEvent) {
+  handleKeydown(event: KeyboardEvent) {
     if (!this.panzoomInstance) return;
     if (event.key === 'Alt') {
       this.panzoomInstance.resume();
+      this.canvasContainerRef.nativeElement.classList.add('movable');
+      this.canvasContainerRef.nativeElement.classList.remove('clickable');
     } else if (event.key === 'r') {
       this.resetGlobalTransform();
     } else if (this.panzoomInstance.isPaused()) {
-      this.myKeydown.emit(event);
+      if (this.editorId === 'editor2') {
+        this.canvasContainerRef.nativeElement.classList.add('clickable');
+      }
+      this.editorKeydown.emit(event);
     }
   }
   @HostListener('window:keyup', ['$event'])
-  keyboardEventKeyUpHandler(event: KeyboardEvent) {
+  handleKeyup(event: KeyboardEvent) {
     if (!this.panzoomInstance) return;
     if (event.key === 'Alt') {
       this.panzoomInstance.pause();
+      this.canvasContainerRef.nativeElement.classList.remove('movable');
+      if (this.editorId === 'editor2') {
+        this.canvasContainerRef.nativeElement.classList.add('clickable');
+      }
     }
   }
 
@@ -90,13 +97,17 @@ export class BaseEditorComponent {
     if (!this.isCollapsed) {
       BaseEditorComponent.setGlobalPanzoomTransform(BaseEditorComponent.globalTransform);
       this.editorExpanded.emit();
+      this.canvasContainerRef.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
     }
   }
   static setGlobalPanzoomTransform(t: Transform): void {
     if (!BaseEditorComponent.isChangingTransforms) {
       BaseEditorComponent.isChangingTransforms = true;
       BaseEditorComponent.globalTransform = t;
-      this.globalPanzoomInstances.forEach((p) => {
+      BaseEditorComponent.globalPanzoomInstances.forEach((p) => {
         p.zoomAbs(0, 0, t.scale);
         p.moveTo(t.x, t.y);
       });

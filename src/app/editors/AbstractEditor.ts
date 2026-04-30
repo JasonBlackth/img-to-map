@@ -1,6 +1,5 @@
 import { EventEmitter } from '@angular/core';
 import { BaseEditorComponent } from './base-editor-component/base-editor-component';
-import { EventPolicy } from '../common/EventPolicy';
 import { ChangeValueAction } from '../common/reversible-action/ChangeValueAction';
 
 export abstract class AbstractEditor {
@@ -11,17 +10,20 @@ export abstract class AbstractEditor {
   private _displayImage: any;
   private _inputImage: any;
   private pendingProcessTimeoutId: number | null = null;
-  private readonly processingDebounceMs = 100;
+  private readonly WAIT_BEFORE_PROCESSING_MS = 100;
 
-  set displayImage(image: any) {
+  setDisplayImage(image: any) {
+    this.setDisplayImageWithoutUpdate(image);
+    this.updateDisplayImage();
+  }
+  setDisplayImageWithoutUpdate(image: any) {
     if (!image) return;
     if (this._displayImage !== undefined) {
       this._displayImage.delete();
     }
     this._displayImage = image;
-    this.updateDisplayImage();
   }
-  get displayImage() {
+  getDisplayImage() {
     return this._displayImage;
   }
 
@@ -33,20 +35,19 @@ export abstract class AbstractEditor {
     this._inputImage = image;
 
     this.onNewInputImage();
-    this.scheduleLatestOnlyProcessing();
+    this.scheduleProcessImage();
   }
   get inputImage() {
     return this._inputImage;
   }
 
-  updateDisplayImage(eventPolicy = EventPolicy.EMIT_EVENT): void {
-    if (!this.baseEditor) {
-      return;
-    }
-    this.baseEditor.setDisplayImage(this.displayImage);
-
-    if (eventPolicy === EventPolicy.EMIT_EVENT) {
-      this.displayImageChanged.emit(this.displayImage);
+  updateDisplayImage(): void {
+    this.updateDisplayImageWithoutEvent();
+    this.displayImageChanged.emit(this.getDisplayImage());
+  }
+  updateDisplayImageWithoutEvent() {
+    if (this.baseEditor) {
+      this.baseEditor.setDisplayImage(this.getDisplayImage());
     }
   }
 
@@ -55,15 +56,14 @@ export abstract class AbstractEditor {
   abstract processImage(): void;
 
   handlePropertyChanged(): void {
-    this.scheduleLatestOnlyProcessing();
+    this.scheduleProcessImage();
   }
 
   setProperty<T>(propertyName: string, newValue: T): void {
     ChangeValueAction.for(this, propertyName, newValue);
-    this.handlePropertyChanged();
   }
 
-  protected scheduleLatestOnlyProcessing(): void {
+  protected scheduleProcessImage(): void {
     if (this.pendingProcessTimeoutId !== null) {
       window.clearTimeout(this.pendingProcessTimeoutId);
     }
@@ -74,7 +74,7 @@ export abstract class AbstractEditor {
         return;
       }
       this.processImage();
-    }, this.processingDebounceMs);
+    }, this.WAIT_BEFORE_PROCESSING_MS);
   }
 
   public setIsCollapsed(isCollapsed: boolean): void {

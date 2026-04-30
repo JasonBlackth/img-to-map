@@ -1,10 +1,9 @@
 import { ImageStyle } from './ImageStyle';
 import { ImageStyleEnum } from './ImageStyleEnum';
-import { SeedsObject } from './SeedsObject';
 import { BigNoise } from './styles/BigNoise';
 import { BinaryStyle } from './styles/BinaryStyle';
 import { SmallNoise } from './styles/SmallNoise';
-import { ClassicStyle } from './styles/ClassicFantasyStyle';
+import { ClassicStyle } from './styles/ClassicStyle';
 import { VintageStyle } from './styles/VintageStyle';
 
 export class ImageStyleManager {
@@ -20,17 +19,22 @@ export class ImageStyleManager {
     this.activeStyle = this.getStyle(style);
   }
 
-  public setActive(style: ImageStyleEnum): void {
-    this.activeStyle = this.getStyle(style);
-  }
-
   public apply(): any {
     return this.activeStyle.apply(this.inputImage);
+  }
+
+  public setActive(style: ImageStyleEnum): void {
+    this.activeStyle = this.getStyle(style);
   }
 
   public setInputImage(image: any): void {
     this.inputImage = image;
     ImageStyle.setInputImage(image);
+  }
+
+  public setSeedAndGetImage(seed: number): any {
+    ImageStyle.setSeed(seed);
+    return this.activeStyle.drawWithNewSeeds();
   }
 
   private getStyle(style: ImageStyleEnum): ImageStyle {
@@ -40,15 +44,5 @@ export class ImageStyleManager {
     if (style === ImageStyleEnum.BIG_NOISE) return this.bigNoiseStyle;
     if (style === ImageStyleEnum.SMALL_NOISE) return this.smallNoiseStyle;
     return this.binaryStyle;
-  }
-
-  resetSeedsAndGetImage(): any {
-    ImageStyle.setSeeds({ seed1: Math.random(), seed2: Math.random() });
-    return this.activeStyle.drawWithNewSeeds();
-  }
-
-  setSeedsAndGetImage(seeds: SeedsObject): any {
-    ImageStyle.setSeeds(seeds);
-    return this.activeStyle.drawWithNewSeeds();
   }
 }

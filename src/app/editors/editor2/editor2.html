@@ -1,5 +1,5 @@
 <base-editor-component
-  (myKeydown)="handleKeydown($event)"
+  (editorKeydown)="handleKeydown($event)"
   (canvasClick)="handleCanvasClick($event)"
   headingText="Select Contours"
   editorId="editor2"
@@ -8,7 +8,7 @@
   <slider
     id="minContourAreaSlider"
     [min]="0"
-    [max]="30000"
+    [max]="5000"
     [value]="minContourArea"
     (valueChange)="setProperty('minContourArea', $event)"
     >Minimum Contour Area

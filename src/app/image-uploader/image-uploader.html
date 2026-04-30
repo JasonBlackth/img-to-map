@@ -3,6 +3,7 @@
     hidden
     type="file"
     (change)="onFileUpload($event)"
+    (cancel)="hideNewUploadWarning()"
     [accept]="acceptedImageTypes.join(',')"
   />
 </ng-template>
@@ -13,7 +14,7 @@
     (dragover)="onDragOver($event)"
     [hidden]="isFilePresent()"
   >
-    <label class="input-label">
+    <label class="clickable">
       <img class="icon" id="upload-icon" src="icons/add.svg" alt="" />
       <br />
       <strong>Upload Image</strong>
@@ -25,33 +26,28 @@
 </ng-template>
 
 <ng-template #uploadedImageDisplay>
-  <div class="uploaded-image-container container">
-    <table style="width: 100%">
-      <tr>
-        <td style="width: 0%">
-          <img id="uploaded-image-display" [src]="fileUrl" [hidden]="isImageLoading()" />
-          <div
-            id="uploaded-image-loading-spinner"
-            class="spinner-border text-light"
-            [hidden]="!isImageLoading()"
-            role="status"
-          >
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </td>
-        <td>
-          <strong>Uploaded Image</strong>
-          <br />
-          {{ fileName }}
-        </td>
-        <td style="text-align: right">
-          <label class="upload-new-label input-label" (click)="showNewUploadWarning()">
-            <img class="icon" id="upload-new-icon" src="icons/upload.svg" alt="" />
-            Upload New
-          </label>
-        </td>
-      </tr>
-    </table>
+  <div class="uploaded-image-container">
+    <div>
+      <img id="uploaded-image-display" [src]="fileUrl" [hidden]="isImageLoading()" />
+      <div
+        id="uploaded-image-loading-spinner"
+        class="spinner-border text-light"
+        [hidden]="!isImageLoading()"
+        role="status"
+      >
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    <div class="file-name-display">
+      <strong>Uploaded Image</strong> <br />
+      {{ fileName }}
+    </div>
+    <div class="upload-new-container">
+      <label class="upload-new-label clickable" (click)="showNewUploadWarning()">
+        <img class="icon" id="upload-new-icon" src="icons/upload.svg" alt="" />
+        Upload New
+      </label>
+    </div>
   </div>
 </ng-template>
 
@@ -82,7 +78,7 @@
     <div class="dialog-options">
       <button (click)="hideNewUploadWarning()">Cancel</button>
       <button>
-        <label class="input-label">
+        <label class="clickable">
           Yes, discard changes
           <ng-container *ngTemplateOutlet="fileInput"></ng-container>
         </label>

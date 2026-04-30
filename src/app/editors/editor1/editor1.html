@@ -27,7 +27,7 @@
   <slider
     id="sampleSizeSlider"
     [min]="3"
-    [max]="1000"
+    [max]="2500"
     [step]="2"
     [value]="sampleSize"
     (valueChange)="setProperty('sampleSize', $event)"
@@ -47,6 +47,7 @@
       id="isResultInvertedCheckbox"
       [checked]="isResultInverted"
       (change)="setProperty('isResultInverted', $event.target.checked)"
+      class="clickable"
     />
     Invert Result
   </label>

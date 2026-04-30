@@ -24,7 +24,10 @@
   </div>
   <div class="editor row collapse" id="{{ editorId }}">
     <div class="left col-lg-6 col-12">
-      <div class="canvas-container">
+      <div
+        class="canvas-container {{ editorId === 'editor2' ? 'clickable' : '' }}"
+        #canvasContainer
+      >
         <canvas
           id="{{ editorId }}-canvas"
           tabindex="0"

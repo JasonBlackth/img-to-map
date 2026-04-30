@@ -19,15 +19,11 @@ export class ChangeValueAction<T> extends ReversibleAction<T> {
     this.setEditorProperty(this.newValue);
   }
 
-  revert(): void {
+  reverse(): void {
     this.setEditorProperty(this.originalValue);
   }
 
-  static for<T>(
-    editor: AbstractEditor,
-    propertyName: string,
-    newValue: T,
-  ): ChangeValueAction<T> {
+  static for<T>(editor: AbstractEditor, propertyName: string, newValue: T): ChangeValueAction<T> {
     const originalValue = (editor as any)[propertyName];
     if (originalValue === newValue) {
       return null as any;
@@ -40,5 +36,6 @@ export class ChangeValueAction<T> extends ReversibleAction<T> {
 
   private setEditorProperty(to: T): void {
     (this.editor as any)[this.propertyName] = to;
+    this.editor.handlePropertyChanged();
   }
 }

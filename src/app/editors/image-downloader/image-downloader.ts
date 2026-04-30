@@ -6,7 +6,7 @@ import { ImageStyleEnum } from './image-styles/ImageStyleEnum';
 import { ReversibleAction } from '../../common/reversible-action/ReversibleAction';
 import { ImageStyleManager } from './image-styles/ImageStyleManager';
 import { ImageStyle } from './image-styles/ImageStyle';
-import { SeedsObject } from './image-styles/SeedsObject';
+import { CvUtils } from '../../common/CvUtils';
 
 @Component({
   selector: 'image-downloader',
@@ -39,18 +39,18 @@ export class ImageDownloader extends AbstractEditor {
 
   applyStyleChanges() {
     if (!this.inputImage) return;
-    this.displayImage = this.styleManager.apply();
+    this.setDisplayImage(this.styleManager.apply());
   }
   resetRandomSeeds() {
-    let oldSeeds = ImageStyle.getStaticSeeds();
-    let newSeeds = { seed1: Math.random(), seed2: Math.random() };
-    ReversibleAction.of<{ old: SeedsObject; new: SeedsObject }>({
-      dataStorage: { old: oldSeeds, new: newSeeds },
-      apply: () => {
-        this.displayImage = this.styleManager.setSeedsAndGetImage(newSeeds);
+    let oldSeed = ImageStyle.getSeed();
+    let newSeed = Math.random();
+    ReversibleAction.of<{ old: number; new: number }>({
+      dataStorage: { old: oldSeed, new: newSeed },
+      apply: (dataStorage: { old: number; new: number }) => {
+        this.setDisplayImage(this.styleManager.setSeedAndGetImage(dataStorage.new));
       },
-      revert: (dataStorage: { old: SeedsObject; new: SeedsObject }) => {
-        this.displayImage = this.styleManager.setSeedsAndGetImage(dataStorage.old);
+      reverse: (dataStorage: { old: number; new: number }) => {
+        this.setDisplayImage(this.styleManager.setSeedAndGetImage(dataStorage.old));
       },
     });
   }
@@ -61,7 +61,7 @@ export class ImageDownloader extends AbstractEditor {
 
     try {
       cv.resize(
-        this.displayImage,
+        this.getDisplayImage(),
         imgToDownload,
         window.ActiveProject.getOriginalImageSize(),
         0,
@@ -72,7 +72,7 @@ export class ImageDownloader extends AbstractEditor {
       const blob = await this.matToBlob(imgToDownload);
 
       link.href = URL.createObjectURL(blob);
-      link.download = this.getSuggestedDownloadName();
+      link.download = this.getDownloadName();
       link.click();
 
       URL.revokeObjectURL(link.href);
@@ -99,7 +99,7 @@ export class ImageDownloader extends AbstractEditor {
     });
   }
 
-  private getSuggestedDownloadName(): string {
+  private getDownloadName(): string {
     const styleName = this.imageStyleSelected.toLowerCase().replace('_', '-');
     const date = new Date();
     const localDate = date.toLocaleDateString().replace(/[^0-9]/g, '');
@@ -108,30 +108,17 @@ export class ImageDownloader extends AbstractEditor {
     return `${styleName}-map-${localDate}-${localTime}.${extension}`;
   }
 
-  loadBiggerNoiseMat($event: Event) {
+  protected loadNoiseMat($event: Event) {
     const img = $event.target as HTMLImageElement;
     const mat = cv.imread(img);
-    const singleChannel = new cv.Mat();
-    const floatMat = new cv.Mat();
-    cv.cvtColor(mat, singleChannel, cv.COLOR_RGBA2GRAY);
-    singleChannel.convertTo(floatMat, cv.CV_32F, 1 / 255);
-    ImageStyle.setBiggerNoiseMat(floatMat);
+    const floatMat = CvUtils.convertToFloat(mat);
+
+    if (img.id === 'bigger') {
+      ImageStyle.setBiggerNoiseMat(floatMat);
+    } else if (img.id === 'smaller') {
+      ImageStyle.setSmallerNoiseMat(floatMat);
+    }
     img.remove();
-    console.log('Loaded bigger noise mat');
     mat.delete();
-    singleChannel.delete();
-  }
-  loadSmallerNoiseMat($event: Event) {
-    const img = $event.target as HTMLImageElement;
-    const mat = cv.imread(img);
-    const singleChannel = new cv.Mat();
-    const floatMat = new cv.Mat();
-    cv.cvtColor(mat, singleChannel, cv.COLOR_RGBA2GRAY);
-    singleChannel.convertTo(floatMat, cv.CV_32F, 1 / 255);
-    ImageStyle.setSmallerNoiseMat(floatMat);
-    img.remove();
-    console.log('Loaded smaller noise mat');
-    mat.delete();
-    singleChannel.delete();
   }
 }

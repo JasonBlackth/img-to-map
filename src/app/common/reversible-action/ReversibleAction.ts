@@ -4,7 +4,7 @@ export abstract class ReversibleAction<T> implements ReversibleActionType<T> {
   public dataStorage: T = {} as T;
 
   abstract apply(): void;
-  abstract revert(): void;
+  abstract reverse(): void;
 
   static of<T>(template: ReversibleActionType<T>): ReversibleAction<T> {
     const action = ReversibleAction.from(template);
@@ -15,7 +15,7 @@ export abstract class ReversibleAction<T> implements ReversibleActionType<T> {
 
   private static from<T>(args: ReversibleActionType<T>): ReversibleAction<T> {
     const dataStorage = args.dataStorage ? args.dataStorage : ({} as T);
-    let apply, revert;
+    let apply, reverse;
     if (args.apply.length > 0) {
       apply = function () {
         args.apply(dataStorage);
@@ -23,13 +23,13 @@ export abstract class ReversibleAction<T> implements ReversibleActionType<T> {
     } else {
       apply = args.apply;
     }
-    if (args.revert.length > 0) {
-      revert = function () {
-        args.revert(dataStorage);
+    if (args.reverse.length > 0) {
+      reverse = function () {
+        args.reverse(dataStorage);
       };
     } else {
-      revert = args.revert;
+      reverse = args.reverse;
     }
-    return { dataStorage, apply, revert } as ReversibleAction<T>;
+    return { dataStorage, apply, reverse } as ReversibleAction<T>;
   }
 }
