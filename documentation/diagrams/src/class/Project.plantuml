@@ -1,0 +1,24 @@
+@startuml Project
+
+class Project {
+    -actionHistory: ReversibleAction<any>[]
+    -undoneActions: ReversibleAction<any>[]
+    #displayEditors: boolean
+    +imageUploader: ImageUploader
+    +editor1: Editor1
+    +editor2: Editor2
+    +editor3: Editor3
+    +imageDownloader: ImageDownloader
+    +undo(): void
+    +redo(): void
+    +registerAction(action: ReversibleAction<any>): void
+    +getOriginalImageSize(): any
+    #keyboardEventHandler(event: KeyboardEvent): void
+    #onImageUploaded(image: any): void
+    #propagateImageChangeFrom(editorIndex: number): void
+    #onEditorExpanded(expandedEditorIndex: number): void
+    -isAnyEditorExpandedAfter(editorIndex: number): boolean
+    -getEditors(): AbstractEditor[]
+}
+
+@enduml

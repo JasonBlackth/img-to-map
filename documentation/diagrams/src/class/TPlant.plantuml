@@ -1,4 +1,4 @@
-@startuml
+@startuml Tplant
 class ImageUploader {
     #acceptedImageTypes: string[]
     #fileName: string
@@ -15,58 +15,58 @@ class ImageUploader {
     #warningMessage: string
     #isNewUploadWarningVisible: boolean
     -cdr: ChangeDetectorRef
-    +onDragOver(event: DragEvent): void
-    +onFileDrop(event: DragEvent): void
-    +onFileUpload(event: Event): void
-    +handleUploadedFile(file: File): void
+    +getOriginalImageSize(): any
     +isFilePresent(): boolean
     +isImageLoading(): boolean
-    +startImageLoading(url: string): HTMLImageElement
-    +closeWarning(): void
-    +showWarning(message: string): void
-    +getOriginalImageSize(): any
-    +getNewSize(cvImage: any): any
-    +showNewUploadWarning(): void
-    +hideNewUploadWarning(): void
+    #onDragOver(event: DragEvent): void
+    #onFileDrop(event: DragEvent): void
+    #onFileUpload(event: Event): void
+    #showWarning(message: string): void
+    #closeWarning(): void
+    #showNewUploadWarning(): void
+    #hideNewUploadWarning(): void
+    #getNewSize(cvImage: any): any
+    -handleUploadedFile(file: File): void
+    -startImageLoading(url: string): HTMLImageElement
 }
 class BaseEditorComponent {
     #panzoomInstance: PanZoom
+    #isCanvasLoading: boolean
     +canvasRef: ElementRef<HTMLCanvasElement>
-    +canvasContainerRef: ElementRef<HTMLDivElement>
-    +collapseToggleRef: ElementRef<HTMLAnchorElement>
+    -canvasContainerRef: ElementRef<HTMLDivElement>
+    -collapseToggleRef: ElementRef<HTMLAnchorElement>
     +headingText: string
     +editorId: string
     +displayImageChanged: any
     +canvasClick: any
-    +myKeydown: any
+    +editorKeydown: any
     +editorExpanded: any
     +isCollapsed: boolean
+    -cdr: ChangeDetectorRef
     +setDisplayImage(image: any): void
     +setIsCollapsed(isCollapsed: boolean): void
-    +keyboardEventHandler(event: KeyboardEvent): void
-    +keyboardEventKeyUpHandler(event: KeyboardEvent): void
-    +handleCanvasClick(event: PointerEvent): void
+    +setIsCanvasLoading(isLoading: boolean): void
+    #resetGlobalTransform(): void
+    #handleKeydown(event: KeyboardEvent): void
+    #handleKeyup(event: KeyboardEvent): void
+    #handleCanvasClick(event: PointerEvent): void
     #onCollapsePressed(): void
-    +resetGlobalTransform(): void
     -createPanzoomInstance(): void
-    +{static} globalPanzoomInstances: PanZoom[]
-    +{static} isChangingTransforms: boolean
-    +{static} globalTransform: Transform
-    +{static} setGlobalPanzoomTransform(t: Transform): void
-}
-enum EventPolicy {
-    EMIT_EVENT
-    SUPPRESS_EVENT
+    -{static} globalPanzoomInstances: PanZoom[]
+    -{static} isChangingTransforms: boolean
+    -{static} globalTransform: Transform
+    +{static} resetGlobalTransform(): void
+    -{static} setGlobalPanzoomTransform(t: Transform): void
 }
 interface ReversibleActionType<T> {
     +dataStorage?: T | undefined
     +apply(data?: T | undefined): void
-    +revert(data?: T | undefined): void
+    +reverse(data?: T | undefined): void
 }
 abstract class ReversibleAction<T> implements ReversibleActionType {
     +dataStorage: T
     +{abstract} apply(): void
-    +{abstract} revert(): void
+    +{abstract} reverse(): void
     +{static} of(template: ReversibleActionType<T>): ReversibleAction<T>
     -{static} from(args: ReversibleActionType<T>): ReversibleAction<T>
 }
@@ -76,8 +76,7 @@ class ChangeValueAction<T> extends ReversibleAction {
     -originalValue: T
     -newValue: T
     +apply(): void
-    +revert(): void
-    -setEditorProperty(to: T): void
+    +reverse(): void
     +{static} for(editor: AbstractEditor, propertyName: string, newValue: T): ChangeValueAction<T>
 }
 abstract class AbstractEditor {
@@ -91,26 +90,24 @@ abstract class AbstractEditor {
     +setDisplayImage(image: any): void
     +setDisplayImageWithoutUpdate(image: any): void
     +getDisplayImage(): any
-    +inputImage: any
-    +inputImage: any
-    +updateDisplayImage(): void
-    +updateDisplayImageWithoutEvent(): void
-    #onNewInputImage(): void
-    +{abstract} processImage(): void
-    +handlePropertyChanged(): void
-    +setProperty(propertyName: string, newValue: T): void
-    #scheduleProcessImage(): void
+    +setInputImage(image: any): void
+    +getInputImage(): any
     +setIsCollapsed(isCollapsed: boolean): void
     +isCollapsed(): boolean
+    +setProperty(propertyName: string, value: T): void
+    #updateDisplayImage(): void
+    #updateDisplayImageWithoutEvent(): void
+    #onNewInputImage(): void
+    #{abstract} processImage(): void
+    #handlePropertyChanged(): void
+    #changePropertyAction(propertyName: string, newValue: T): ReversibleAction<T>
+    #scheduleProcessImage(): void
     #emitEditorExpanded(): void
 }
 enum ImageStyleEnum {
     BINARY
     CLASSIC
     VINTAGE
-    QUICK_CLASSIC
-    BIG_NOISE
-    SMALL_NOISE
 }
 class Grad {
     +x: number
@@ -167,15 +164,7 @@ abstract class ImageStyle {
     -{static} scaleAndCropNoiseMats(): void
     -{static} isNoiseMatsValid(): boolean
 }
-class BigNoise extends ImageStyle {
-    +apply(image: any): any
-    +drawWithNewSeeds(): any
-}
 class BinaryStyle extends ImageStyle {
-    +apply(image: any): any
-    +drawWithNewSeeds(): any
-}
-class SmallNoise extends ImageStyle {
     +apply(image: any): any
     +drawWithNewSeeds(): any
 }
@@ -193,12 +182,12 @@ class ClassicStyle extends ImageStyle {
     +SEA_DEPTH_3: any
     +SEA_DEPTH_4: any
     +FLOAT_WHITE: any
-    +thresholds: number[]
+    -thresholds: number[]
     -blurredInputImage: any
     -blurredInputImageFloat: any
     +apply(image: any): any
     +drawWithNewSeeds(): any
-    -getOutputImage(): any
+    -createOutputImage(): any
     -applyThresholds(image: any): any
     -calculateSeaDepth(): any
 }
@@ -217,8 +206,6 @@ class ImageStyleManager {
     -binaryStyle: BinaryStyle
     -vintageStyle: VintageStyle
     -classicStyle: ClassicStyle
-    -bigNoiseStyle: BigNoise
-    -smallNoiseStyle: SmallNoise
     -activeStyle: ImageStyle
     -inputImage: any
     +apply(): any
@@ -228,19 +215,19 @@ class ImageStyleManager {
     -getStyle(style: ImageStyleEnum): ImageStyle
 }
 class ImageDownloader extends AbstractEditor {
-    +imageStyleSelected: ImageStyleEnum
+    #imageStyleSelected: ImageStyleEnum
     -styleManager: ImageStyleManager
     +editorExpanded: any
     +baseEditor: BaseEditorComponent
-    +downloadFormat: string
+    #downloadFormat: string
     #onNewInputImage(): void
     +processImage(): void
-    +applyStyleChanges(): void
-    +resetRandomSeeds(): void
-    +downloadImage(): Promise<void>
-    -matToBlob(mat: any): Promise<Blob>
-    -getDownloadName(): string
+    -applyStyleChanges(): void
+    #resetRandomSeeds(): void
+    #downloadImage(): Promise<void>
     #loadNoiseMat($event: Event): void
+    -convertMatToBlob(mat: any): Promise<Blob>
+    -getDownloadName(): string
 }
 class Slider {
     +min: number
@@ -271,42 +258,42 @@ class Editor1 extends AbstractEditor {
     +processImage(): void
     +onNewInputImage(): void
     -adaptiveThreshold(dst: any): void
-    -performMorphology(dst: any): void
-    +toggleIsDilationFirst(): void
+    -dilateAndErode(dst: any): void
+    #toggleIsDilationFirst(): void
     +handlePropertyChanged(): void
 }
 class Editor3 extends AbstractEditor {
-    +coastlineSmoothness: number
+    #coastlineSmoothness: number
     +displayImageChanged: any
     +editorExpanded: any
     +baseEditor: BaseEditorComponent
     +processImage(): void
     #onNewInputImage(): void
-    +blurCoastlines(): void
+    -blurCoastlines(): void
 }
 class Editor2 extends AbstractEditor {
-    +contours: any
+    #minContourArea: number
+    -contours: any
     -contourMap: any
     -selectedContours: Set<number>
     -CONTOUR_CLICK_RADIUS: 9
     +displayImageChanged: any
     +editorExpanded: any
     +baseEditor: BaseEditorComponent
-    +minContourArea: number
     +processImage(): void
-    +handleCanvasClick(event: PointerEvent): void
-    +handleKeydown(event: KeyboardEvent): void
-    +deleteSelectedContours(): ReversibleAction<deleteContourDataStorage>
-    +createContourImage(): void
-    +getClickedContour(clickX: number, clickY: number): number
-    +findContourClosestToClick(clickX: number, clickY: number): number
-    +createContourMap(): void
-    +deleteContoursAtIndices(indices: number[]): void
-    +redrawContours(inds: number[], colour: any): void
-    +redrawContoursWithoutEvent(inds: number[], colour: any): void
-    +drawContoursAboveMinArea(image: any, colourFunction: (index: number) => any): void
-    +keepSelectedOnly(): ReversibleAction<any>
-    +dropSelection(): void
+    #handleCanvasClick(event: PointerEvent): void
+    #handleKeydown(event: KeyboardEvent): void
+    #deleteSelectedContours(): ReversibleAction<deleteContourDataStorage>
+    #keepSelectedOnly(): ReversibleAction<any>
+    #dropSelection(): void
+    -createContourImage(): void
+    -createContourMap(): void
+    -getClickedContour(clickX: number, clickY: number): number
+    -findContourClosestToClick(clickX: number, clickY: number): number
+    -deleteContoursAtIndices(indices: number[]): void
+    -redrawContours(inds: number[], color: any): void
+    -redrawContoursWithoutEvent(inds: number[], color: any): void
+    -drawContoursAboveMinArea(image: any, colorFunction: (index: number) => any): void
 }
 interface deleteContourDataStorage {
     +editor: Editor2
@@ -322,7 +309,6 @@ class Project {
     +editor2: Editor2
     +editor3: Editor3
     +imageDownloader: ImageDownloader
-    -editors: AbstractEditor[]
     +undo(): void
     +redo(): void
     +registerAction(action: ReversibleAction<any>): void
@@ -332,6 +318,7 @@ class Project {
     #propagateImageChangeFrom(editorIndex: number): void
     #onEditorExpanded(expandedEditorIndex: number): void
     -isAnyEditorExpandedAfter(editorIndex: number): boolean
+    -getEditors(): AbstractEditor[]
 }
 class App
 @enduml

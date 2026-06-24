@@ -3,14 +3,12 @@
 left to right direction
 
 
-package "Edit Coastlines"{
+package "Partvonalak javítása"{
     usecase (E1) as "Partvonalak simítása"
-    usecase (E2) as "Partvonalak\negyenetlenebbé tétele"   
 }
 
 actor :Felhasználó: as User3
 
 User3 --> (E1)
-User3 --> (E2)
 
 @enduml

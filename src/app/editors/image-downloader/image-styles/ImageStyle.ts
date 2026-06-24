@@ -82,7 +82,6 @@ export abstract class ImageStyle {
 
   private static generateNewNoiseMats() {
     if (!ImageStyle.lastInputImage) return;
-    let startTime = performance.now();
 
     const sideLength = this.NOISE_MAT_GENERATION_SIZE;
     const smallerNoiseMat = new cv.Mat(sideLength, sideLength, cv.CV_32F);
@@ -93,7 +92,6 @@ export abstract class ImageStyle {
         biggerNoiseMat.floatPtr(i, j)[0] = ImageStyle.getBiggerNoiseAt(i, j);
       }
     }
-    let endTime = performance.now();
 
     ImageStyle.setSmallerNoiseMat(smallerNoiseMat);
     ImageStyle.setBiggerNoiseMat(biggerNoiseMat);

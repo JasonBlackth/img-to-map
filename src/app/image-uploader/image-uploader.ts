@@ -30,11 +30,23 @@ export class ImageUploader {
 
   constructor(private readonly cdr: ChangeDetectorRef) {}
 
-  onDragOver(event: DragEvent) {
+  public getOriginalImageSize() {
+    return this.originalImageSize;
+  }
+
+  public isFilePresent(): boolean {
+    return this.fileName.length !== 0;
+  }
+
+  public isImageLoading(): boolean {
+    return this.loadTimeoutId !== undefined;
+  }
+
+  protected onDragOver(event: DragEvent) {
     event.preventDefault();
   }
 
-  onFileDrop(event: DragEvent) {
+  protected onFileDrop(event: DragEvent) {
     event.preventDefault();
     const input = event.dataTransfer as DataTransfer;
     if (!input || !input.files) {
@@ -48,7 +60,7 @@ export class ImageUploader {
     this.handleUploadedFile(file);
   }
 
-  onFileUpload(event: Event) {
+  protected onFileUpload(event: Event) {
     this.hideNewUploadWarning();
     const input = event.target as HTMLInputElement;
     if (input.files) {
@@ -58,7 +70,34 @@ export class ImageUploader {
     }
   }
 
-  handleUploadedFile(file: File) {
+  protected showWarning(message: string): void {
+    this.warningMessage = message;
+    this.isWarningVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  protected closeWarning(): void {
+    this.isWarningVisible = false;
+    this.cdr.detectChanges();
+  }
+
+  protected showNewUploadWarning() {
+    this.isNewUploadWarningVisible = true;
+    this.cdr.detectChanges();
+  }
+  protected hideNewUploadWarning() {
+    this.isNewUploadWarningVisible = false;
+    this.cdr.detectChanges();
+  }
+
+  protected getNewSize(cvImage: any): any {
+    const maxSide = Math.max(cvImage.cols, cvImage.rows);
+    const scale =
+      maxSide > this.MAX_IMAGE_SIDELENGTH_PX ? this.MAX_IMAGE_SIDELENGTH_PX / maxSide : 1;
+    return new cv.Size(cvImage.cols * scale, cvImage.rows * scale);
+  }
+
+  private handleUploadedFile(file: File) {
     if (!file) return;
     this.closeWarning();
     this.uploadedImage.emit(null);
@@ -79,15 +118,7 @@ export class ImageUploader {
     }, this.IMAGE_LOAD_TIMEOUT_MS);
   }
 
-  isFilePresent(): boolean {
-    return this.fileName.length !== 0;
-  }
-
-  isImageLoading(): boolean {
-    return this.loadTimeoutId !== undefined;
-  }
-
-  startImageLoading(url: string): HTMLImageElement {
+  private startImageLoading(url: string): HTMLImageElement {
     let img = new Image();
     img.src = url;
     img.hidden = true;
@@ -106,35 +137,5 @@ export class ImageUploader {
     };
     document.body.appendChild(img);
     return img;
-  }
-
-  closeWarning(): void {
-    this.isWarningVisible = false;
-    this.cdr.detectChanges();
-  }
-
-  showWarning(message: string): void {
-    this.warningMessage = message;
-    this.isWarningVisible = true;
-    this.cdr.detectChanges();
-  }
-
-  public getOriginalImageSize() {
-    return this.originalImageSize;
-  }
-  getNewSize(cvImage: any): any {
-    const maxSide = Math.max(cvImage.cols, cvImage.rows);
-    const scale =
-      maxSide > this.MAX_IMAGE_SIDELENGTH_PX ? this.MAX_IMAGE_SIDELENGTH_PX / maxSide : 1;
-    return new cv.Size(cvImage.cols * scale, cvImage.rows * scale);
-  }
-
-  showNewUploadWarning() {
-    this.isNewUploadWarningVisible = true;
-    this.cdr.detectChanges();
-  }
-  hideNewUploadWarning() {
-    this.isNewUploadWarningVisible = false;
-    this.cdr.detectChanges();
   }
 }

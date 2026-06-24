@@ -1,0 +1,112 @@
+@startuml Editor1
+
+hide empty members
+
+' class ImageDownloader {
+'     .. <size:10>@Component</size> ..
+'     +editorExpanded: EventEmitter<any>
+'     #imageStyleSelected: ImageStyleEnum
+'     #baseEditor: BaseEditorComponent
+'     #downloadFormat: string
+'     -styleManager: ImageStyleManager
+'     __
+'     #onNewInputImage(): void
+'     #processImage(): void
+'     #resetRandomSeeds(): void
+'     #downloadImage(): Promise<void>
+'     #loadNoiseMat(event: Event): void
+'     -applyStyleChanges(): void
+'     -convertMatToBlob(mat: any): Promise<Blob>
+'     -getDownloadName(): string
+' }
+
+
+' ImageDownloader " 1 " o-- ImageStyleManager
+
+
+' class ImageStyleManager {
+'     -inputImage: any
+'     -activeStyle: ImageStyle
+'     +apply(): any
+'     +setActive(style: ImageStyleEnum): void
+'     +setInputImage(image: any): void
+'     +setSeedAndGetImage(seed: number): any
+'     -getStyle(style: ImageStyleEnum): ImageStyle
+' }
+
+' abstract class ImageStyle {
+' }
+
+' ImageStyleManager o-- ImageStyle
+
+' abstract class ImageStyle {
+'     +{abstract} apply(image: any): any
+'     +{abstract} drawWithNewSeeds(): any
+'     -{static} seed: number
+'     #{static} smallerNoiseMat: any
+'     #{static} biggerNoiseMat: any
+'     #{static} lastInputImage: any
+'     +{static} setInputImage(inputImage: any): void
+'     +{static} getSeed(): number
+'     +{static} setSeed(seed: number): void
+'     #{static} findContours(): any
+'     -{static} generateNewNoiseMats(): void
+'     -{static} scaleAndCropNoiseMats(): void
+'     -{static} isNoiseMatsValid(): boolean
+' }
+' class BinaryStyle extends ImageStyle {
+'     +apply(image: any): any
+'     +drawWithNewSeeds(): any
+' }
+
+' class ClassicStyle extends ImageStyle {
+'     -thresholds: number[]
+'     -blurredInputImage: any
+'     +apply(image: any): any
+'     +drawWithNewSeeds(): any
+'     -createOutputImage(): any
+'     -applyThresholds(image: any): any
+'     -calculateSeaDepth(): any
+' }
+' class VintageStyle extends ImageStyle {
+'     -thresholds: number[]
+'     +apply(image: any): any
+'     +drawWithNewSeeds(): any
+'     -applyThresholds(image: any): any
+' }
+
+' class Editor3 {
+'     .. <size:10>@Component</size> ..
+'     +displayImageChanged: EventEmitter<any>
+'     +editorExpanded: EventEmitter<any>
+'     #baseEditor: BaseEditorComponent
+'     #coastlineSmoothness: number
+'     __
+'     #processImage(): void
+'     -blurCoastlines(): void
+' }
+
+
+class Project {
+    .. <size:10>@Component</size> ..
+    -actionHistory: ReversibleAction<any>[]
+    -undoneActions: ReversibleAction<any>[]
+    #displayEditors: boolean
+    +imageUploader: ImageUploader
+    +editor1: Editor1
+    +editor2: Editor2
+    +editor3: Editor3
+    +imageDownloader: ImageDownloader
+    __
+    +undo(): void
+    +redo(): void
+    +registerAction(action: ReversibleAction<any>): void
+    +getOriginalImageSize(): any
+    #keyboardEventHandler(event: KeyboardEvent): void
+    #onImageUploaded(image: any): void
+    #propagateImageChangeFrom(editorIndex: number): void
+    #onEditorExpanded(expandedEditorIndex: number): void
+    -isAnyEditorExpandedAfter(editorIndex: number): boolean
+    -getEditors(): AbstractEditor[]
+}
+@enduml

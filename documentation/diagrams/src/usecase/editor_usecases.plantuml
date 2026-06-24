@@ -1,0 +1,61 @@
+@startuml Editor Use Cases
+
+left to right direction
+
+package "Bináris kép létrehozása" as Ed1{
+    usecase (P1) as "Sample méretének\nbeállítása"
+    usecase (P2) as "Threshold érték korrigálása"
+    usecase (P3) as "Eredmény invertálása"
+    usecase (P4) as "Tágítás & erodálás\nismétlésszámának beállítása"
+    usecase (P5) as "Tágítás & erodálás\nsorrendjének felcserélése"
+}
+
+actor :Felhasználó: as User
+
+
+package "Kontúrok kiválasztása" as Ed2{
+    usecase (F1) as "Körvonalak kijelölése"
+    usecase (F2) as "Kijelölt körvonalak törlése"
+    usecase (F3) as "Csak kijelölt körvonalak megtartása"
+
+}
+
+
+
+package "Partvonalak javítása" as Ed3{
+    usecase (E1) as "Partvonalak simítása"
+}
+
+package "Stílus választása és kép letöltése" as Ed4{
+    usecase (S1) as "Stílus választása"
+    usecase (S2) as "Random tényezők újragenerálása"
+    usecase (S3) as "Formátum kiválasztása"
+    usecase (S4) as "Kép letöltése"
+}
+
+
+
+' User -[hidden]l-> (Ed1)
+' User -[hidden]r-> (Ed2)
+' User -[hidden]l-> (Ed3)
+' User -[hidden]r-> (Ed4)
+
+
+User -[hidden]l-> (P1)
+User -[hidden]l-> (P2)
+User -[hidden]l-> (P3)
+User -[hidden]l-> (P4)
+User -[hidden]l-> (P5)
+
+User -[hidden]r-> (F1)
+User -[hidden]r-> (F2)
+User -[hidden]r-> (F3)
+
+User -l-> (E1)
+
+User -[hidden]r-> (S1)
+User -[hidden]r-> (S2)
+User -[hidden]r-> (S3)
+User -[hidden]r-> (S4)
+
+@enduml

@@ -32,20 +32,17 @@ export class Editor1 extends AbstractEditor {
   override baseEditor: BaseEditorComponent = undefined as any;
 
   override processImage() {
-    let startTime = performance.now();
     const dst = this.grayScaleInputImage.clone();
     this.adaptiveThreshold(dst);
     this.dilateAndErode(dst);
     this.setDisplayImage(dst);
-    let endTime = performance.now();
-    console.log(`Time taken to process image in editor1: ${endTime - startTime} ms`);
   }
 
   override onNewInputImage(): void {
     if (this.grayScaleInputImage) {
       this.grayScaleInputImage.delete();
     }
-    this.grayScaleInputImage = CvUtils.convertToGrayscale(this.inputImage);
+    this.grayScaleInputImage = CvUtils.convertToGrayscale(this.getInputImage());
   }
 
   private adaptiveThreshold(dst: any): void {
@@ -96,9 +93,10 @@ export class Editor1 extends AbstractEditor {
       erode();
       dilate();
     }
+    
   }
 
-  toggleIsDilationFirst(): void {
+  protected toggleIsDilationFirst(): void {
     this.isChangeIgnorable = this.dilationIters === 0 || this.erosionIters === 0;
     this.setProperty('isDilationFirst', !this.isDilationFirst);
   }

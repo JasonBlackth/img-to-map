@@ -1,104 +1,71 @@
 @startuml Editor
 
-abstract class AbstractEditor {
-    #baseEditor: BaseEditorComponent | undefined
-    #displayImageChanged: EventEmitter<any>
-    -_displayImage: any
-    -_inputImage: any
-    -pendingProcessTimeoutId: number | null
-    -processingDebounceMs: 50
-    +displayImage: any
-    +displayImage: any
-    +inputImage: any
-    +inputImage: any
-    +updateDisplayImage(eventPolicy?: EventPolicy): void
-    #onNewInputImage(): void
-    +{abstract} processImage(): any
-    +handlePropertyChanged(): any
-    +setProperty(propertyName: string, newValue: T): void
-    -scheduleLatestOnlyProcessing(): void
-    +setIsCollapsed(isCollapsed: boolean): void
-}
+
 class BaseEditorComponent {
-    #panzoomInstance: PanZoom
-    +canvasRef: ElementRef<HTMLCanvasElement>
-    +collapseToggleRef: ElementRef<HTMLAnchorElement>
+    .. <size:10>@Component</size> ..
     +headingText: string
     +editorId: string
     +displayImageChanged: EventEmitter<any>
-    +canvasClick: any
-    +myKeydown: any
+    +canvasClick: EventEmitter<any>
+    +editorKeydown: EventEmitter<any>
+    +editorExpanded: EventEmitter<any>
     +isCollapsed: boolean
+    #isCanvasLoading: boolean
+    #panzoomInstance: PanZoom
+    __
     +setDisplayImage(image: any): void
     +setIsCollapsed(isCollapsed: boolean): void
-    +keyboardEventHandler(event: KeyboardEvent): void
-    +keyboardEventKeyUpHandler(event: KeyboardEvent): void
-    +handleCanvasClick(event: PointerEvent): void
+    +setIsCanvasLoading(isLoading: boolean): void
+    #handleKeydown(event: KeyboardEvent): void
+    #handleKeyup(event: KeyboardEvent): void
+    #handleCanvasClick(event: PointerEvent): void
     #onCollapsePressed(): void
-    +resetGlobalTransform(): void
     -createPanzoomInstance(): void
-    +{static} globalPanzoomInstances: PanZoom[]
-    +{static} isChangingTransforms: boolean
-    +{static} globalTransform: Transform
-    +{static} setGlobalPanzoomTransform(t: Transform): void
+    -{static} globalPanzoomInstances: PanZoom[]
+    -{static} isChangingTransforms: boolean
+    -{static} globalTransform: Transform
+    +{static} resetGlobalTransform(): void
+    -{static} setGlobalPanzoomTransform(t: Transform): void
 }
-
-class ImageDownloader extends AbstractEditor {
-    +imageStyleSelected: any
-    -styleManager: ImageStyleManager
-    +baseEditor: BaseEditorComponent
-    +processImage(): void
-    +applyStyleChanges(): void
-    +resetRandomSeeds(): void
-    +downloadImage(): void
-    -getSuggestedDownloadName(): string
-}
-class Editor1 extends AbstractEditor {
-    #sampleSize: number
-    #addedConstant: number
-    #dilationIters: number
-    #erosionIters: number
-    #isDilationFirst: boolean
-    -grayScaleInputImage: any
+abstract class AbstractEditor {
     +displayImageChanged: EventEmitter<any>
-    +baseEditor: BaseEditorComponent
-    +processImage(): void
-    +onNewInputImage(): void
-    +adatptiveThreshold(dst: any): void
-    -performMorphology(dst: any): void
-    +toggleIsDilationFirst(): void
+    +editorExpanded: EventEmitter<any>
+    #baseEditor: BaseEditorComponent
+    -WAIT_BEFORE_PROCESSING_MS: number
+    +setDisplayImage(image: any): void
+    +getDisplayImage(): any
+    +setInputImage(image: any): void
+    +getInputImage(): any
+    +setIsCollapsed(isCollapsed: boolean): void
+    +isCollapsed(): boolean
+    +setProperty(propertyName: string, value: T): void
+    #{abstract} processImage(): void
+    #scheduleProcessImage(): void
+    #updateDisplayImage(): void
+    #onNewInputImage(): void
+    #handlePropertyChanged(): void
+    #changePropertyAction(propertyName: string, newValue: T): ReversibleAction<T>
 }
-class Editor3 extends AbstractEditor {
-    +coastlineSmoothness: number
-    +contours: any
-    +displayImageChanged: EventEmitter<any>
-    +baseEditor: BaseEditorComponent
-    +processImage(): void
-    +blurCoastlines(): void
-    +makeCoastlinesJagged(): void
+class Editor1 {
+    .. <size:10>@Component</size> ..
 }
-class Editor2 extends AbstractEditor {
-    +baseEditor: BaseEditorComponent
-    +displayImageChanged: EventEmitter<any>
-    +contours: any
-    -contourMap: any
-    -selectedContours: Set<number>
-
-
-    +processImage(): void
-    +handleCanvasClick(event: PointerEvent): void
-    +handleKeydown(event: KeyboardEvent): void
-    +deleteSelectedContours(): Action<deleteContourDataStorage>
-    +createContourImage(): void
-    +findContourClosestTo(clickX: number, clickY: number): number
-    +createContourMap(): void
-    +deleteContoursAtIndices(indices: number[]): void
-    +reDrawContours(inds: number[], colour: any, eventPolicy?: EventPolicy): void
-    +keepSelectedOnly(): Action<any>
-    +dropSelection(): void
+class Editor2 {
+    .. <size:10>@Component</size> ..
+}
+class Editor3 {
+    .. <size:10>@Component</size> ..
+}
+class ImageDownloader {
+    .. <size:10>@Component</size> ..
 }
 
-Editor1 -[hidden]r-> Editor2
-Editor2 -[hidden]r-> Editor3
-Editor3 -[hidden]r-> ImageDownloader
+
+AbstractEditor "1" o-r-  BaseEditorComponent
+    
+Editor1 .u.|> AbstractEditor
+Editor2 .u.|> AbstractEditor
+Editor3 .u.|> AbstractEditor
+ImageDownloader .u.|> AbstractEditor
+
+
 @enduml

@@ -13,22 +13,22 @@ export abstract class AbstractEditor {
   private pendingProcessTimeoutId: number | null = null;
   private readonly WAIT_BEFORE_PROCESSING_MS = 100;
 
-  setDisplayImage(image: any) {
+  public setDisplayImage(image: any) {
     this.setDisplayImageWithoutUpdate(image);
     this.updateDisplayImage();
   }
-  setDisplayImageWithoutUpdate(image: any) {
+  public setDisplayImageWithoutUpdate(image: any) {
     if (!image) return;
     if (this._displayImage !== undefined) {
       this._displayImage.delete();
     }
     this._displayImage = image;
   }
-  getDisplayImage() {
+  public getDisplayImage() {
     return this._displayImage;
   }
 
-  set inputImage(image: any) {
+  public setInputImage(image: any) {
     if (!image) return;
     if (this._inputImage !== undefined) {
       this._inputImage.delete();
@@ -38,15 +38,29 @@ export abstract class AbstractEditor {
     this.onNewInputImage();
     this.scheduleProcessImage();
   }
-  get inputImage() {
+  public getInputImage() {
     return this._inputImage;
   }
 
-  updateDisplayImage(): void {
+  public setIsCollapsed(isCollapsed: boolean): void {
+    if (this.baseEditor) {
+      this.baseEditor.setIsCollapsed(isCollapsed);
+    }
+  }
+  public isCollapsed(): boolean {
+    return this.baseEditor ? this.baseEditor.isCollapsed : true;
+  }
+
+  public setProperty<T>(propertyName: string, value: T): void {
+    (this as any)[propertyName] = value;
+    this.handlePropertyChanged();
+  }
+
+  protected updateDisplayImage(): void {
     this.updateDisplayImageWithoutEvent();
     this.displayImageChanged.emit(this.getDisplayImage());
   }
-  updateDisplayImageWithoutEvent() {
+  protected updateDisplayImageWithoutEvent() {
     if (this.baseEditor) {
       this.baseEditor.setDisplayImage(this.getDisplayImage());
     }
@@ -54,19 +68,14 @@ export abstract class AbstractEditor {
 
   protected onNewInputImage(): void {}
 
-  abstract processImage(): void;
+  protected abstract processImage(): void;
 
-  handlePropertyChanged(): void {
+  protected handlePropertyChanged(): void {
     this.scheduleProcessImage();
   }
 
-  changePropertyAction<T>(propertyName: string, newValue: T): ReversibleAction<T> {
+  protected changePropertyAction<T>(propertyName: string, newValue: T): ReversibleAction<T> {
     return ChangeValueAction.for(this, propertyName, newValue);
-  }
-
-  setProperty<T>(propertyName: string, value: T): void {
-    (this as any)[propertyName] = value;
-    this.handlePropertyChanged();
   }
 
   protected scheduleProcessImage(): void {
@@ -84,14 +93,6 @@ export abstract class AbstractEditor {
     }, this.WAIT_BEFORE_PROCESSING_MS);
   }
 
-  public setIsCollapsed(isCollapsed: boolean): void {
-    if (this.baseEditor) {
-      this.baseEditor.setIsCollapsed(isCollapsed);
-    }
-  }
-  public isCollapsed(): boolean {
-    return this.baseEditor ? this.baseEditor.isCollapsed : true;
-  }
   protected emitEditorExpanded(): void {
     this.editorExpanded.emit();
   }

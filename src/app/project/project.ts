@@ -7,6 +7,7 @@ import { Editor3 } from '../editors/editor3/editor3.js';
 import { Editor2 } from '../editors/editor2/editor2.js';
 import { AbstractEditor } from '../editors/AbstractEditor.js';
 import { ReversibleAction } from '../common/reversible-action/ReversibleAction';
+import { BaseEditorComponent } from '../editors/base-editor-component/base-editor-component';
 
 @Component({
   selector: 'project',
@@ -75,8 +76,9 @@ export class Project {
     }
     this.actionHistory = [];
     this.undoneActions = [];
+    BaseEditorComponent.resetGlobalTransform();
     this.displayEditors = true;
-    this.editor1.inputImage = image;
+    this.editor1.setInputImage(image);
 
     this.getEditors().forEach((editor, index) => editor.setIsCollapsed(index > 0));
   }
@@ -85,7 +87,7 @@ export class Project {
     if (this.isAnyEditorExpandedAfter(editorIndex)) {
       const currentEditor = this.getEditors()[editorIndex];
       const nextEditor = this.getEditors()[editorIndex + 1];
-      nextEditor.inputImage = currentEditor.getDisplayImage().clone();
+      nextEditor.setInputImage(currentEditor.getDisplayImage().clone());
     }
   }
 

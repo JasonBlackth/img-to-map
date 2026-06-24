@@ -2,12 +2,12 @@
 
 left to right direction
 
-package "Adaptive Threshold"{
+package "Bináris kép létrehozása"{
     usecase (P1) as "Sample méretének\nbeállítása"
     usecase (P2) as "Threshold érték korrigálása"
     usecase (P3) as "Eredmény invertálása"
-    usecase (P4) as "Morfológiai műveletek\nismétlésszámának beállítása"
-    usecase (P5) as "Morfológiai műveletek\nsorrendjének felcserélése"
+    usecase (P4) as "Tágítás & erodálás\nismétlésszámának beállítása"
+    usecase (P5) as "Tágítás & erodálás\nsorrendjének felcserélése"
 }
 
 actor :Felhasználó: as User1

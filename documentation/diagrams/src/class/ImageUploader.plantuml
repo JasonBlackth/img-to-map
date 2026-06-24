@@ -1,0 +1,30 @@
+@startuml ImageUploader
+
+class ImageUploader {
+    .. <size:10>@Component</size> ..
+    +uploadedImage: EventEmitter<any>
+    #acceptedImageTypes: string[]
+    #fileName: string
+    #fileUrl: string
+    #warningMessage: string
+    #isWarningVisible: boolean
+    #isNewUploadWarningVisible: boolean
+    -IMAGE_LOAD_TIMEOUT_MS: number
+    -MAX_IMAGE_SIDELENGTH_PX: number
+    __
+    +getOriginalImageSize(): any
+    +isFilePresent(): boolean
+    +isImageLoading(): boolean
+    #onDragOver(event: DragEvent): void
+    #onFileDrop(event: DragEvent): void
+    #onFileUpload(event: Event): void
+    #showWarning(message: string): void
+    #closeWarning(): void
+    #showNewUploadWarning(): void
+    #hideNewUploadWarning(): void
+    #getNewSize(cvImage: any): any
+    -handleUploadedFile(file: File): void
+    -startImageLoading(url: string): HTMLImageElement
+}
+
+@enduml

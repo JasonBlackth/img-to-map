@@ -15,7 +15,7 @@ import { CvUtils } from '../../common/CvUtils';
   styleUrl: './image-downloader.css',
 })
 export class ImageDownloader extends AbstractEditor {
-  public imageStyleSelected = ImageStyleEnum.BINARY;
+  protected imageStyleSelected = ImageStyleEnum.BINARY;
   private styleManager = new ImageStyleManager(this.imageStyleSelected);
 
   @Output()
@@ -23,24 +23,22 @@ export class ImageDownloader extends AbstractEditor {
 
   @ViewChild(BaseEditorComponent)
   override baseEditor: BaseEditorComponent = undefined as any;
-  downloadFormat: string = 'image/jpeg';
+  protected downloadFormat: string = 'image/jpeg';
 
   protected override onNewInputImage(): void {
-    this.styleManager.setInputImage(this.inputImage);
+    this.styleManager.setInputImage(this.getInputImage());
   }
 
   override processImage() {
-    let startTime = performance.now();
     this.styleManager.setActive(this.imageStyleSelected);
     this.applyStyleChanges();
-    let endTime = performance.now();
   }
 
-  applyStyleChanges() {
-    if (!this.inputImage) return;
+  private applyStyleChanges() {
+    if (!this.getInputImage()) return;
     this.setDisplayImage(this.styleManager.apply());
   }
-  resetRandomSeeds() {
+  protected resetRandomSeeds() {
     let oldSeed = ImageStyle.getSeed();
     let newSeed = Math.random();
     ReversibleAction.of<{ old: number; new: number }>({
@@ -60,7 +58,7 @@ export class ImageDownloader extends AbstractEditor {
     });
   }
 
-  async downloadImage() {
+  protected async downloadImage() {
     const link = document.createElement('a');
     const imgToDownload = new cv.Mat();
 
@@ -87,6 +85,20 @@ export class ImageDownloader extends AbstractEditor {
     }
   }
 
+  protected loadNoiseMat($event: Event) {
+    const img = $event.target as HTMLImageElement;
+    const mat = cv.imread(img);
+    const floatMat = CvUtils.convertToFloat(mat);
+
+    if (img.id === 'bigger') {
+      ImageStyle.setBiggerNoiseMat(floatMat);
+    } else if (img.id === 'smaller') {
+      ImageStyle.setSmallerNoiseMat(floatMat);
+    }
+    img.remove();
+    mat.delete();
+  }
+
   private convertMatToBlob(mat: any): Promise<Blob> {
     const canvas = document.createElement('canvas');
     cv.imshow(canvas, mat);
@@ -111,19 +123,5 @@ export class ImageDownloader extends AbstractEditor {
     const localTime = date.toLocaleTimeString().replace(/[^0-9]/g, '');
     const extension = this.downloadFormat.split('/')[1];
     return `${styleName}-map-${localDate}-${localTime}.${extension}`;
-  }
-
-  protected loadNoiseMat($event: Event) {
-    const img = $event.target as HTMLImageElement;
-    const mat = cv.imread(img);
-    const floatMat = CvUtils.convertToFloat(mat);
-
-    if (img.id === 'bigger') {
-      ImageStyle.setBiggerNoiseMat(floatMat);
-    } else if (img.id === 'smaller') {
-      ImageStyle.setSmallerNoiseMat(floatMat);
-    }
-    img.remove();
-    mat.delete();
   }
 }

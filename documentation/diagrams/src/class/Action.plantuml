@@ -1,31 +1,28 @@
 @startuml Action
 
 
-interface ActionType{
-    - dataStorage? : Object
-    + apply(data? : Object) : void
-    + revert(data? : Object) : void
+interface "ReversibleActionType<T>" {
+    +dataStorage?: T | undefined
+    +apply(data?: T | undefined): void
+    +reverse(data?: T | undefined): void
+}
+abstract class "ReversibleAction<T>" implements "ReversibleActionType<T>" {
+    +dataStorage: T
+    +{abstract} apply(): void
+    +{abstract} reverse(): void
+    +{static} of(template: ReversibleActionType<T>): ReversibleAction<T>
+}
+class "ChangeValueAction<T>" extends "ReversibleAction<T>" {
+    -editor: AbstractEditor
+    -propertyName: string
+    -originalValue: T
+    -newValue: T
+    +apply(): void
+    +reverse(): void
+    +{static} for(editor: AbstractEditor, propertyName: string, newValue: T): ChangeValueAction<T>
 }
 
-abstract class Action{
-    - dataStorage : Object
-    + apply() : void
-    + revert() : void
-    + static createAndPerform(template : ActionType) : Action
-}
-
-class "ChangeValueAction<T>" {
-    - editor : Editor
-    - propertyName : String
-    - originalValue : T
-    - newValue : T
-    - setEditorProperty(to: T) : void
-    + apply() : void
-    + revert() : void
-    + static createAndPerform(editor : Editor, propertyName: String, newValue: T)
-}
-
-ActionType <|.. Action
-Action <|.. "ChangeValueAction<T>"
+' "ReversibleActionType<T>" <|.. "ReversibleAction<T>"
+' "ReversibleAction<T>" <|.. "ChangeValueAction<T>"
 
 @enduml

@@ -18,33 +18,34 @@ import panzoom, { Transform, PanZoom } from 'panzoom';
 })
 export class BaseEditorComponent {
   protected panzoomInstance!: PanZoom;
-  static globalPanzoomInstances: PanZoom[] = new Array();
-  static isChangingTransforms: boolean = false;
-  static globalTransform: Transform = { x: 0, y: 0, scale: 1 };
+  protected isCanvasLoading: boolean = false;
+
+  private static globalPanzoomInstances: PanZoom[] = new Array();
+  private static isChangingTransforms: boolean = false;
+  private static globalTransform: Transform = { x: 0, y: 0, scale: 1 };
 
   @ViewChild('editorCanvas')
-  canvasRef!: ElementRef<HTMLCanvasElement>;
+  public canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasContainer')
-  canvasContainerRef!: ElementRef<HTMLDivElement>;
+  private canvasContainerRef!: ElementRef<HTMLDivElement>;
   @ViewChild('collapseToggle')
-  collapseToggleRef!: ElementRef<HTMLAnchorElement>;
+  private collapseToggleRef!: ElementRef<HTMLAnchorElement>;
 
   @Input()
-  headingText: string = 'Untitled Editor';
+  public headingText: string = 'Untitled Editor';
   @Input()
-  editorId: string = 'noIdEditor';
+  public editorId: string = 'noIdEditor';
 
   @Output()
-  displayImageChanged = new EventEmitter<any>();
+  public displayImageChanged = new EventEmitter<any>();
   @Output()
-  canvasClick = new EventEmitter<PointerEvent>();
+  public canvasClick = new EventEmitter<PointerEvent>();
   @Output()
-  editorKeydown = new EventEmitter<KeyboardEvent>();
+  public editorKeydown = new EventEmitter<KeyboardEvent>();
   @Output()
-  editorExpanded = new EventEmitter<void>();
+  public editorExpanded = new EventEmitter<void>();
 
-  isCollapsed: boolean = true;
-  isCanvasLoading: boolean = false;
+  public isCollapsed: boolean = true;
 
   constructor(private readonly cdr: ChangeDetectorRef) {}
 
@@ -64,8 +65,19 @@ export class BaseEditorComponent {
     }
   }
 
+  public setIsCanvasLoading(isLoading: boolean): void {
+    this.isCanvasLoading = isLoading;
+    this.cdr.detectChanges();
+  }
+  public static resetGlobalTransform() {
+    BaseEditorComponent.setGlobalPanzoomTransform({ x: 0, y: 0, scale: 1 });
+  }
+  protected resetGlobalTransform() {
+    BaseEditorComponent.resetGlobalTransform();
+  }
+
   @HostListener('window:keydown', ['$event'])
-  handleKeydown(event: KeyboardEvent) {
+  protected handleKeydown(event: KeyboardEvent) {
     if (!this.panzoomInstance) return;
     if (event.key === 'Alt') {
       this.panzoomInstance.resume();
@@ -81,7 +93,7 @@ export class BaseEditorComponent {
     }
   }
   @HostListener('window:keyup', ['$event'])
-  handleKeyup(event: KeyboardEvent) {
+  protected handleKeyup(event: KeyboardEvent) {
     if (!this.panzoomInstance) return;
     if (event.key === 'Alt') {
       this.panzoomInstance.pause();
@@ -92,7 +104,7 @@ export class BaseEditorComponent {
     }
   }
 
-  handleCanvasClick(event: PointerEvent) {
+  protected handleCanvasClick(event: PointerEvent) {
     if (this.panzoomInstance.isPaused()) {
       this.canvasClick.emit(event);
     }
@@ -109,7 +121,7 @@ export class BaseEditorComponent {
       });
     }
   }
-  static setGlobalPanzoomTransform(t: Transform): void {
+  private static setGlobalPanzoomTransform(t: Transform): void {
     if (!BaseEditorComponent.isChangingTransforms) {
       BaseEditorComponent.isChangingTransforms = true;
       BaseEditorComponent.globalTransform = t;
@@ -120,9 +132,6 @@ export class BaseEditorComponent {
       BaseEditorComponent.isChangingTransforms = false;
     }
   }
-  resetGlobalTransform() {
-    BaseEditorComponent.setGlobalPanzoomTransform({ x: 0, y: 0, scale: 1 });
-  }
 
   private createPanzoomInstance() {
     const panzoomOptions = {
@@ -132,17 +141,18 @@ export class BaseEditorComponent {
     };
     this.panzoomInstance = panzoom(this.canvasRef.nativeElement, panzoomOptions);
     this.panzoomInstance.pause();
+    this.panzoomInstance.zoomAbs(0, 0, BaseEditorComponent.globalTransform.scale);
+    this.panzoomInstance.moveTo(
+      BaseEditorComponent.globalTransform.x,
+      BaseEditorComponent.globalTransform.y,
+    );
     this.panzoomInstance.on('pan', (p: PanZoom) => {
       BaseEditorComponent.setGlobalPanzoomTransform(p.getTransform());
     });
     this.panzoomInstance.on('zoom', (p: PanZoom) => {
       BaseEditorComponent.setGlobalPanzoomTransform(p.getTransform());
     });
-    BaseEditorComponent.globalPanzoomInstances.push(this.panzoomInstance);
-  }
 
-  public setIsCanvasLoading(isLoading: boolean): void {
-    this.isCanvasLoading = isLoading;
-    this.cdr.detectChanges();
+    BaseEditorComponent.globalPanzoomInstances.push(this.panzoomInstance);
   }
 }

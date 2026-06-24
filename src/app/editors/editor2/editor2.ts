@@ -13,8 +13,8 @@ import { CvUtils } from '../../common/CvUtils';
   styleUrls: ['./editor2.css'],
 })
 export class Editor2 extends AbstractEditor {
-  public contours: any;
   protected minContourArea: number = 1500;
+  private contours: any;
   private contourMap: any;
   private selectedContours: Set<number> = new Set();
   private readonly CONTOUR_CLICK_RADIUS = 9;
@@ -29,19 +29,17 @@ export class Editor2 extends AbstractEditor {
   override baseEditor: BaseEditorComponent = undefined as any;
 
   override processImage(): void {
-    let startTime = performance.now();
     this.createContourImage();
     this.createContourMap();
     this.updateDisplayImage();
-    let endTime = performance.now();
   }
 
-  handleCanvasClick(event: PointerEvent) {
+  protected handleCanvasClick(event: PointerEvent) {
     const ctrlHeld = event.ctrlKey || event.metaKey || event.shiftKey;
 
     const rect = this.baseEditor.canvasRef.nativeElement.getBoundingClientRect();
-    let clickX = (event.clientX - rect.left) * (this.inputImage.cols / rect.width);
-    let clickY = (event.clientY - rect.top) * (this.inputImage.rows / rect.height);
+    let clickX = (event.clientX - rect.left) * (this.getInputImage().cols / rect.width);
+    let clickY = (event.clientY - rect.top) * (this.getInputImage().rows / rect.height);
     clickX = Math.round(clickX);
     clickY = Math.round(clickY);
 
@@ -59,7 +57,7 @@ export class Editor2 extends AbstractEditor {
       }
     }
   }
-  handleKeydown(event: KeyboardEvent) {
+  protected handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Delete') {
       this.deleteSelectedContours();
     }
@@ -71,7 +69,7 @@ export class Editor2 extends AbstractEditor {
     }
   }
 
-  deleteSelectedContours(): ReversibleAction<deleteContourDataStorage> {
+  protected deleteSelectedContours(): ReversibleAction<deleteContourDataStorage> {
     const deletedIndices = Array.from(this.selectedContours);
     const deletedContours = deletedIndices.map((i) => this.contours.get(i).clone());
 
@@ -89,21 +87,42 @@ export class Editor2 extends AbstractEditor {
     });
   }
 
-  createContourImage(): void {
-    this.selectedContours.clear();
-    let startTime = performance.now();
-    this.contours = CvUtils.findContours(this.inputImage);
-    let endTime = performance.now();
-
-    startTime = performance.now();
-    this.setDisplayImageWithoutUpdate(
-      cv.Mat.zeros(this.inputImage.rows, this.inputImage.cols, cv.CV_8UC3),
+  protected keepSelectedOnly(): ReversibleAction<any> {
+    const inverseOfSelection = Array.from(Array(this.contours.size()).keys()).filter(
+      (index) => !this.selectedContours.has(index) && this.isAboveMinContourArea(index),
     );
-    this.drawContoursAboveMinArea(this.getDisplayImage(), () => Colors.WHITE);
-    endTime = performance.now();
+    this.dropSelection();
+    this.selectedContours = new Set(inverseOfSelection);
+
+    return this.deleteSelectedContours();
   }
 
-  getClickedContour(clickX: number, clickY: number): number {
+  protected dropSelection(): void {
+    this.redrawContours(Array.from(this.selectedContours), Colors.WHITE);
+    this.selectedContours.clear();
+  }
+
+  private createContourImage(): void {
+    this.selectedContours.clear();
+
+    this.contours = CvUtils.findContours(this.getInputImage());
+
+    this.setDisplayImageWithoutUpdate(
+      cv.Mat.zeros(this.getInputImage().rows, this.getInputImage().cols, cv.CV_8UC3),
+    );
+    this.drawContoursAboveMinArea(this.getDisplayImage(), () => Colors.WHITE);
+  }
+
+  private createContourMap() {
+    this.contourMap = cv.Mat.zeros(
+      this.getInputImage().rows,
+      this.getInputImage().cols,
+      cv.CV_16UC1,
+    );
+    this.drawContoursAboveMinArea(this.contourMap, (index: number) => new cv.Scalar(index + 1));
+  }
+
+  private getClickedContour(clickX: number, clickY: number): number {
     const indexAtClick = this.contourMap.data16U[clickY * this.contourMap.cols + clickX] - 1;
     if (indexAtClick !== -1) {
       return indexAtClick;
@@ -111,7 +130,8 @@ export class Editor2 extends AbstractEditor {
       return this.findContourClosestToClick(clickX, clickY);
     }
   }
-  findContourClosestToClick(clickX: number, clickY: number): number {
+
+  private findContourClosestToClick(clickX: number, clickY: number): number {
     const r = this.CONTOUR_CLICK_RADIUS;
     const r2 = r * r;
     let closestSoFar: { contour_idx: number; sqDist: number } | null = null;
@@ -131,12 +151,7 @@ export class Editor2 extends AbstractEditor {
     return -1;
   }
 
-  createContourMap() {
-    this.contourMap = cv.Mat.zeros(this.inputImage.rows, this.inputImage.cols, cv.CV_16UC1);
-    this.drawContoursAboveMinArea(this.contourMap, (index: number) => new cv.Scalar(index + 1));
-  }
-
-  deleteContoursAtIndices(indices: number[]): void {
+  private deleteContoursAtIndices(indices: number[]): void {
     if (!indices) return;
     this.redrawContours(indices, Colors.BLACK);
     for (const index of indices) {
@@ -146,40 +161,29 @@ export class Editor2 extends AbstractEditor {
     }
   }
 
-  redrawContours(inds: number[], colour: any): void {
+  private redrawContours(inds: number[], color: any): void {
     for (const ind of inds) {
-      cv.drawContours(this.getDisplayImage(), this.contours, ind, colour, cv.FILLED);
+      cv.drawContours(this.getDisplayImage(), this.contours, ind, color, cv.FILLED);
     }
     this.updateDisplayImage();
   }
-  redrawContoursWithoutEvent(inds: number[], colour: any): void {
+  private redrawContoursWithoutEvent(inds: number[], color: any): void {
     for (const ind of inds) {
-      cv.drawContours(this.getDisplayImage(), this.contours, ind, colour, cv.FILLED);
+      cv.drawContours(this.getDisplayImage(), this.contours, ind, color, cv.FILLED);
     }
     this.updateDisplayImageWithoutEvent();
   }
 
-  drawContoursAboveMinArea(image: any, colourFunction: (index: number) => any): void {
+  private drawContoursAboveMinArea(image: any, colorFunction: (index: number) => any): void {
     for (let i = 0; i < this.contours.size(); ++i) {
-      if (cv.contourArea(this.contours.get(i)) > this.minContourArea) {
-        cv.drawContours(image, this.contours, i, colourFunction(i), cv.FILLED);
+      if (this.isAboveMinContourArea(i)) {
+        cv.drawContours(image, this.contours, i, colorFunction(i), cv.FILLED);
       }
     }
   }
 
-  keepSelectedOnly(): ReversibleAction<any> {
-    const inverseOfSelection = Array.from(Array(this.contours.size()).keys()).filter(
-      (index) => !this.selectedContours.has(index),
-    );
-    this.dropSelection();
-    this.selectedContours = new Set(inverseOfSelection);
-
-    return this.deleteSelectedContours();
-  }
-
-  dropSelection(): void {
-    this.redrawContours(Array.from(this.selectedContours), Colors.WHITE);
-    this.selectedContours.clear();
+  private isAboveMinContourArea(index: number): boolean {
+    return cv.contourArea(this.contours.get(index)) > this.minContourArea;
   }
 }
 

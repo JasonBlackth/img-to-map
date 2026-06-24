@@ -12,32 +12,28 @@ export class ClassicStyle extends ImageStyle {
 
   FLOAT_WHITE = new cv.Scalar(1.0);
 
-  thresholds = [0.1, 0.2, 0.4, 0.8, 2.0];
+  private thresholds = [0.1, 0.2, 0.4, 0.8, 200.0];
 
   private blurredInputImage: any;
   private blurredInputImageFloat: any;
 
   public override apply(image: any): any {
-    let startTime = performance.now();
-
     image.copyTo(ImageStyle.lastInputImage);
     this.blurredInputImage = new cv.Mat();
     this.calculateSeaDepth();
-    let output = this.getOutputImage();
-
-    let endTime = performance.now();
+    let output = this.createOutputImage();
 
     return output;
   }
 
   drawWithNewSeeds(): any {
     if (this.blurredInputImage && ImageStyle.lastInputImage) {
-      return this.getOutputImage(); //this.getOutputImage();
+      return this.createOutputImage(); //this.getOutputImage();
     }
     throw new Error('No image to draw with ClassicStyle');
   }
 
-  private getOutputImage(): any {
+  private createOutputImage(): any {
     let dst = new cv.Mat();
     cv.addWeighted(this.blurredInputImageFloat, 1.0, ImageStyle.smallerNoiseMat, 0.1, 0, dst);
     dst = this.applyThresholds(dst);
@@ -75,7 +71,6 @@ export class ClassicStyle extends ImageStyle {
     let x = Math.floor(Math.min(dst.rows, dst.cols) / 20) * 2 + 1;
     let ksize = new cv.Size(2 * x + 1, 2 * x + 1);
 
-    let startTime = performance.now();
     ImageStyle.findContours();
     for (let j = 0; j < ImageStyle.contours.size(); ++j) {
       let contour = ImageStyle.contours.get(j);
@@ -84,16 +79,13 @@ export class ClassicStyle extends ImageStyle {
         cv.drawContours(dst, ImageStyle.contours, j, this.FLOAT_WHITE, 20);
       }
     }
-    let endTime = performance.now();
 
-    startTime = performance.now();
     cv.blur(dst, dst, ksize);
     cv.addWeighted(originalImage, 1.0, dst, 2.0, 0, dst);
     cv.drawContours(dst, ImageStyle.contours, -1, this.FLOAT_WHITE, 5);
     x = Math.floor(Math.min(dst.rows, dst.cols) / 60) * 2 + 1;
     ksize = new cv.Size(x, x);
     cv.blur(dst, dst, ksize);
-    endTime = performance.now();
 
     this.blurredInputImageFloat = dst;
   }

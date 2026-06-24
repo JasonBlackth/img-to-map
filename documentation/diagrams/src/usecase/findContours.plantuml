@@ -2,7 +2,7 @@
 
 left to right direction
 
-package "Select Contours"{
+package "Kontúrok kiválasztása"{
     usecase (F1) as "Körvonalak kijelölése"
     usecase (F2) as "Kijelölt körvonalak törlése"
     usecase (F3) as "Csak kijelölt körvonalak megtartása"
