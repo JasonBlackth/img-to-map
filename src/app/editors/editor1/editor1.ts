@@ -31,6 +31,15 @@ export class Editor1 extends AbstractEditor {
   @ViewChild(BaseEditorComponent)
   override baseEditor: BaseEditorComponent = undefined as any;
 
+  public override resetPropertiesToDefault(): void {
+    this.sampleSize = 501;
+    this.shiftThreshold = 0;
+    this.dilationIters = 0;
+    this.erosionIters = 0;
+    this.isDilationFirst = true;
+    this.isResultInverted = false;
+  }
+
   override processImage() {
     const dst = this.grayScaleInputImage.clone();
     this.adaptiveThreshold(dst);
@@ -56,7 +65,7 @@ export class Editor1 extends AbstractEditor {
       cv.ADAPTIVE_THRESH_MEAN_C,
       this.isResultInverted ? cv.THRESH_BINARY_INV : cv.THRESH_BINARY,
       this.sampleSize,
-      -this.shiftThreshold,
+      this.isResultInverted ? this.shiftThreshold : -this.shiftThreshold,
     );
   }
 
@@ -93,7 +102,6 @@ export class Editor1 extends AbstractEditor {
       erode();
       dilate();
     }
-    
   }
 
   protected toggleIsDilationFirst(): void {

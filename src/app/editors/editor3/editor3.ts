@@ -19,6 +19,10 @@ export class Editor3 extends AbstractEditor {
   @ViewChild(BaseEditorComponent)
   override baseEditor: BaseEditorComponent = undefined as any;
 
+  public override resetPropertiesToDefault(): void {
+    this.coastlineSmoothness = 7;
+  }
+
   override processImage() {
     this.blurCoastlines();
   }

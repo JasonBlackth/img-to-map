@@ -16,6 +16,7 @@ export class Editor2 extends AbstractEditor {
   protected minContourArea: number = 1500;
   private contours: any;
   private contourMap: any;
+  private isContourDeletedAt: Array<boolean> = [];
   private selectedContours: Set<number> = new Set();
   private readonly CONTOUR_CLICK_RADIUS = 9;
 
@@ -27,6 +28,10 @@ export class Editor2 extends AbstractEditor {
 
   @ViewChild(BaseEditorComponent)
   override baseEditor: BaseEditorComponent = undefined as any;
+
+  public override resetPropertiesToDefault(): void {
+    this.minContourArea = 1500;
+  }
 
   override processImage(): void {
     this.createContourImage();
@@ -69,32 +74,45 @@ export class Editor2 extends AbstractEditor {
     }
   }
 
-  protected deleteSelectedContours(): ReversibleAction<deleteContourDataStorage> {
-    const deletedIndices = Array.from(this.selectedContours);
-    const deletedContours = deletedIndices.map((i) => this.contours.get(i).clone());
+  protected deleteSelectedContours(
+    useInverseOfSelection = false,
+  ): ReversibleAction<DeleteContourDataStorage> {
+    const indicesToDelete = useInverseOfSelection
+      ? this.getInverseOf(this.selectedContours)
+      : new Set(this.selectedContours);
 
     return ReversibleAction.of({
-      dataStorage: { editor: this, deletedIndices, deletedContours } as deleteContourDataStorage,
-      apply: (ds: deleteContourDataStorage) => {
-        ds.editor.deleteContoursAtIndices(ds.deletedIndices);
+      dataStorage: {
+        editor: this,
+        indicesToDelete,
+        useInverseOfSelection,
+      } as DeleteContourDataStorage,
+      apply: (ds: DeleteContourDataStorage) => {
+        ds.editor.dropSelection();
+        ds.editor.redrawContours(ds.indicesToDelete, Colors.BLACK);
+        ds.indicesToDelete.forEach((index) => (ds.editor.isContourDeletedAt[index] = true));
       },
-      reverse: (ds: deleteContourDataStorage) => {
-        ds.deletedIndices.forEach((originalIndex: number, index: number) => {
-          ds.editor.contours.set(originalIndex, ds.deletedContours[index]);
-        });
-        ds.editor.redrawContours(ds.deletedIndices, Colors.WHITE);
+      reverse: (ds: DeleteContourDataStorage) => {
+        const deletedIndices = useInverseOfSelection
+          ? this.getInverseOf(ds.indicesToDelete)
+          : ds.indicesToDelete;
+        ds.editor.redrawContours(ds.indicesToDelete, Colors.WHITE);
+        ds.editor.redrawContours(ds.editor.selectedContours, Colors.WHITE);
+        ds.editor.redrawContours(deletedIndices, Colors.RED);
+        ds.editor.selectedContours = new Set(deletedIndices);
+        ds.indicesToDelete.forEach((index) => (ds.editor.isContourDeletedAt[index] = false));
       },
     });
   }
+  private getInverseOf(inputSet: Set<number>): Set<number> {
+    const inverseArray = Array.from(Array(this.contours.size()).keys()).filter(
+      (index) => !inputSet.has(index) && this.isAboveMinContourArea(index),
+    );
+    return new Set(inverseArray);
+  }
 
   protected keepSelectedOnly(): ReversibleAction<any> {
-    const inverseOfSelection = Array.from(Array(this.contours.size()).keys()).filter(
-      (index) => !this.selectedContours.has(index) && this.isAboveMinContourArea(index),
-    );
-    this.dropSelection();
-    this.selectedContours = new Set(inverseOfSelection);
-
-    return this.deleteSelectedContours();
+    return this.deleteSelectedContours(true);
   }
 
   protected dropSelection(): void {
@@ -106,6 +124,7 @@ export class Editor2 extends AbstractEditor {
     this.selectedContours.clear();
 
     this.contours = CvUtils.findContours(this.getInputImage());
+    this.isContourDeletedAt = Array(this.contours.size()).fill(false);
 
     this.setDisplayImageWithoutUpdate(
       cv.Mat.zeros(this.getInputImage().rows, this.getInputImage().cols, cv.CV_8UC3),
@@ -124,7 +143,7 @@ export class Editor2 extends AbstractEditor {
 
   private getClickedContour(clickX: number, clickY: number): number {
     const indexAtClick = this.contourMap.data16U[clickY * this.contourMap.cols + clickX] - 1;
-    if (indexAtClick !== -1) {
+    if (indexAtClick !== -1 && !this.isContourDeletedAt[indexAtClick]) {
       return indexAtClick;
     } else {
       return this.findContourClosestToClick(clickX, clickY);
@@ -134,40 +153,30 @@ export class Editor2 extends AbstractEditor {
   private findContourClosestToClick(clickX: number, clickY: number): number {
     const r = this.CONTOUR_CLICK_RADIUS;
     const r2 = r * r;
-    let closestSoFar: { contour_idx: number; sqDist: number } | null = null;
+    let closest: { contour_idx: number; sqDist: number } | null = null;
 
     for (let x = Math.max(clickX - r, 0); x < Math.min(clickX + r, this.contourMap.cols); ++x) {
       for (let y = Math.max(clickY - r, 0); y < Math.min(clickY + r, this.contourMap.rows); ++y) {
         const sqDist = (x - clickX) ** 2 + (y - clickY) ** 2;
         const index = this.contourMap.data16U[y * this.contourMap.cols + x] - 1;
-        if (sqDist <= r2 && index !== -1) {
-          if (!closestSoFar || closestSoFar.sqDist > sqDist) {
-            closestSoFar = { contour_idx: index, sqDist: sqDist };
+        if (sqDist <= r2 && index !== -1 && !this.isContourDeletedAt[index]) {
+          if (!closest || closest.sqDist > sqDist) {
+            closest = { contour_idx: index, sqDist: sqDist };
           }
         }
       }
     }
-    if (closestSoFar) return closestSoFar.contour_idx;
+    if (closest) return closest.contour_idx;
     return -1;
   }
 
-  private deleteContoursAtIndices(indices: number[]): void {
-    if (!indices) return;
-    this.redrawContours(indices, Colors.BLACK);
-    for (const index of indices) {
-      const contourToDelete = this.contours.get(index).clone();
-      const dummyReplacement = new cv.Mat(contourToDelete.rows, 1, cv.CV_32SC2, new cv.Scalar(-1));
-      this.contours.set(index, dummyReplacement);
-    }
-  }
-
-  private redrawContours(inds: number[], color: any): void {
+  private redrawContours(inds: Iterable<number>, color: any): void {
     for (const ind of inds) {
       cv.drawContours(this.getDisplayImage(), this.contours, ind, color, cv.FILLED);
     }
     this.updateDisplayImage();
   }
-  private redrawContoursWithoutEvent(inds: number[], color: any): void {
+  private redrawContoursWithoutEvent(inds: Iterable<number>, color: any): void {
     for (const ind of inds) {
       cv.drawContours(this.getDisplayImage(), this.contours, ind, color, cv.FILLED);
     }
@@ -187,8 +196,8 @@ export class Editor2 extends AbstractEditor {
   }
 }
 
-interface deleteContourDataStorage {
+interface DeleteContourDataStorage {
   editor: Editor2;
-  deletedIndices: number[];
-  deletedContours: any[];
+  indicesToDelete: Set<number>;
+  useInverseOfSelection: boolean;
 }

@@ -13,6 +13,8 @@ export abstract class AbstractEditor {
   private pendingProcessTimeoutId: number | null = null;
   private readonly WAIT_BEFORE_PROCESSING_MS = 100;
 
+  public abstract resetPropertiesToDefault(): void;
+
   public setDisplayImage(image: any) {
     this.setDisplayImageWithoutUpdate(image);
     this.updateDisplayImage();
@@ -66,9 +68,9 @@ export abstract class AbstractEditor {
     }
   }
 
-  protected onNewInputImage(): void {}
-
   protected abstract processImage(): void;
+
+  protected onNewInputImage(): void {}
 
   protected handlePropertyChanged(): void {
     this.scheduleProcessImage();

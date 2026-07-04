@@ -25,6 +25,12 @@ export class ImageDownloader extends AbstractEditor {
   override baseEditor: BaseEditorComponent = undefined as any;
   protected downloadFormat: string = 'image/jpeg';
 
+  public override resetPropertiesToDefault(): void {
+    this.imageStyleSelected = ImageStyleEnum.BINARY;
+    this.styleManager = new ImageStyleManager(this.imageStyleSelected);
+    this.downloadFormat = 'image/jpeg';
+  }
+
   protected override onNewInputImage(): void {
     this.styleManager.setInputImage(this.getInputImage());
   }

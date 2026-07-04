@@ -80,7 +80,10 @@ export class Project {
     this.displayEditors = true;
     this.editor1.setInputImage(image);
 
-    this.getEditors().forEach((editor, index) => editor.setIsCollapsed(index > 0));
+    this.getEditors().forEach((editor, index) => {
+      editor.setIsCollapsed(index > 0);
+      editor.resetPropertiesToDefault();
+    });
   }
 
   protected propagateImageChangeFrom(editorIndex: number): void {

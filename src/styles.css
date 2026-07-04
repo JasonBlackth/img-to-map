@@ -5,9 +5,13 @@
   --highlight-color: rgb(85, 85, 85);
   --dark-highlight-color: rgb(20, 20, 20);
 
-  --alert-text-color: rgb(251, 215, 112);
-  --alert-background-color: rgb(61, 46, 0);
-  --alert-border-color: rgb(123, 92, 0);
+  --warning-text-color: rgb(251, 215, 112);
+  --warning-background-color: rgb(61, 46, 0);
+  --warning-border-color: rgb(123, 92, 0);
+
+  --info-text-color: #4cd0eb;
+  --info-background-color: #20d7ff1f;
+  --info-border-color: #00728b;
 }
 
 body {
@@ -181,37 +185,35 @@ canvas {
   transform: rotate(90deg);
 }
 
-.alert-warning {
-  color: var(--alert-text-color);
-  background-color: var(--alert-background-color);
-  border-color: var(--alert-border-color);
+.alert {
   position: relative;
-
   width: 100%;
   margin: 2.5em auto;
 }
 
-#warning-icon {
+.alert-warning {
+  color: var(--warning-text-color);
+  background-color: var(--warning-background-color);
+  border-color: var(--warning-border-color);
+}
+
+.alert-info {
+  color: var(--info-text-color);
+  background-color: var(--info-background-color);
+  border-color: var(--info-border-color);
+}
+
+#alert-icon {
   width: 1.4em;
   height: 1.4em;
   margin-top: 0.25em;
   margin-right: 0.7em;
 }
 
-.warning-anchor {
-  color: var(--alert-text-color);
-  text-align: right;
-  display: block;
-  padding-right: 2em;
-}
-.warning-anchor:hover {
-  color: var(--foreground-color);
-}
-
 button.close-alert {
   background: none;
   border: none;
-  color: var(--alert-text-color);
+  color: inherit;
 
   font-size: 1.5em;
   position: absolute;

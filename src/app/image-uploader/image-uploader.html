@@ -51,19 +51,19 @@
   </div>
 </ng-template>
 
-<ng-template #warningDisplay>
+<ng-template #alertDisplay>
   <div
-    id="warning-div"
-    class="alert alert-warning"
+    id="alert-div"
+    [class]="'alert alert-' + alertType"
     role="alert"
     style="display: flex; flex-direction: row"
   >
-    <img id="warning-icon" src="icons/bootstrap-warning.svg" />
+    <img id="alert-icon" [src]="'icons/bootstrap-' + alertType + '.svg'" />
     <div>
-      <h4 class="alert-heading">Warning</h4>
-      <p>{{ warningMessage }}</p>
+      <h4 class="alert-heading">{{ alertType | titlecase }}</h4>
+      <p>{{ alertMessage }}</p>
     </div>
-    <button type="button" class="close-alert" aria-label="Close" (click)="closeWarning()">
+    <button type="button" class="close-alert" aria-label="Close" (click)="closeAlert()">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
@@ -93,8 +93,8 @@
   <ng-container *ngTemplateOutlet="uploadedImageDisplay"></ng-container>
 }
 
-@if (isWarningVisible) {
-  <ng-container *ngTemplateOutlet="warningDisplay"></ng-container>
+@if (isAlertVisible) {
+  <ng-container *ngTemplateOutlet="alertDisplay"></ng-container>
 }
 
 @if (isNewUploadWarningVisible) {

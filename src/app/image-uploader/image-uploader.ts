@@ -1,9 +1,10 @@
-import { NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet, TitleCasePipe } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
+import { AlertTypes } from './AlertTypes';
 
 @Component({
   selector: 'image-uploader',
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, TitleCasePipe],
   templateUrl: './image-uploader.html',
   styleUrl: './image-uploader.css',
 })
@@ -16,17 +17,20 @@ export class ImageUploader {
   private readonly TIMEOUT_WARNING_MESSAGE =
     'Image loading timed out. Your file may be too large or corrupted.';
   private readonly INVALID_FORMAT_WARNING_MESSAGE =
-    'Please upload a valid image format (JPEG, JPG or PNG).';
-  private readonly SIZE_WARNING_MESSAGE = `Image is larger than ${this.MAX_IMAGE_SIDELENGTH_PX}x${this.MAX_IMAGE_SIDELENGTH_PX} pixels and has been converted to a smaller size to prevent performance issues. Output will be upscaled to original size using interpolation.`;
+    'Please upload a valid image format (JPEG/JPG or PNG).';
+  private readonly SIZE_INFO_MESSAGE = `Image is larger than ${this.MAX_IMAGE_SIDELENGTH_PX}x${this.MAX_IMAGE_SIDELENGTH_PX} pixels and has been converted to a smaller size to prevent performance issues. Output will be upscaled back to the original size using interpolation.`;
   protected loadTimeoutId: number | undefined = undefined;
   private originalImageSize: any = null;
 
   @Output()
   uploadedImage = new EventEmitter<any>();
-  protected isWarningVisible: boolean = false;
+  protected isAlertVisible: boolean = false;
+  protected isInfoVisible: boolean = false;
 
-  protected warningMessage: string = '';
+  protected alertMessage: string = '';
+  protected infoMessage: string = '';
   protected isNewUploadWarningVisible: boolean = false;
+  protected alertType: AlertTypes = AlertTypes.WARNING;
 
   constructor(private readonly cdr: ChangeDetectorRef) {}
 
@@ -54,7 +58,7 @@ export class ImageUploader {
     }
     const file = input.files[0];
     if (!this.acceptedImageTypes.includes(file.type)) {
-      this.showWarning(this.INVALID_FORMAT_WARNING_MESSAGE);
+      this.showAlert(this.INVALID_FORMAT_WARNING_MESSAGE);
       return;
     }
     this.handleUploadedFile(file);
@@ -70,14 +74,15 @@ export class ImageUploader {
     }
   }
 
-  protected showWarning(message: string): void {
-    this.warningMessage = message;
-    this.isWarningVisible = true;
+  protected showAlert(message: string, type: AlertTypes = AlertTypes.WARNING): void {
+    this.alertType = type;
+    this.alertMessage = message;
+    this.isAlertVisible = true;
     this.cdr.detectChanges();
   }
 
-  protected closeWarning(): void {
-    this.isWarningVisible = false;
+  protected closeAlert(): void {
+    this.isAlertVisible = false;
     this.cdr.detectChanges();
   }
 
@@ -99,7 +104,7 @@ export class ImageUploader {
 
   private handleUploadedFile(file: File) {
     if (!file) return;
-    this.closeWarning();
+    this.closeAlert();
     this.uploadedImage.emit(null);
 
     this.fileName = file.name;
@@ -112,7 +117,7 @@ export class ImageUploader {
     this.loadTimeoutId = window.setTimeout(() => {
       this.fileUrl = '';
       this.fileName = '';
-      this.showWarning(this.TIMEOUT_WARNING_MESSAGE);
+      this.showAlert(this.TIMEOUT_WARNING_MESSAGE);
       this.loadTimeoutId = undefined;
       document.body.removeChild(img);
     }, this.IMAGE_LOAD_TIMEOUT_MS);
@@ -128,7 +133,7 @@ export class ImageUploader {
       let cvImage = cv.imread(img);
       this.originalImageSize = cvImage.size();
       if (img.width > this.MAX_IMAGE_SIDELENGTH_PX || img.height > this.MAX_IMAGE_SIDELENGTH_PX) {
-        this.showWarning(this.SIZE_WARNING_MESSAGE);
+        this.showAlert(this.SIZE_INFO_MESSAGE, AlertTypes.INFO);
         cv.resize(cvImage, cvImage, this.getNewSize(cvImage), 0, 0, cv.INTER_AREA);
       }
 
