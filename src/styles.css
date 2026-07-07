@@ -1,17 +1,22 @@
 :root {
-  --background-color: rgb(40, 40, 40);
-  --editor-background-color: rgb(25, 25, 25);
-  --foreground-color: rgb(240, 240, 240);
-  --highlight-color: rgb(85, 85, 85);
-  --dark-highlight-color: rgb(20, 20, 20);
+  --background-color: #1e2122;
+  --editor-background-color: #131415;
+  --border-color: #3d4245;
+  --foreground-color: #dfdcd7;
+  --highlight-color: #404548;
+  --dark-highlight-color: #0d0e0e;
+  --warning-text-color: #e5bf53;
+  --warning-background-color: #312500c9;
+  --warning-border-color: #daa300;
+  --info-text-color: #54d2ec;
+  --info-background-color: #0098b91f;
+  --info-border-color: #00afd5;
+}
 
-  --warning-text-color: rgb(251, 215, 112);
-  --warning-background-color: rgb(61, 46, 0);
-  --warning-border-color: rgb(123, 92, 0);
-
-  --info-text-color: #4cd0eb;
-  --info-background-color: #20d7ff1f;
-  --info-border-color: #00728b;
+html,
+body {
+  min-height: 100%;
+  height: fit-content;
 }
 
 body {
@@ -33,7 +38,8 @@ h1 {
 button {
   background-color: var(--dark-highlight-color);
   color: var(--foreground-color);
-  border: 1px solid var(--foreground-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.2em;
   padding: 5px;
   margin: 5px;
 }
@@ -52,10 +58,10 @@ button:hover {
   height: 30px;
 }
 .upload-new-label {
-  border: 1px solid var(--foreground-color);
-  border-radius: 10px;
-  padding: 10px;
-  margin: 10px 20px 10px 0;
+  border: 1px solid var(--border-color);
+  border-radius: 0.4em;
+  padding: 0.65em;
+  margin: 0.65em 0;
   background-color: var(--dark-highlight-color);
 }
 .upload-new-label:hover {
@@ -65,9 +71,10 @@ button:hover {
 select {
   background-color: var(--dark-highlight-color);
   color: var(--foreground-color);
-  border: 1px solid var(--foreground-color);
-  padding: 5px;
-  margin: 5px;
+  border: 1px solid var(--border-color);
+  border-radius: 0.2em;
+  padding: 0.3em;
+  margin: 0.3em;
   cursor: pointer;
 }
 select:hover {
@@ -102,10 +109,20 @@ select:hover {
 .editor-container {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--foreground-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.4em;
   padding: 10px;
   margin: 20px auto;
   background-color: var(--editor-background-color);
+}
+
+.editor-heading > div > h2 {
+  margin: 0;
+}
+
+.editor-heading {
+  padding: 0.2em 0.7em;
+  align-items: center;
 }
 
 .slider-container {
@@ -138,7 +155,8 @@ select:hover {
 .canvas-container {
   display: flex;
   position: relative;
-  border: 0.05em solid var(--foreground-color);
+  border: 0.05em solid var(--border-color);
+  border-radius: 0.2em;
   overflow: hidden;
   min-width: 250px;
   min-height: 300px;
@@ -169,9 +187,7 @@ canvas {
 
 .collapse-toggle {
   display: flex;
-}
-.collapse-toggle > a {
-  margin: auto;
+  flex-direction: row-reverse;
 }
 .collapse-icon {
   width: 25px;
@@ -227,14 +243,16 @@ button.close-alert {
 
 #new-upload-warning {
   position: fixed;
-  position-area: top;
-  top: 40%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 95%;
   max-width: 40em;
   background-color: var(--editor-background-color);
-  border: 1px solid var(--foreground-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.4em;
   padding: 2em;
   z-index: 10;
-  margin: 1em;
 }
 
 #new-upload-warning .dialog-options {
@@ -264,8 +282,10 @@ input[type='checkbox'] {
 }
 
 .uploaded-image-container {
-  border: 1px solid var(--foreground-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.4em;
   margin: auto;
+  padding: 1em 1.4em;
   background-color: var(--editor-background-color);
   display: flex;
   flex-direction: row;
@@ -274,12 +294,13 @@ input[type='checkbox'] {
 
 #uploaded-image-loading-spinner,
 #uploaded-image-display {
-  margin: 10px;
+  margin-right: 0.8em;
   max-width: 250px;
   max-height: 100px;
 }
 #uploaded-image-display {
-  border: 1px solid var(--foreground-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.2em;
 }
 
 .file-name-display {

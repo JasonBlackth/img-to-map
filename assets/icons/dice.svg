@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg version="1.1" id="svg1" width="2933.3333" height="2933.3333" viewBox="-50.584 209.803 2173.24 1987.531" xmlns="http://www.w3.org/2000/svg">
-  <g id="g1">
-    <g id="group-R5">
       <g transform="matrix(0.898794, 0.438371, -0.438371, 0.898794, 110.919838, 160.21759)" style="transform-origin: 930.623px 1038.57px;">
         <g>
           <path style="stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255); stroke-width: 3px;" d="M 56.256 525.702 L 932.029 29.998 L 1784.104 539.987 L 1793.229 1570.807 L 950.823 2036.524 L 71.057 1540.042 L 56.256 525.702 Z"/>
@@ -17,11 +15,4 @@
         <path id="path11" d="M 1378.49 1183.53 C 1327.91 1212.74 1287.01 1283.57 1287.17 1341.7 C 1287.35 1399.85 1328.49 1423.29 1379.09 1394.07 C 1429.69 1364.86 1470.57 1294.06 1470.41 1235.9 C 1470.25 1177.77 1429.09 1154.31 1378.49 1183.53" style="fill-opacity: 1; fill-rule: nonzero; stroke: rgb(0, 0, 0); --darkreader-inline-stroke: var(--darkreader-text-000000, #e8e6e3); stroke-width: 3px;" data-darkreader-inline-stroke=""/>
         <path id="path12" d="M 838.439 583.765 C 889.026 612.979 970.812 612.979 1021.07 583.765 C 1071.33 554.552 1071.07 507.192 1020.48 477.979 C 969.866 448.752 888.106 448.765 837.839 477.979 C 787.574 507.192 787.823 554.552 838.439 583.765" style="fill-opacity: 1; fill-rule: nonzero; stroke: rgb(0, 0, 0); --darkreader-inline-stroke: var(--darkreader-text-000000, #e8e6e3); stroke-width: 3px;" data-darkreader-inline-stroke=""/>
       </g>
-      <g id="Objects" transform="matrix(1, 0, 0, 1, -555.090637, 75.633781)">
-        <g transform="matrix(1, 0, 0, 1, -625.380737, 268.020325)">
-          <g/>
-        </g>
-      </g>
-    </g>
-  </g>
 </svg>
