@@ -1,3 +1,7 @@
+/*
+ * <<licensetext>>
+ */
+
 import { NgTemplateOutlet, TitleCasePipe } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
 import { AlertTypes } from './AlertTypes';
@@ -18,7 +22,7 @@ export class ImageUploader {
     'Image loading timed out. Your file may be too large or corrupted.';
   private readonly INVALID_FORMAT_WARNING_MESSAGE =
     'Please upload a valid image format (JPEG/JPG or PNG).';
-  private readonly SIZE_INFO_MESSAGE = `Image is larger than ${this.MAX_IMAGE_SIDELENGTH_PX}x${this.MAX_IMAGE_SIDELENGTH_PX} pixels and has been converted to a smaller size to prevent performance issues. Output will be upscaled back to the original size using interpolation.`;
+  private readonly SIZE_INFO_MESSAGE = `Image is larger than ${this.MAX_IMAGE_SIDELENGTH_PX}x${this.MAX_IMAGE_SIDELENGTH_PX} pixels and has been converted to a smaller size to prevent performance issues. Output will be scaled back to the original size using interpolation.`;
   protected loadTimeoutId: number | undefined = undefined;
   private originalImageSize: any = null;
 
