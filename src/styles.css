@@ -32,20 +32,41 @@ app-root {
   justify-content: center;
 }
 
+.border{
+  border: 1px solid var(--border-color);
+  border-radius: 0.4em;
+}
+.small-radius{
+  border-radius: 0.2em;
+}
+.border-thick-dashed{
+  border: 0.15em dashed;
+  border-radius: 1.5em;
+}
+.clickable {
+  cursor: pointer;
+}
+.movable {
+  cursor: move;
+}
+
 h1 {
   margin: 50px;
 }
-button {
+
+button, select {
   background-color: var(--dark-highlight-color);
-  color: var(--foreground-color);
+  color: inherit;
   border: 1px solid var(--border-color);
   border-radius: 0.2em;
-  padding: 5px;
-  margin: 5px;
+  padding: 0.3em;
+  margin: 0.3em;
+  cursor: pointer;
 }
-button:hover {
+button:hover, select:hover {
   background-color: var(--highlight-color);
 }
+
 .reset-button {
   position: absolute;
   bottom: 0;
@@ -68,21 +89,10 @@ button:hover {
   background-color: var(--highlight-color);
 }
 
-select {
-  background-color: var(--dark-highlight-color);
-  color: var(--foreground-color);
-  border: 1px solid var(--border-color);
-  border-radius: 0.2em;
-  padding: 0.3em;
-  margin: 0.3em;
-  cursor: pointer;
-}
-select:hover {
-  background-color: var(--highlight-color);
-}
+
 
 .file-drop-area {
-  border: 0.15em dashed var(--foreground-color);
+  border: 0.15em dashed;
   border-radius: 1.5em;
   margin: auto;
   height: 16em;
@@ -317,10 +327,3 @@ input[type='checkbox'] {
   float: right;
 }
 
-.clickable {
-  cursor: pointer;
-}
-
-.movable {
-  cursor: move;
-}
