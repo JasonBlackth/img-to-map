@@ -1,3 +1,7 @@
+/*
+ * <<licensetext>>
+ */
+
 import { Component, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ImageUploader } from '../image-uploader/image-uploader';
@@ -8,10 +12,11 @@ import { Editor2 } from '../editors/editor2/editor2.js';
 import { AbstractEditor } from '../editors/AbstractEditor.js';
 import { ReversibleAction } from '../common/reversible-action/ReversibleAction';
 import { BaseEditorComponent } from '../editors/base-editor-component/base-editor-component';
+import { DivergenceCalculator } from '../editors/divergence-calculator/divergence-calculator';
 
 @Component({
   selector: 'project',
-  imports: [CommonModule, ImageUploader, Editor1, Editor2, Editor3, ImageDownloader],
+  imports: [CommonModule, ImageUploader, Editor1, Editor2, Editor3, ImageDownloader, DivergenceCalculator],
   templateUrl: './project.html',
   styleUrls: ['./project.css'],
 })
@@ -25,6 +30,7 @@ export class Project {
   @ViewChild(Editor2) editor2!: Editor2;
   @ViewChild(Editor3) editor3!: Editor3;
   @ViewChild(ImageDownloader) imageDownloader!: ImageDownloader;
+  @ViewChild(DivergenceCalculator) divergenceCalculator!: DivergenceCalculator;
 
   constructor() {
     (window as any).ActiveProject = this;
@@ -105,6 +111,10 @@ export class Project {
         this.propagateImageChangeFrom(0);
       }
     }
+  }
+
+  protected onDivergenceCalculatorExpanded(){
+    this.divergenceCalculator.processImage();
   }
 
   private isAnyEditorExpandedAfter(editorIndex: number): boolean {

@@ -1,9 +1,13 @@
-import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
+/*
+ * <<licensetext>>
+ */
+
+import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
 import { BaseEditorComponent } from '../base-editor-component/base-editor-component';
 import { AbstractEditor } from '../AbstractEditor';
 
 @Component({
-  selector: 'app-divergence-calculator',
+  selector: 'divergence-calculator',
   imports: [BaseEditorComponent],
   templateUrl: './divergence-calculator.html',
   styleUrls: ['./divergence-calculator.css'],
@@ -18,21 +22,45 @@ export class DivergenceCalculator extends AbstractEditor {
   @ViewChild(BaseEditorComponent)
   override baseEditor: BaseEditorComponent = undefined as any;
 
-  @ViewChild('heightMap')
-  heightMap: HTMLImageElement = undefined as any;
+  @ViewChild('heightMap') heightMap!: ElementRef<HTMLImageElement>;
 
   public override resetPropertiesToDefault(): void {}
 
   override processImage(): void {
-    const vectorField = this.generateVectorFieldOf(this.getInputImage());
-    const divergenceImage = cv.Mat.zeros(vectorField.rows, vectorField.cols, cv.CV_8UC1);
+    console.log(this.heightMap);
+    const heightMapMat = cv.imread(this.heightMap.nativeElement);
+    const vectorField = this.generateVectorFieldOf(heightMapMat);
+    const divergenceImage = this.calculateDivergence(vectorField);
+
+    this.setDisplayImage(divergenceImage);
+  }
+
+  private calculateDivergence(vectorField: any): any{
+    const divergenceMat = cv.Mat.zeros(vectorField.rows, vectorField.cols, cv.CV_8UC1);
+    for (let i = 1; i < vectorField.cols - 1; ++i){
+      for (let j = 1; j < vectorField.rows - 1; ++j){
+        let prevXPoint = vectorField.ucharPtr(i-1, j);
+        let nextXPoint = vectorField.ucharPtr(i+1, j);
+
+        let xDivergence = (nextXPoint[0] - prevXPoint[0]) / 2
+
+        let prevYPoint = vectorField.ucharPtr(i, j-1);
+        let nextYPoint = vectorField.ucharPtr(i, j+1);
+
+        let yDivergence = (nextXPoint[1] - prevXPoint[1]) / 2
+
+        divergenceMat.ucharPtr(i,j)[0] = xDivergence + yDivergence;       
+        
+      }
+    }
+    return divergenceMat;
   }
 
   private generateVectorFieldOf(image: any): any {
     const vectorField = cv.Mat.zeros(image.rows, image.cols, cv.CV_8SC2);
     for (let y = 0; y < image.height; y++) {
       for (let x = 0; x < image.width; x++) {
-        let currentPoint = HeightMapPoint.of(x, y, image);
+        let currentPoint = HeightMapPoint.at(x, y, image);
         const lowestNeighbour = this.findALowestNeighbour(x, y, image);
 
         if (lowestNeighbour.height > currentPoint.height) {
@@ -66,7 +94,7 @@ export class DivergenceCalculator extends AbstractEditor {
 
   private findALowestNeighbour(x: number, y: number, image: any): HeightMapPoint {
     const neighboursSorted = this.getNeighboursInImage(x, y, image)
-      .map((neighbour) => HeightMapPoint.of(neighbour.x, neighbour.y, image))
+      .map((neighbour) => HeightMapPoint.at(neighbour.x, neighbour.y, image))
       .sort((a, b) => a.height - b.height);
     const oneLowestNeighbour = neighboursSorted[0];
 
@@ -92,7 +120,7 @@ class HeightMapPoint {
     this.height = height;
   }
 
-  static of(x: number, y: number, image: any): HeightMapPoint {
+  static at(x: number, y: number, image: any): HeightMapPoint {
     const height = image.ucharPtr(y, x)[0];
     return new HeightMapPoint(x, y, height);
   }
