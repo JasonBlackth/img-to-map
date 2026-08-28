@@ -1,10 +1,13 @@
+/*
+ * <<licensetext>>
+ */
+
 export {};
 
 declare global {
-  const cv: any;
+  const cv: CvNamespace;
   interface Window {
     Module: any;
-    cv: any;
     openCvReady: Promise<void>;
     ActiveProject: Project;
   }
