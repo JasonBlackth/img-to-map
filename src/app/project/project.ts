@@ -8,6 +8,7 @@ import { Editor2 } from '../editors/editor2/editor2.js';
 import { AbstractEditor } from '../editors/AbstractEditor.js';
 import { ReversibleAction } from '../common/reversible-action/ReversibleAction';
 import { BaseEditorComponent } from '../editors/base-editor-component/base-editor-component';
+import { UploadedImageDto } from '../dto/UploadedImageDto';
 
 @Component({
   selector: 'project',
@@ -16,8 +17,9 @@ import { BaseEditorComponent } from '../editors/base-editor-component/base-edito
   styleUrls: ['./project.css'],
 })
 export class Project {
-  private actionHistory: ReversibleAction<any>[] = [];
-  private undoneActions: ReversibleAction<any>[] = [];
+  private actionHistory: ReversibleAction<unknown>[] = [];
+  private undoneActions: ReversibleAction<unknown>[] = [];
+  public originalImageSize: CvSize | undefined = undefined;
   protected displayEditors = false;
 
   @ViewChild(ImageUploader) imageUploader!: ImageUploader;
@@ -27,7 +29,7 @@ export class Project {
   @ViewChild(ImageDownloader) imageDownloader!: ImageDownloader;
 
   constructor() {
-    (window as any).ActiveProject = this;
+    window.ActiveProject = this;
   }
 
   public undo(): void {
@@ -46,13 +48,9 @@ export class Project {
     }
   }
 
-  public registerAction(action: ReversibleAction<any>): void {
+  public registerAction(action: ReversibleAction<unknown>): void {
     this.actionHistory.push(action);
     this.undoneActions = [];
-  }
-
-  public getOriginalImageSize() {
-    return this.imageUploader.getOriginalImageSize();
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -69,21 +67,15 @@ export class Project {
     }
   }
 
-  protected onImageUploaded(image: any): void {
-    if (!image) {
-      this.displayEditors = false;
+  protected onImageLoadingStarted(): void {
+    this.displayEditors = false;
+  }
+
+  protected onSuccessfulUpload(uploadDto: UploadedImageDto): void {
+    if (!uploadDto.isValid()) {
       return;
     }
-    this.actionHistory = [];
-    this.undoneActions = [];
-    BaseEditorComponent.resetGlobalTransform();
-    this.displayEditors = true;
-    this.editor1.setInputImage(image);
-
-    this.getEditors().forEach((editor, index) => {
-      editor.setIsCollapsed(index > 0);
-      editor.resetPropertiesToDefault();
-    });
+    this.resetProjectState(uploadDto);
   }
 
   protected propagateImageChangeFrom(editorIndex: number): void {
@@ -105,6 +97,21 @@ export class Project {
         this.propagateImageChangeFrom(0);
       }
     }
+  }
+
+  private resetProjectState(uploadDto: UploadedImageDto) {
+    this.actionHistory = [];
+    this.undoneActions = [];
+    BaseEditorComponent.resetGlobalTransform();
+    this.displayEditors = true;
+
+    this.editor1.setInputImage(uploadDto.image);
+    this.originalImageSize = uploadDto.originalSize;
+
+    this.getEditors().forEach((editor, index) => {
+      editor.setIsCollapsed(index > 0);
+      editor.resetPropertiesToDefault();
+    });
   }
 
   private isAnyEditorExpandedAfter(editorIndex: number): boolean {

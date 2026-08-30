@@ -14,10 +14,10 @@ export class ClassicStyle extends ImageStyle {
 
   private thresholds = [0.1, 0.2, 0.4, 0.8, 200.0];
 
-  private blurredInputImage: any;
-  private blurredInputImageFloat: any;
+  private blurredInputImage!: CvMat;
+  private blurredInputImageFloat!: CvMat;
 
-  public override apply(image: any): any {
+  public override apply(image: CvMat): CvMat {
     image.copyTo(ImageStyle.lastInputImage);
     this.blurredInputImage = new cv.Mat();
     this.calculateSeaDepth();
@@ -26,14 +26,14 @@ export class ClassicStyle extends ImageStyle {
     return output;
   }
 
-  drawWithNewSeeds(): any {
+  drawWithNewSeeds(): CvMat {
     if (this.blurredInputImage && ImageStyle.lastInputImage) {
       return this.createOutputImage(); //this.getOutputImage();
     }
     throw new Error('No image to draw with ClassicStyle');
   }
 
-  private createOutputImage(): any {
+  private createOutputImage(): CvMat {
     let dst = new cv.Mat();
     cv.addWeighted(this.blurredInputImageFloat, 1.0, ImageStyle.smallerNoiseMat, 0.1, 0, dst);
     dst = this.applyThresholds(dst);
@@ -41,11 +41,11 @@ export class ClassicStyle extends ImageStyle {
     return dst;
   }
 
-  private applyThresholds(image: any): any {
+  private applyThresholds(image: CvMat): CvMat {
     const outputImage = new cv.Mat(image.rows, image.cols, cv.CV_8UC3, this.SEA_DEPTH_4);
     let mask = new cv.Mat();
 
-    let thresholdMats: any[] = [];
+    let thresholdMats: CvMat[] = [];
     let colors = [this.SEA_DEPTH_3, this.SEA_DEPTH_2, this.SEA_DEPTH_1, this.SEA_DEPTH_0];
     this.thresholds.forEach((threshold) => {
       let t = new cv.Mat(image.rows, image.cols, cv.CV_32FC1, new cv.Scalar(threshold));
@@ -62,7 +62,7 @@ export class ClassicStyle extends ImageStyle {
     return outputImage;
   }
 
-  private calculateSeaDepth(): any {
+  private calculateSeaDepth(): void {
     let dst = new cv.Mat();
     ImageStyle.lastInputImage.copyTo(dst);
     dst.convertTo(dst, cv.CV_32F, 1 / 255);

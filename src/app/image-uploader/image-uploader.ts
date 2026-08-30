@@ -5,6 +5,7 @@
 import { NgTemplateOutlet, TitleCasePipe } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
 import { AlertTypes } from './AlertTypes';
+import { UploadedImageDto } from '../dto/UploadedImageDto';
 
 @Component({
   selector: 'image-uploader',
@@ -23,11 +24,14 @@ export class ImageUploader {
   private readonly INVALID_FORMAT_WARNING_MESSAGE =
     'Please upload a valid image format (JPEG/JPG or PNG).';
   private readonly SIZE_INFO_MESSAGE = `Image is larger than ${this.MAX_IMAGE_SIDELENGTH_PX}x${this.MAX_IMAGE_SIDELENGTH_PX} pixels and has been converted to a smaller size to prevent performance issues. Output will be scaled back to the original size using interpolation.`;
-  protected loadTimeoutId: number | undefined = undefined;
-  private originalImageSize: any = null;
+  protected activeLoadingProcessId: number | undefined = undefined;
+  private originalImageSize: CvSize | null = null;
 
   @Output()
-  uploadedImage = new EventEmitter<any>();
+  imageLoadingSuccessful = new EventEmitter<UploadedImageDto>();
+  @Output()
+  imageLoadingStarted = new EventEmitter<void>();
+
   protected isAlertVisible: boolean = false;
   protected isInfoVisible: boolean = false;
 
@@ -38,16 +42,12 @@ export class ImageUploader {
 
   constructor(private readonly cdr: ChangeDetectorRef) {}
 
-  public getOriginalImageSize() {
-    return this.originalImageSize;
-  }
-
   public isFilePresent(): boolean {
     return this.fileName.length !== 0;
   }
 
   public isImageLoading(): boolean {
-    return this.loadTimeoutId !== undefined;
+    return this.activeLoadingProcessId !== undefined;
   }
 
   protected onDragOver(event: DragEvent) {
@@ -99,7 +99,7 @@ export class ImageUploader {
     this.cdr.detectChanges();
   }
 
-  protected getNewSize(cvImage: any): any {
+  protected calculateMaxAllowedSize(cvImage: CvMat): CvSize {
     const maxSide = Math.max(cvImage.cols, cvImage.rows);
     const scale =
       maxSide > this.MAX_IMAGE_SIDELENGTH_PX ? this.MAX_IMAGE_SIDELENGTH_PX / maxSide : 1;
@@ -109,20 +109,20 @@ export class ImageUploader {
   private handleUploadedFile(file: File) {
     if (!file) return;
     this.closeAlert();
-    this.uploadedImage.emit(null);
+    this.imageLoadingStarted.emit();
 
     this.fileName = file.name;
     this.fileUrl = URL.createObjectURL(file);
     let img = this.startImageLoading(this.fileUrl);
 
-    if (this.loadTimeoutId) {
-      clearTimeout(this.loadTimeoutId);
+    if (this.activeLoadingProcessId) {
+      clearTimeout(this.activeLoadingProcessId);
     }
-    this.loadTimeoutId = window.setTimeout(() => {
+    this.activeLoadingProcessId = window.setTimeout(() => {
       this.fileUrl = '';
       this.fileName = '';
       this.showAlert(this.TIMEOUT_WARNING_MESSAGE);
-      this.loadTimeoutId = undefined;
+      this.activeLoadingProcessId = undefined;
       document.body.removeChild(img);
     }, this.IMAGE_LOAD_TIMEOUT_MS);
   }
@@ -132,16 +132,16 @@ export class ImageUploader {
     img.src = url;
     img.hidden = true;
     img.onload = () => {
-      clearTimeout(this.loadTimeoutId);
-      this.loadTimeoutId = undefined;
+      clearTimeout(this.activeLoadingProcessId);
+      this.activeLoadingProcessId = undefined;
       let cvImage = cv.imread(img);
       this.originalImageSize = cvImage.size();
       if (img.width > this.MAX_IMAGE_SIDELENGTH_PX || img.height > this.MAX_IMAGE_SIDELENGTH_PX) {
         this.showAlert(this.SIZE_INFO_MESSAGE, AlertTypes.INFO);
-        cv.resize(cvImage, cvImage, this.getNewSize(cvImage), 0, 0, cv.INTER_AREA);
+        cv.resize(cvImage, cvImage, this.calculateMaxAllowedSize(cvImage), 0, 0, cv.INTER_AREA);
       }
 
-      this.uploadedImage.emit(cvImage);
+      this.imageLoadingSuccessful.emit(new UploadedImageDto(cvImage));
       document.body.removeChild(img);
     };
     document.body.appendChild(img);

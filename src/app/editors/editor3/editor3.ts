@@ -12,12 +12,12 @@ export class Editor3 extends AbstractEditor {
   protected coastlineSmoothness: number = 7;
 
   @Output()
-  override displayImageChanged = new EventEmitter<any>();
+  override displayImageChanged = new EventEmitter<CvMat>();
   @Output()
   override editorExpanded = new EventEmitter<void>();
 
   @ViewChild(BaseEditorComponent)
-  override baseEditor: BaseEditorComponent = undefined as any;
+  override baseEditor: BaseEditorComponent = undefined!;
 
   public override resetPropertiesToDefault(): void {
     this.coastlineSmoothness = 7;
@@ -38,6 +38,6 @@ export class Editor3 extends AbstractEditor {
     let anchor = new cv.Point(-1, -1);
     cv.blur(this.getInputImage(), dst, ksize, anchor, cv.BORDER_DEFAULT);
     cv.threshold(dst, dst, 200, 255, cv.THRESH_BINARY);
-    this.setDisplayImage(dst);
+    this.overrideDisplayImage(dst);
   }
 }

@@ -5,6 +5,7 @@ import { BaseEditorComponent } from '../base-editor-component/base-editor-compon
 import { NgTemplateOutlet } from '@angular/common';
 import { AbstractEditor } from '../AbstractEditor.js';
 import { CvUtils } from '../../common/CvUtils';
+import { GrayscaleImage } from '../../common/image/GrayscaleImage';
 
 @Component({
   selector: 'editor1',
@@ -21,15 +22,17 @@ export class Editor1 extends AbstractEditor {
   protected isResultInverted: boolean = false;
   protected isChangeIgnorable: boolean = false;
 
-  private grayScaleInputImage: any;
+  private grayScaleInputImage: CvMat = undefined!;
+
+  private inputImageGrayscale: GrayscaleImage = undefined!;
 
   @Output()
-  override displayImageChanged = new EventEmitter<any>();
+  override displayImageChanged = new EventEmitter<CvMat>();
   @Output()
   override editorExpanded = new EventEmitter<void>();
 
   @ViewChild(BaseEditorComponent)
-  override baseEditor: BaseEditorComponent = undefined as any;
+  override baseEditor: BaseEditorComponent = undefined!;
 
   public override resetPropertiesToDefault(): void {
     this.sampleSize = 501;
@@ -41,67 +44,29 @@ export class Editor1 extends AbstractEditor {
   }
 
   override processImage() {
-    const dst = this.grayScaleInputImage.clone();
-    this.adaptiveThreshold(dst);
-    this.dilateAndErode(dst);
-    this.setDisplayImage(dst);
+    const outputImageBinary = this.inputImageGrayscale.applyAdaptiveThreshold(
+      this.sampleSize,
+      this.shiftThreshold,
+    );
+    if (this.isResultInverted) {
+      outputImageBinary.invert();
+    }
+    if (this.isDilationFirst) {
+      outputImageBinary.dilate(this.dilationIters);
+      outputImageBinary.erode(this.erosionIters);
+    } else {
+      outputImageBinary.erode(this.erosionIters);
+      outputImageBinary.dilate(this.dilationIters);
+    }
+    this.overrideDisplayImage(outputImageBinary.getMat());
   }
 
   override onNewInputImage(): void {
     if (this.grayScaleInputImage) {
       this.grayScaleInputImage.delete();
     }
-    this.grayScaleInputImage = CvUtils.convertToGrayscale(this.getInputImage());
-  }
-
-  private adaptiveThreshold(dst: any): void {
-    let ksize = new cv.Size(3, 3);
-    let anchor = new cv.Point(-1, -1);
-    cv.blur(dst, dst, ksize, anchor, cv.BORDER_DEFAULT);
-    cv.adaptiveThreshold(
-      dst,
-      dst,
-      255,
-      cv.ADAPTIVE_THRESH_MEAN_C,
-      this.isResultInverted ? cv.THRESH_BINARY_INV : cv.THRESH_BINARY,
-      this.sampleSize,
-      this.isResultInverted ? this.shiftThreshold : -this.shiftThreshold,
-    );
-  }
-
-  private dilateAndErode(dst: any): void {
-    let anchor = new cv.Point(-1, -1);
-    let M = cv.Mat.ones(3, 3, cv.CV_8U);
-    let dilate = () => {
-      cv.dilate(
-        dst,
-        dst,
-        M,
-        anchor,
-        this.dilationIters,
-        cv.BORDER_CONSTANT,
-        cv.morphologyDefaultBorderValue(),
-      );
-    };
-    let erode = () => {
-      cv.erode(
-        dst,
-        dst,
-        M,
-        anchor,
-        this.erosionIters,
-        cv.BORDER_CONSTANT,
-        cv.morphologyDefaultBorderValue(),
-      );
-    };
-
-    if (this.isDilationFirst) {
-      dilate();
-      erode();
-    } else {
-      erode();
-      dilate();
-    }
+    this.grayScaleInputImage = CvUtils.convertMatToGrayscale(this.getInputImage());
+    this.inputImageGrayscale = GrayscaleImage.fromMat(this.getInputImage());
   }
 
   protected toggleIsDilationFirst(): void {

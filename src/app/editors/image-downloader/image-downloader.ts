@@ -22,7 +22,7 @@ export class ImageDownloader extends AbstractEditor {
   override editorExpanded = new EventEmitter<void>();
 
   @ViewChild(BaseEditorComponent)
-  override baseEditor: BaseEditorComponent = undefined as any;
+  override baseEditor: BaseEditorComponent = undefined!;
   protected downloadFormat: string = 'image/jpeg';
 
   public override resetPropertiesToDefault(): void {
@@ -42,7 +42,7 @@ export class ImageDownloader extends AbstractEditor {
 
   private applyStyleChanges() {
     if (!this.getInputImage()) return;
-    this.setDisplayImage(this.styleManager.apply());
+    this.overrideDisplayImage(this.styleManager.apply());
   }
   protected resetRandomSeeds() {
     let oldSeed = ImageStyle.getSeed();
@@ -52,13 +52,13 @@ export class ImageDownloader extends AbstractEditor {
       apply: (dataStorage: { old: number; new: number }) => {
         this.baseEditor.setIsCanvasLoading(true);
         window.setTimeout(() => {
-          this.setDisplayImage(this.styleManager.setSeedAndGetImage(dataStorage.new));
+          this.overrideDisplayImage(this.styleManager.setSeedAndGetImage(dataStorage.new));
         }, 0);
       },
       reverse: (dataStorage: { old: number; new: number }) => {
         this.baseEditor.setIsCanvasLoading(true);
         window.setTimeout(() => {
-          this.setDisplayImage(this.styleManager.setSeedAndGetImage(dataStorage.old));
+          this.overrideDisplayImage(this.styleManager.setSeedAndGetImage(dataStorage.old));
         }, 0);
       },
     });
@@ -72,7 +72,7 @@ export class ImageDownloader extends AbstractEditor {
       cv.resize(
         this.getDisplayImage(),
         imgToDownload,
-        window.ActiveProject.getOriginalImageSize(),
+        window.ActiveProject.originalImageSize,
         0,
         0,
         cv.INTER_CUBIC,
@@ -105,7 +105,7 @@ export class ImageDownloader extends AbstractEditor {
     mat.delete();
   }
 
-  private convertMatToBlob(mat: any): Promise<Blob> {
+  private convertMatToBlob(mat: CvMat): Promise<Blob> {
     const canvas = document.createElement('canvas');
     cv.imshow(canvas, mat);
 

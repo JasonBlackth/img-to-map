@@ -1,7 +1,7 @@
 <div class="container">
   <div class="row">
     <div class="col-md-8" style="margin: auto">
-      <image-uploader (uploadedImage)="onImageUploaded($event)"> </image-uploader>
+      <image-uploader (imageLoadingSuccessful)="onSuccessfulUpload($event)"> </image-uploader>
       <div [hidden]="!displayEditors">
         <editor1 (displayImageChanged)="propagateImageChangeFrom(0)"> </editor1>
         <editor2

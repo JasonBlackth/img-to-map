@@ -5,21 +5,21 @@ import { ReversibleAction } from '../common/reversible-action/ReversibleAction';
 
 export abstract class AbstractEditor {
   protected baseEditor: BaseEditorComponent | undefined;
-  public displayImageChanged = new EventEmitter<any>();
+  public displayImageChanged = new EventEmitter<CvMat>();
   public editorExpanded = new EventEmitter<void>();
 
-  private _displayImage: any;
-  private _inputImage: any;
+  private _displayImage!: CvMat;
+  private _inputImage!: CvMat;
   private pendingProcessTimeoutId: number | null = null;
   private readonly WAIT_BEFORE_PROCESSING_MS = 100;
 
   public abstract resetPropertiesToDefault(): void;
 
-  public setDisplayImage(image: any) {
+  public overrideDisplayImage(image: CvMat) {
     this.setDisplayImageWithoutUpdate(image);
     this.updateDisplayImage();
   }
-  public setDisplayImageWithoutUpdate(image: any) {
+  public setDisplayImageWithoutUpdate(image: CvMat) {
     if (!image) return;
     if (this._displayImage !== undefined) {
       this._displayImage.delete();
@@ -30,7 +30,7 @@ export abstract class AbstractEditor {
     return this._displayImage;
   }
 
-  public setInputImage(image: any) {
+  public setInputImage(image: CvMat) {
     if (!image) return;
     if (this._inputImage !== undefined) {
       this._inputImage.delete();

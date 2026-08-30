@@ -7,7 +7,7 @@ export {};
 declare global {
   const cv: CvNamespace;
   interface Window {
-    Module: any;
+    Module: unknown;
     openCvReady: Promise<void>;
     ActiveProject: Project;
   }

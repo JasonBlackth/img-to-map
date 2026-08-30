@@ -10,13 +10,13 @@ export class VintageStyle extends ImageStyle {
 
   thresholds = [0.5, 0.6, 0.68, 0.75, 2.0];
 
-  public override apply(image: any): any {
+  public override apply(image: CvMat): CvMat {
     ImageStyle.lastInputImage = image.clone();
     ImageStyle.findContours();
 
     return this.drawWithNewSeeds();
   }
-  drawWithNewSeeds(): any {
+  drawWithNewSeeds(): CvMat {
     let dst = new cv.Mat(ImageStyle.rows, ImageStyle.cols, cv.CV_8UC3);
     cv.addWeighted(ImageStyle.biggerNoiseMat, 1, ImageStyle.smallerNoiseMat, 0.06, 0, dst);
     const outputImage = this.applyThresholds(dst);
@@ -25,11 +25,11 @@ export class VintageStyle extends ImageStyle {
     return outputImage;
   }
 
-  applyThresholds(image: any): any {
+  applyThresholds(image: CvMat): CvMat {
     const outputImage = new cv.Mat(image.rows, image.cols, cv.CV_8UC3, this.AGING_STRENGTH_0);
     let mask = new cv.Mat();
 
-    let thresholdMats: any[] = [];
+    let thresholdMats: CvMat[] = [];
     let colors = [
       this.AGING_STRENGTH_1,
       this.AGING_STRENGTH_2,

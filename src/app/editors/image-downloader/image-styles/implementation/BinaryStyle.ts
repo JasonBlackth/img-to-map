@@ -1,10 +1,10 @@
 import { ImageStyle } from '../ImageStyle';
 
 export class BinaryStyle extends ImageStyle {
-  public override apply(image: any) {
+  public override apply(image: CvMat): CvMat {
     return image.clone();
   }
-  override drawWithNewSeeds() {
+  override drawWithNewSeeds(): CvMat {
     return ImageStyle.lastInputImage.clone();
   }
 }

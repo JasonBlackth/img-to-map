@@ -4,6 +4,6 @@ export class Colors {
   public static RED = rgb(255, 0, 0);
 }
 
-export function rgb(r: number, g: number, b: number): any {
+export function rgb(r: number, g: number, b: number): number[] {
   return [r, g, b, 255];
 }

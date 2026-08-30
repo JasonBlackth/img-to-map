@@ -14,20 +14,20 @@ import { CvUtils } from '../../common/CvUtils';
 })
 export class Editor2 extends AbstractEditor {
   protected minContourArea: number = 1500;
-  private contours: any;
-  private contourMap: any;
+  private contours!: CvMatVector;
+  private contourMap!: CvMat;
   private isContourDeletedAt: Array<boolean> = [];
   private selectedContours: Set<number> = new Set();
   private readonly CONTOUR_CLICK_RADIUS = 9;
 
   @Output()
-  override displayImageChanged = new EventEmitter<any>();
+  override displayImageChanged = new EventEmitter<CvMat>();
 
   @Output()
   override editorExpanded = new EventEmitter<void>();
 
   @ViewChild(BaseEditorComponent)
-  override baseEditor: BaseEditorComponent = undefined as any;
+  override baseEditor: BaseEditorComponent = undefined!;
 
   public override resetPropertiesToDefault(): void {
     this.minContourArea = 1500;
@@ -111,7 +111,7 @@ export class Editor2 extends AbstractEditor {
     return new Set(inverseArray);
   }
 
-  protected keepSelectedOnly(): ReversibleAction<any> {
+  protected keepSelectedOnly(): ReversibleAction<DeleteContourDataStorage> {
     return this.deleteSelectedContours(true);
   }
 
@@ -170,20 +170,23 @@ export class Editor2 extends AbstractEditor {
     return -1;
   }
 
-  private redrawContours(inds: Iterable<number>, color: any): void {
+  private redrawContours(inds: Iterable<number>, color: CvScalar | number[]): void {
     for (const ind of inds) {
       cv.drawContours(this.getDisplayImage(), this.contours, ind, color, cv.FILLED);
     }
     this.updateDisplayImage();
   }
-  private redrawContoursWithoutEvent(inds: Iterable<number>, color: any): void {
+  private redrawContoursWithoutEvent(inds: Iterable<number>, color: CvScalar | number[]): void {
     for (const ind of inds) {
       cv.drawContours(this.getDisplayImage(), this.contours, ind, color, cv.FILLED);
     }
     this.updateDisplayImageWithoutEvent();
   }
 
-  private drawContoursAboveMinArea(image: any, colorFunction: (index: number) => any): void {
+  private drawContoursAboveMinArea(
+    image: CvMat,
+    colorFunction: (index: number) => CvScalar | number[],
+  ): void {
     for (let i = 0; i < this.contours.size(); ++i) {
       if (this.isAboveMinContourArea(i)) {
         cv.drawContours(image, this.contours, i, colorFunction(i), cv.FILLED);

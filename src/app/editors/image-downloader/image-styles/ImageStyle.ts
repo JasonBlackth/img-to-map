@@ -5,19 +5,19 @@ export abstract class ImageStyle {
   static seed = 0.6452150732801007;
   static noise = new Perlin(ImageStyle.seed);
   static noise2 = new Perlin(ImageStyle.seed + 0.1);
-  protected static smallerNoiseMat: any;
-  protected static biggerNoiseMat: any;
-  protected static contours: any;
-  protected static lastInputImage: any;
+  protected static smallerNoiseMat: CvMat;
+  protected static biggerNoiseMat: CvMat;
+  protected static contours: CvMatVector;
+  protected static lastInputImage: CvMat;
   protected static rows: number = 0;
   protected static cols: number = 0;
   private static readonly NOISE_MAT_GENERATION_SIZE: number = 1000;
 
-  public abstract apply(image: any): any;
+  public abstract apply(image: CvMat): CvMat;
 
-  public abstract drawWithNewSeeds(): any;
+  public abstract drawWithNewSeeds(): CvMat;
 
-  public static setInputImage(inputImage: any) {
+  public static setInputImage(inputImage: CvMat): void {
     ImageStyle.lastInputImage = new cv.Mat();
     inputImage.copyTo(ImageStyle.lastInputImage);
     this.findContours();
@@ -46,22 +46,22 @@ export abstract class ImageStyle {
     this.generateNewNoiseMats();
   }
 
-  public static setBiggerNoiseMat(mat: any) {
+  public static setBiggerNoiseMat(mat: CvMat): void {
     if (ImageStyle.biggerNoiseMat) ImageStyle.biggerNoiseMat.delete();
     ImageStyle.biggerNoiseMat = mat;
   }
-  public static setSmallerNoiseMat(mat: any) {
+  public static setSmallerNoiseMat(mat: CvMat): void {
     if (ImageStyle.smallerNoiseMat) ImageStyle.smallerNoiseMat.delete();
     ImageStyle.smallerNoiseMat = mat;
   }
-  public static getSmallerNoiseMat(): any {
+  public static getSmallerNoiseMat(): CvMat {
     return this.smallerNoiseMat;
   }
-  public static getBiggerNoiseMat(): any {
+  public static getBiggerNoiseMat(): CvMat {
     return this.biggerNoiseMat;
   }
 
-  protected static findContours(): any {
+  protected static findContours(): void {
     if (this.contours) this.contours.delete();
     this.contours = CvUtils.findContours(this.lastInputImage);
   }

@@ -37,7 +37,7 @@ export class BaseEditorComponent {
   public editorId: string = 'noIdEditor';
 
   @Output()
-  public displayImageChanged = new EventEmitter<any>();
+  public displayImageChanged = new EventEmitter<CvMat>();
   @Output()
   public canvasClick = new EventEmitter<PointerEvent>();
   @Output()
@@ -49,7 +49,7 @@ export class BaseEditorComponent {
 
   constructor(private readonly cdr: ChangeDetectorRef) {}
 
-  public setDisplayImage(image: any) {
+  public setDisplayImage(image: CvMat) {
     if (!image) return;
     if (!this.panzoomInstance) {
       this.createPanzoomInstance();
