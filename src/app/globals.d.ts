@@ -1,7 +1,3 @@
-/*
- * <<licensetext>>
- */
-
 export {};
 
 declare global {

@@ -1,7 +1,3 @@
-/*
- * <<licensetext>>
- */
-
 import { NgTemplateOutlet, TitleCasePipe } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
 import { AlertTypes } from './AlertTypes';

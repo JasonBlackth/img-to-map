@@ -1,6 +1,3 @@
-/*
- * <<licensetext>>
- */
 interface CvMat {
   readonly rows: number;
   readonly cols: number;
